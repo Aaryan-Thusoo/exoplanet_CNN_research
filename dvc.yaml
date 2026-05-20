@@ -1,0 +1,34 @@
+stages:
+  prepare_kepler_data:
+    cmd: python scripts/prepare_kepler_data.py
+    deps:
+      - scripts/prepare_kepler_data.py
+      - data/raw
+    outs:
+      - data/processed
+
+  train_real_cnn:
+    cmd: python scripts/real_cnn_model.py
+    deps:
+      - scripts/real_cnn_model.py
+      - data/processed
+    params:
+      - model
+      - training
+    outs:
+      - models/real_model.keras
+    metrics:
+      - results/real_metrics.json
+
+  evaluate_real_cnn:
+    cmd: python scripts/real_cnn_model_evaluation.py
+    deps:
+      - scripts/real_cnn_model_evaluation.py
+      - models/real_model.keras
+      - data/processed/test_data.csv
+    outs:
+      - results/real_conf_matrix.png
+      - results/accuracy.png
+      - results/loss.png
+    metrics:
+      - results/evaluation.json
