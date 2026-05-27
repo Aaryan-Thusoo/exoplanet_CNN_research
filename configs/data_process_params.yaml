@@ -1,0 +1,7 @@
+exo_input_file: "/Users/aaryanthusoo/Desktop/UCL/CNN_Exoplanets/data/raw/Kepler_Confirmed_ExoPlanets.csv"
+exo_skipped_rows: 11
+exo_output_folder: "/Users/aaryanthusoo/Desktop/UCL/CNN_Exoplanets/data/processed/exo_data"
+
+eb_input_file: "/Users/aaryanthusoo/Desktop/UCL/CNN_Exoplanets/data/raw/Kepler_Confirmed_EB.csv"
+eb_skipped_rows: 0
+eb_output_folder: "/Users/aaryanthusoo/Desktop/UCL/CNN_Exoplanets/data/processed/eb_data"

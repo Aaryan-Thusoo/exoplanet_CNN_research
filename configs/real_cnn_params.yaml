@@ -1,0 +1,45 @@
+reading:
+
+cnn_layers:
+  - type: "conv1d"
+    channels: 32
+    kernel_size: 11
+    padding: "same"
+    activation: "relu"
+
+  - type: "max_pooling1d"
+    pool_size: 2
+
+  - type: "dropout"
+    rate: 0.2
+
+  - type: "conv1d"
+    channels: 64
+    kernel_size: 11
+    padding: "same"
+    activation: "relu"
+
+  - type: "max_pooling1d"
+    pool_size: 2
+
+  - type: "dropout"
+    rate: 0.2
+
+  - type: "global_max_pooling1d"
+
+  - type: "dense"
+    units: 32
+    activation: "relu"
+
+  - type: "dropout"
+    rate: 0.3
+
+  - type: "dense"
+    units: 1
+    activation: "sigmoid"
+
+
+
+
+
+
