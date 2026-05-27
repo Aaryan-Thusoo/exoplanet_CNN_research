@@ -2,6 +2,9 @@ name: CNN_Exoplanets
 dependencies:
   numpy
   matplotlib
-  scikit-
+  pandas
+  lightkurve
+  pyyaml
+
 
 

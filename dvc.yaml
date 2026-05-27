@@ -1,20 +1,42 @@
 stages:
-  prepare_kepler_data:
-    cmd: python scripts/prepare_kepler_data.py
+  prepare_kepler_exo_data:
+    cmd: python scripts/prepare_kepler_exo_data.py
     deps:
-      - scripts/prepare_kepler_data.py
-      - data/raw
+      - scripts/prepare_kepler_exo_data.py
+      - data/raw/Kepler_Confirmed_ExoPlanets.csv
+    params:
+      data_processs_params.yaml
     outs:
-      - data/processed
+      - data/processed/exo_data
+
+  prepare_kepler_eb_data:
+    cmd: python scripts/prepare_kepler_eb_data.py
+    deps:
+      - scripts/prepare_kepler_eb_data.py
+      - data/raw/Kepler_Confirmed_ExoPlanets.csv #!!!
+    params:
+      data_process_params.yaml
+    outs:
+      - data/processed/eb_data
+
+  organize_data:
+    cmd: python scripts/organize_data.py
+    deps:
+      - scripts/organize_data.py
+      - data/processed/exo_data
+      - data/processed/eb_data
+    params:
+      - data_process_params.yaml
+    outs:
+      -  data/processed
 
   train_real_cnn:
-    cmd: python scripts/real_cnn_model.py
+    cmd: python scripts/organize_data.py
     deps:
-      - scripts/real_cnn_model.py
+      - scripts/organize_data.py
       - data/processed
     params:
-      - model
-      - training
+      - real_cnn_params.yaml
     outs:
       - models/real_model.keras
     metrics:
