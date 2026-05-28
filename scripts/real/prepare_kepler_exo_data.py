@@ -1,16 +1,17 @@
-# region Imports
 from pathlib import Path
 import sys
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT))
+
 from scripts.helpers.yaml_reading import load_params
 from scripts.helpers.temp_help_name import download_lcs
 
+import numpy as np
 import pandas as pd
 
 
-# Parameters file path
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-sys.path.append(str(PROJECT_ROOT / "configs"))
-yaml_file = PROJECT_ROOT / "configs"/ "data_process_params.yaml"
+yaml_file = PROJECT_ROOT / "configs" / "data_process_params.yaml"
 
 
 def main() -> None:
@@ -18,7 +19,8 @@ def main() -> None:
 
     input_file = params["exo_input_file"]
     skipped_rows = params["exo_skipped_rows"]
-    output_dir = params["output_dir"]
+    output_dir = Path(params["exo_output_folder"])
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     KIC_df = pd.read_csv(input_file, skiprows=skipped_rows)
     KIC_df.drop_duplicates(subset="kepid", keep="last").dropna()
@@ -49,7 +51,7 @@ def main() -> None:
         })
 
         final_exo_df.to_csv(
-            f"{output_dir}/kepler_exo_flux_{split[j]}_{split[j + 1]}.csv",
+            output_dir / f"kepler_exo_flux_{split[j]}_{split[j + 1]}.csv",
             index=False,
         )
 

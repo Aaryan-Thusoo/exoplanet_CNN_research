@@ -1,57 +1,83 @@
-# region Imports
 from pathlib import Path
 import sys
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT))
+
 from scripts.helpers.yaml_reading import load_params
 from scripts.helpers.temp_help_name import download_lcs
 
+import numpy as np
 import pandas as pd
 
 
-# Parameters file path
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-sys.path.append(str(PROJECT_ROOT / "configs"))
-yaml_file = PROJECT_ROOT / "configs"/ "data_process_params.yaml"
+PARAMS_FILE = PROJECT_ROOT / "configs" / "data_process_params.yaml"
+CHUNK_SIZE = 200
+LIGHT_CURVE_LENGTH = 4894
 
 
 def main() -> None:
-    params = load_params(yaml_file)
+    params = load_params(PARAMS_FILE)
 
-    input_file = params["eb_input_file"]
+    input_file = Path(params["eb_input_file"])
     skipped_rows = params["eb_skipped_rows"]
-    output_dir = params["eb_data_dir"]
+    output_dir = Path(params["eb_output_folder"])
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    KIC_df = pd.read_csv(input_file, skiprows=skipped_rows)
-    KIC_df.drop_duplicates(subset="kepid", keep="last").dropna()
+    kic_df = pd.read_csv(input_file, skiprows=skipped_rows)
 
-    split = np.arange(0, len(KIC_df), 200)
+    if "Kepler ID" in kic_df.columns and "kepid" not in kic_df.columns:
+        kic_df = kic_df.rename(columns={"Kepler ID": "kepid"})
 
-    for j in range(len(split) - 1):
+    if "kepid" not in kic_df.columns:
+        raise KeyError(f"Expected a 'kepid' column. Found columns: {list(kic_df.columns)}")
+
+    kic_df = kic_df.drop_duplicates(subset="kepid", keep="last").dropna(subset=["kepid"])
+
+    failed_kepids = []
+
+    for start in range(0, len(kic_df), CHUNK_SIZE):
+        end = min(start + CHUNK_SIZE, len(kic_df))
+
         kepid_list = []
         eb_list = []
 
-        print(f"Started Split {j}: KIC #{split[j]} to KIC #{split[j + 1]}")
+        print(f"Started EB chunk: KIC #{start} to KIC #{end}")
 
-        for i, kepid in enumerate(KIC_df.iloc[split[j]:split[j + 1]]["kepid"]):
-            kic_lcs = download_lcs(kepid, n=4894)  # returns a list of equal-length chunks
+        for i, kepid in enumerate(kic_df.iloc[start:end]["kepid"]):
+            try:
+                kic_lcs = download_lcs(kepid, n=LIGHT_CURVE_LENGTH)
+            except Exception as error:
+                print(f"\tSkipping {kepid}: {error}")
+                failed_kepids.append({"kepid": kepid, "error": str(error)})
+                continue
 
-            # Add one row per chunk
+            if not kic_lcs:
+                print(f"\tSkipping {kepid}: no light curves returned")
+                failed_kepids.append({"kepid": kepid, "error": "no light curves returned"})
+                continue
+
             for chunk in kic_lcs:
                 kepid_list.append(kepid)
                 eb_list.append(chunk)
 
             print(f"\tCompleted section {i}")
 
-        print(f"Completed {j}")
-
-        final_eb_df = pd.DataFrame({
-            "kepid": kepid_list,
-            "flux": [arr.tolist() for arr in eb_list]
-        })
-
-        final_eb_df.to_csv(
-            f"{output_dir}/kepler_eb_flux_{split[j]}_{split[j + 1]}.csv",
-            index=False,
+        final_eb_df = pd.DataFrame(
+            {
+                "kepid": kepid_list,
+                "flux": [np.asarray(arr).tolist() for arr in eb_list],
+            }
         )
+
+        output_file = output_dir / f"kepler_eb_flux_{start}_{end}.csv"
+        final_eb_df.to_csv(output_file, index=False)
+
+        print(f"Completed EB chunk: {output_file}")
+
+    if failed_kepids:
+        failed_df = pd.DataFrame(failed_kepids)
+        failed_df.to_csv(output_dir / "failed_eb_downloads.csv", index=False)
 
 if __name__ == "__main__":
     main()
