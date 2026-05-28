@@ -1,51 +1,61 @@
 stages:
   prepare_kepler_exo_data:
-    cmd: python scripts/prepare_kepler_exo_data.py
+    cmd: python scripts/real/prepare_kepler_exo_data.py
     deps:
-      - scripts/prepare_kepler_exo_data.py
+      - scripts/real/prepare_kepler_exo_data.py
       - data/raw/Kepler_Confirmed_ExoPlanets.csv
     params:
-      data_processs_params.yaml
+      - configs/data_process_params.yaml:
+          - exo_input_file
+          - exo_skipped_rows
+          - exo_output_folder
     outs:
       - data/processed/exo_data
 
   prepare_kepler_eb_data:
-    cmd: python scripts/prepare_kepler_eb_data.py
+    cmd: python scripts/real/prepare_kepler_eb_data.py
     deps:
-      - scripts/prepare_kepler_eb_data.py
-      - data/raw/Kepler_Confirmed_ExoPlanets.csv #!!!
+      - scripts/real/prepare_kepler_eb_data.py
+      - data/raw/Kepler_Confirmed_EB.csv
     params:
-      data_process_params.yaml
+      - configs/data_process_params.yaml:
+          - eb_input_file
+          - eb_skipped_rows
+          - eb_output_folder
     outs:
       - data/processed/eb_data
 
   organize_data:
-    cmd: python scripts/organize_data.py
+    cmd: python scripts/real/organize_data.py
     deps:
-      - scripts/organize_data.py
+      - scripts/real/organize_data.py
       - data/processed/exo_data
       - data/processed/eb_data
     params:
-      - data_process_params.yaml
+      - configs/data_process_params.yaml
     outs:
-      -  data/processed
+      - data/real_model/train.npz
+      - data/real_model/val.npz
+      - data/real_model/test.npz
 
   train_real_cnn:
-    cmd: python scripts/organize_data.py
+    cmd: python scripts/real/train_real_cnn.py
     deps:
-      - scripts/organize_data.py
-      - data/processed
+      - scripts/real/train_real_cnn.py
+      - data/real_model/train.npz
+      - data/real_model/val.npz
+      - data/real_model/test.npz
     params:
-      - real_cnn_params.yaml
+      - configs/real_cnn_params.yaml
     outs:
       - models/real_model.keras
     metrics:
       - results/real_metrics.json
 
   evaluate_real_cnn:
-    cmd: python scripts/real_cnn_model_evaluation.py
+    cmd: python scripts/real/real_cnn_model_evaluation.py
     deps:
-      - scripts/real_cnn_model_evaluation.py
+      - scripts/real/real_cnn_model_evaluation.py
       - models/real_model.keras
       - data/processed/test_data.csv
     outs:
