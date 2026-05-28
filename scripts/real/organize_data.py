@@ -1,28 +1,31 @@
 # Imports
 from pathlib import Path
 
+import numpy as np
+import pandas as pd
+import ast
+from typing import List
+
 # Functions
 def files_to_df(file_list: List[str]) -> pd.DataFrame:
     """
     Takes in list of files and concatenates them together
-    Every file must be a .csv file.
-
     :param file_list: list of file paths
     :return: data frame with all data read and concatenated
+    :raises ValueError: If any file path does not have a `.csv` suffix.
     """
     dfs = []
 
     for file in file_list:
-        file_name = f"data/Kepler_Data/{file}"
-        df = pd.read_csv(file_name).drop_duplicates()
+        df = pd.read_csv(file).drop_duplicates()
         dfs.append(df)
 
     return pd.concat(dfs, ignore_index=True)
 
 
-def create_data_classification(df, label):
+def create_data_classification(df: pd.DataFrame, label: int) -> tuple[np.ndarray, np.ndarray]:
     """
-    Creates data classification model
+    Creates data classification real_model
     :param df: data frame with "flux" columns to extract
     :param label: Generates number classification
     :return: Stacked data set
@@ -31,20 +34,31 @@ def create_data_classification(df, label):
     return stacked, np.ones(len(stacked)) * label
 
 
-def shuffle(X, y):
+def shuffle(X: np.ndarray, y: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Randomly shuffles X and y keeping the matching input and output pairs.
+    :param X: input data
+    :param y: output data
+    :return: randomly shuffled X and y arrays
+    """
     indices = np.random.permutation(len(X))
     X = X[indices]
     y = y[indices]
     return X, y
 
-def normalize(X):
+def normalize(X: np.ndarray) -> np.ndarray:
+    """
+    Normalizes input data using the median of the data.
+    :param X: input data
+    :return: normalized data
+    """
     X = (X - np.median(X, axis=1, keepdims=True)) / (np.std(X, axis=1, keepdims=True) + 1e-8)
     X = X[..., np.newaxis]
     return X
 
 
 def main() -> None:
-    folder = Path("data/Kepler_data/")
+    folder = Path("data/processed/")
     files = [f.name for f in folder.iterdir() if f.is_file()]
 
     Exo_files = [file for file in files if "kepler_flux" in file]
@@ -56,7 +70,7 @@ def main() -> None:
     exo_ids = set(kepler_exo_df["kepid"])
     eb_ids = set(kepler_eb_df["kepid"])
 
-    exo_eb_overlap = exo_ids & eb_ids
+    overlap_ids = exo_ids & eb_ids
 
     kepler_exo_df = kepler_exo_df[~kepler_exo_df["kepid"].isin(overlap_ids)].copy()
     kepler_eb_df = kepler_eb_df[~kepler_eb_df["kepid"].isin(overlap_ids)].copy()
@@ -106,5 +120,12 @@ def main() -> None:
     X_real_val = np.squeeze(X_real_val, axis=-1)
     X_real_test = np.squeeze(X_real_test, axis=-1)
 
-    
+    output_dir = Path("data/")
+    output_dir.mkdir(parents=True, exist_ok=True)
 
+    np.savez_compressed(output_dir / "train.npz", X=X_real_train, y=y_real_train)
+    np.savez_compressed(output_dir / "val.npz", X=X_real_val, y=y_real_val)
+    np.savez_compressed(output_dir / "test.npz", X=X_real_test, y=y_real_test)
+
+if __name__ == "__main__":
+    main()
