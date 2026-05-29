@@ -32,7 +32,10 @@ stages:
       - data/processed/exo_data
       - data/processed/eb_data
     params:
-      - configs/data_process_params.yaml
+      - configs/data_process_params.yaml:
+          - organize_train_ratio
+          - organize_val_test_ratio
+          - organize_seed
     outs:
       - data/real_model/train.npz
       - data/real_model/val.npz
