@@ -10,7 +10,6 @@ from scripts.helpers.temp_help_name import download_lcs
 import numpy as np
 import pandas as pd
 
-
 PARAMS_FILE = PROJECT_ROOT / "configs" / "data_process_params.yaml"
 CHUNK_SIZE = 200
 LIGHT_CURVE_LENGTH = 4894

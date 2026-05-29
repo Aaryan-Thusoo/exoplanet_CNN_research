@@ -1,10 +1,25 @@
 # Imports
+
 from pathlib import Path
+import sys
+import ast
+from typing import List
 
 import numpy as np
 import pandas as pd
-import ast
-from typing import List
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from scripts.helpers import temp_help_name as hp
+from scripts.helpers import yaml_reading as yr
+
+PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
+EXO_DIR = PROCESSED_DIR / "exo_data"
+EB_DIR = PROCESSED_DIR / "eb_data"
+REAL_MODEL_DIR = PROJECT_ROOT / "data" / "real_model"
+
+yaml_file = PROJECT_ROOT / "configs" / "data_process_params.yaml"
 
 # Functions
 def files_to_df(file_list: List[str]) -> pd.DataFrame:
@@ -34,17 +49,23 @@ def create_data_classification(df: pd.DataFrame, label: int) -> tuple[np.ndarray
     return stacked, np.ones(len(stacked)) * label
 
 
-def shuffle(X: np.ndarray, y: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def shuffle(
+    X: np.ndarray,
+    y: np.ndarray,
+    seed: int,
+) -> tuple[np.ndarray, np.ndarray]:
     """
-    Randomly shuffles X and y keeping the matching input and output pairs.
-    :param X: input data
-    :param y: output data
-    :return: randomly shuffled X and y arrays
+    Randomly shuffle X and y while keeping matching input/output pairs together.
+
+    :param X: Input data.
+    :param y: Output labels.
+    :param seed: Random seed for reproducible shuffling.
+    :return: Randomly shuffled X and y arrays.
     """
-    indices = np.random.permutation(len(X))
-    X = X[indices]
-    y = y[indices]
-    return X, y
+    rng = np.random.default_rng(seed)
+    indices = rng.permutation(len(X))
+
+    return X[indices], y[indices]
 
 def normalize(X: np.ndarray) -> np.ndarray:
     """
@@ -57,16 +78,18 @@ def normalize(X: np.ndarray) -> np.ndarray:
     return X
 
 
-def main() -> None:
-    folder = Path("data/processed/")
-    files = [f.name for f in folder.iterdir() if f.is_file()]
+def main(seed, train_ratio, val_test_ratio) -> None:
 
-    Exo_files = [file for file in files if "kepler_flux" in file]
-    EB_files = [file for file in files if "keplerEB" in file]
 
-    kepler_exo_df = files_to_df(Exo_files)
-    kepler_eb_df = files_to_df(EB_files)
+    # Pull .csv file paths
+    exo_files = sorted(EXO_DIR.glob("kepler_exo_flux_*.csv"))
+    eb_files = sorted(EB_DIR.glob("kepler_eb_flux_*.csv"))
 
+    # Download files into DataFrames
+    kepler_exo_df = files_to_df(exo_files)
+    kepler_eb_df = files_to_df(eb_files)
+
+    # Remove any overlaps
     exo_ids = set(kepler_exo_df["kepid"])
     eb_ids = set(kepler_eb_df["kepid"])
 
@@ -75,13 +98,14 @@ def main() -> None:
     kepler_exo_df = kepler_exo_df[~kepler_exo_df["kepid"].isin(overlap_ids)].copy()
     kepler_eb_df = kepler_eb_df[~kepler_eb_df["kepid"].isin(overlap_ids)].copy()
 
-    exo_validation = kepler_exo_df.loc[7000:7350]
-    exo_test = kepler_exo_df.loc[7351:]
-    exo_training = kepler_exo_df.loc[:7000]
+    # Limit dataframes to same size
+    kepler_exo_df, kepler_eb_df = hp.same_size(kepler_exo_df, kepler_eb_df)
 
-    eb_validation = kepler_eb_df.loc[6999:7350]
-    eb_test = kepler_eb_df.loc[7351:]
-    eb_training = kepler_eb_df.loc[:6998]
+    exo_training, exo_validation, exo_test = hp.split_by_kepid(kepler_exo_df, train_ratio=train_ratio,
+                                                               val_test_ratio=val_test_ratio, seed=seed)
+
+    eb_training, eb_validation, eb_test = hp.split_by_kepid(kepler_eb_df, train_ratio=train_ratio,
+                                                            val_test_ratio=val_test_ratio, seed=seed)
 
     # Label and Classify data sets
     X_exo_training, y_exo_training = create_data_classification(exo_training, 0)
@@ -91,14 +115,7 @@ def main() -> None:
     X_eb_val, y_eb_val = create_data_classification(eb_validation, 1)
     X_eb_test, y_eb_test = create_data_classification(eb_test, 1)
 
-    """kepid_exo_train = exo_training["kepid"].to_numpy()
-    kepid_exo_val = exo_validation["kepid"].to_numpy()
-    kepid_exo_test = exo_test["kepid"].to_numpy()
-
-    kepid_eb_train = eb_training["kepid"].to_numpy()
-    kepid_eb_val = eb_validation["kepid"].to_numpy()
-    kepid_eb_test = eb_test["kepid"].to_numpy()"""
-
+    # Combine exo and eb data sets
     X_train = np.concatenate([X_exo_training, X_eb_training], axis=0)
     y_train = np.concatenate([y_exo_training, y_eb_training], axis=0)
 
@@ -108,19 +125,23 @@ def main() -> None:
     X_test = np.concatenate([X_exo_test, X_eb_test], axis=0)
     y_test = np.concatenate([y_exo_test, y_eb_test], axis=0)
 
-    X_train, y_real_train = shuffle(X_train, y_train)
-    X_val, y_real_val = shuffle(X_val, y_val)
-    X_test, y_real_test = shuffle(X_test, y_test)
+    # Shuffle data
+    X_train, y_real_train = shuffle(X_train, y_train, seed)
+    X_val, y_real_val = shuffle(X_val, y_val, seed+1)
+    X_test, y_real_test = shuffle(X_test, y_test, seed+2)
 
+    # Normalize data
     X_real_train = normalize(X_train)
     X_real_val = normalize(X_val)
     X_real_test = normalize(X_test)
 
+    # Fix axes for model
     X_real_train = np.squeeze(X_real_train, axis=-1)
     X_real_val = np.squeeze(X_real_val, axis=-1)
     X_real_test = np.squeeze(X_real_test, axis=-1)
 
-    output_dir = Path("data/")
+    # Save data sets for next stage
+    output_dir = REAL_MODEL_DIR
     output_dir.mkdir(parents=True, exist_ok=True)
 
     np.savez_compressed(output_dir / "train.npz", X=X_real_train, y=y_real_train)
@@ -128,4 +149,8 @@ def main() -> None:
     np.savez_compressed(output_dir / "test.npz", X=X_real_test, y=y_real_test)
 
 if __name__ == "__main__":
-    main()
+    params = yr.load_params(yaml_file)
+    seed = params["organize_seed"]
+    train_ratio = params["organize_train_ratio"]
+    val_test_ratio = params["organize_val_test_ratio"]
+    main(seed, train_ratio, val_test_ratio)
