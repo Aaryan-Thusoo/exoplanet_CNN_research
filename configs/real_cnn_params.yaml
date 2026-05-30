@@ -1,4 +1,10 @@
-reading:
+training_and_compiling:
+  epochs: 5
+  batch_size: 32
+  learning_rate: 5e-4
+  weight_decay: 1e-4
+  loss: "binary_crossentropy"
+  metrics: ["accuracy"]
 
 cnn_layers:
   - type: "conv1d"
@@ -37,9 +43,3 @@ cnn_layers:
   - type: "dense"
     units: 1
     activation: "sigmoid"
-
-
-
-
-
-

@@ -49,7 +49,9 @@ stages:
       - data/real_model/val.npz
       - data/real_model/test.npz
     params:
-      - configs/real_cnn_params.yaml
+      - configs/real_cnn_params.yaml:
+          - cnn_layers
+          - training_and_compiling
     outs:
       - models/real_model.keras
     metrics:
