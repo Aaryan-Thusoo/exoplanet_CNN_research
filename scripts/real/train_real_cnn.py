@@ -1,6 +1,11 @@
-# region Imports
 from pathlib import Path
 import sys
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT))
+
+import numpy as np
+import json
 
 from scripts.helpers.yaml_reading import load_params
 from scripts.helpers.layers_helper import *
@@ -10,13 +15,34 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.append(str(PROJECT_ROOT / "configs"))
 yaml_file = PROJECT_ROOT / "configs"/ "real_cnn_params.yaml"
 
+def data_loading():
+    data_path = PROJECT_ROOT / "data" / "real_model"
+
+    train_data = np.load(data_path / "train.npz")
+    val_data = np.load(data_path / "val.npz")
+    test_data = np.load(data_path / "test.npz")
+
+    X_train = train_data["X"][..., np.newaxis]
+    y_train = train_data["y"]
+
+    X_val = val_data["X"][..., np.newaxis]
+    y_val = val_data["y"]
+
+    X_test = test_data["X"][..., np.newaxis]
+    y_test = test_data["y"]
+
+    return X_train, y_train, X_val, y_val, X_test, y_test
+
 
 def main() -> None:
+    
+    X_train, y_train, X_val, y_val, X_test, y_test = data_loading()
+    
     params = load_params(yaml_file)
-
+    
     model_layers = params["cnn_layers"]
 
-    real_layers = []
+    layers = []
 
     for layer in model_layers:
         layer_config = layer.copy()
@@ -24,33 +50,62 @@ def main() -> None:
         layer_config.pop("type")
 
         if type == "conv1d":
-            real_layers.append(conv_layer(**layer_config))
+            layers.append(conv_layer(**layer_config))
         elif type == "max_pooling1d":
-            real_layers.append(max_pooling_layer(**layer_config))
+            layers.append(max_pooling_layer(**layer_config))
         elif type == "dropout":
-            real_layers.append(dropout_layer(**layer_config))
+            layers.append(dropout_layer(**layer_config))
         elif type == "dense":
-            real_layers.append(dense_layer(**layer_config))
+            layers.append(dense_layer(**layer_config))
         elif type == "global_max_pooling1d":
-            real_layers.append(global_max_pooling_layer())
+            layers.append(global_max_pooling_layer())
 
-    real_model = keras.Sequential(keras.layers.Input(shape=X_real_train.shape[1:]))
-    for layer in real_layers:
-        real_model.add(layer)
+    model = keras.Sequential([
+        keras.layers.Input(shape=X_train.shape[1:])
+    ])
+    for layer in layers:
+        model.add(layer)
 
-    real_model.compile(optimizer=keras.optimizers.Adam(learning_rate=5e-4, weight_decay=1e-4),
-                       loss="sparse_categorical_crossentropy", metrics=["accuracy"])
+    # Collect parameters for compiling and training
+    training_and_compiling = params["training_and_compiling"]
 
-    real_early_stop = keras.callbacks.EarlyStopping(
+    learning_rate = float(training_and_compiling["learning_rate"])
+    weight_decay = float(training_and_compiling["weight_decay"])
+    loss = training_and_compiling["loss"]
+    metrics = training_and_compiling["metrics"]
+    batch_size = training_and_compiling["batch_size"]
+    epochs = training_and_compiling["epochs"]
+
+
+
+    model.compile(optimizer=keras.optimizers.Adam(learning_rate=learning_rate, weight_decay=weight_decay),
+                       loss=loss, metrics=metrics)
+
+    early_stop = keras.callbacks.EarlyStopping(
         monitor="val_loss",
         patience=5,
         restore_best_weights=True
     )
 
-    real_history = real_model.fit(X_real_train, y_real_train, validation_data=(X_real_val, y_real_val), epochs=5,
-                                  batch_size=32, callbacks=[real_early_stop])
+    history = model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=epochs,
+                                  batch_size=batch_size, callbacks=[early_stop])
 
-    real_model.save("models/real_model.keras")
+    results_dir = PROJECT_ROOT / "results"
+    results_dir.mkdir(parents=True, exist_ok=True)
+
+    metrics = {
+        "final_train_loss": float(history.history["loss"][-1]),
+        "final_train_accuracy": float(history.history["accuracy"][-1]),
+        "final_val_loss": float(history.history["val_loss"][-1]),
+        "final_val_accuracy": float(history.history["val_accuracy"][-1]),
+    }
+
+    with open(results_dir / "real_metrics.json", "w") as file:
+        json.dump(metrics, file, indent=2)
+
+    model_dir = PROJECT_ROOT / "models"
+    model_dir.mkdir(parents=True, exist_ok=True)
+    model.save(model_dir / "real_model.keras")
 
 if __name__ == "__main__":
     main()
