@@ -30,28 +30,7 @@ def data_loading():
 
     return X_train, y_train, X_val, y_val
 
-def history_saving(history, results_dir: Path) -> None:
-    results_dir.mkdir(parents=True, exist_ok=True)
-
-    history_dict = {
-        key: [float(value) for value in values]
-        for key, values in history.history.items()
-    }
-
-    with open(results_dir / "training_history.json", "w") as file:
-        json.dump(history_dict, file, indent=2)
-
-def results_saving(history, results_dir: Path) -> None:
-    results_dir.mkdir(parents=True, exist_ok=True)
-
-
-def main() -> None:
-    
-    X_train, y_train, X_val, y_val = data_loading()
-    
-    params = load_params(yaml_file)
-    
-    model_layers = params["cnn_layers"]
+def prepare_layers(model_layers, input_shape):
 
     layers = []
 
@@ -72,14 +51,14 @@ def main() -> None:
             layers.append(global_max_pooling_layer())
 
     model = keras.Sequential([
-        keras.layers.Input(shape=X_train.shape[1:])
+        keras.layers.Input(shape=input_shape)
     ])
     for layer in layers:
         model.add(layer)
 
-    # Collect parameters for compiling and training
-    training_and_compiling = params["training_and_compiling"]
+    return model
 
+def run_training(model, training_and_compiling, X_train, y_train, X_val, y_val):
     learning_rate = float(training_and_compiling["learning_rate"])
     weight_decay = float(training_and_compiling["weight_decay"])
     loss = training_and_compiling["loss"]
@@ -88,7 +67,7 @@ def main() -> None:
     epochs = training_and_compiling["epochs"]
 
     model.compile(optimizer=keras.optimizers.Adam(learning_rate=learning_rate, weight_decay=weight_decay),
-                       loss=loss, metrics=metrics)
+                  loss=loss, metrics=metrics)
 
     early_stop = keras.callbacks.EarlyStopping(
         monitor="val_loss",
@@ -97,11 +76,22 @@ def main() -> None:
     )
 
     history = model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=epochs,
-                                  batch_size=batch_size, callbacks=[early_stop])
+                        batch_size=batch_size, callbacks=[early_stop])
 
-    history_saving(history, RESULTS_DIR)
+    return history
 
-    results_dir = RESULTS_DIR
+def history_saving(history, results_dir: Path) -> None:
+    results_dir.mkdir(parents=True, exist_ok=True)
+
+    history_dict = {
+        key: [float(value) for value in values]
+        for key, values in history.history.items()
+    }
+
+    with open(results_dir / "training_history.json", "w") as file:
+        json.dump(history_dict, file, indent=2)
+
+def results_saving(history, results_dir: Path) -> None:
     results_dir.mkdir(parents=True, exist_ok=True)
 
     metrics = {
@@ -114,6 +104,29 @@ def main() -> None:
     with open(results_dir / "real_metrics.json", "w") as file:
         json.dump(metrics, file, indent=2)
 
+
+def main() -> None:
+
+    # Load the data
+    X_train, y_train, X_val, y_val = data_loading()
+
+    # Load the params from configs/real_cnn_params.yaml
+    params = load_params(yaml_file)
+
+    # Load the order of layers and set up the model
+    model_layers = params["cnn_layers"]
+    model = prepare_layers(model_layers, X_train.shape[1:])
+
+    # Conduct training
+    history = run_training(model, params["training_and_compiling"], X_train, y_train, X_val, y_val)
+
+    # Save the history into a .json file
+    history_saving(history, RESULTS_DIR)
+
+    # Save the final metrics into a .json file
+    results_saving(history, RESULTS_DIR)
+
+    # Save the model for use in evaluation
     model_dir = PROJECT_ROOT / "models"
     model_dir.mkdir(parents=True, exist_ok=True)
     model.save(model_dir / "real_model.keras")
