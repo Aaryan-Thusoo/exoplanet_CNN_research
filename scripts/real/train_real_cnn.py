@@ -12,6 +12,7 @@ from scripts.helpers.layers_helper import *
 
 # Parameters file path
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+RESULTS_DIR = PROJECT_ROOT / "results"
 sys.path.append(str(PROJECT_ROOT / "configs"))
 yaml_file = PROJECT_ROOT / "configs"/ "real_cnn_params.yaml"
 
@@ -20,7 +21,6 @@ def data_loading():
 
     train_data = np.load(data_path / "train.npz")
     val_data = np.load(data_path / "val.npz")
-    test_data = np.load(data_path / "test.npz")
 
     X_train = train_data["X"][..., np.newaxis]
     y_train = train_data["y"]
@@ -28,15 +28,26 @@ def data_loading():
     X_val = val_data["X"][..., np.newaxis]
     y_val = val_data["y"]
 
-    X_test = test_data["X"][..., np.newaxis]
-    y_test = test_data["y"]
+    return X_train, y_train, X_val, y_val
 
-    return X_train, y_train, X_val, y_val, X_test, y_test
+def history_saving(history, results_dir: Path) -> None:
+    results_dir.mkdir(parents=True, exist_ok=True)
+
+    history_dict = {
+        key: [float(value) for value in values]
+        for key, values in history.history.items()
+    }
+
+    with open(results_dir / "training_history.json", "w") as file:
+        json.dump(history_dict, file, indent=2)
+
+def results_saving(history, results_dir: Path) -> None:
+    results_dir.mkdir(parents=True, exist_ok=True)
 
 
 def main() -> None:
     
-    X_train, y_train, X_val, y_val, X_test, y_test = data_loading()
+    X_train, y_train, X_val, y_val = data_loading()
     
     params = load_params(yaml_file)
     
@@ -76,8 +87,6 @@ def main() -> None:
     batch_size = training_and_compiling["batch_size"]
     epochs = training_and_compiling["epochs"]
 
-
-
     model.compile(optimizer=keras.optimizers.Adam(learning_rate=learning_rate, weight_decay=weight_decay),
                        loss=loss, metrics=metrics)
 
@@ -90,7 +99,9 @@ def main() -> None:
     history = model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=epochs,
                                   batch_size=batch_size, callbacks=[early_stop])
 
-    results_dir = PROJECT_ROOT / "results"
+    history_saving(history, RESULTS_DIR)
+
+    results_dir = RESULTS_DIR
     results_dir.mkdir(parents=True, exist_ok=True)
 
     metrics = {
