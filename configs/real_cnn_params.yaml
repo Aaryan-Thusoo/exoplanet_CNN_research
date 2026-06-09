@@ -1,5 +1,5 @@
 training_and_compiling:
-  epochs: 5
+  epochs: 2
   batch_size: 32
   learning_rate: 5e-4
   weight_decay: 1e-4
