@@ -64,9 +64,14 @@ stages:
       - scripts/real/real_cnn_model_evaluation.py
       - models/real_model.keras
       - data/real_model/test.npz
+    params:
+      - configs/evaluation_params.yaml:
+          - threshold
     outs:
-      - results/real_conf_matrix.png
-      - results/accuracy.png
-      - results/loss.png
+      - results/plots/confusion_matrix.png
+      - results/plots/training_accuracy_history.png
+      - results/plots/training_loss_history.png
+      - results/plots/confidence_histogram.png
+      - results/plots/confidence_correct_vs_incorrect.png
     metrics:
       - results/evaluation.json
