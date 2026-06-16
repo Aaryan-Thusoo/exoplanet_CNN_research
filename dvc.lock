@@ -86,10 +86,6 @@ stages:
   train_real_cnn:
     cmd: python scripts/real/train_real_cnn.py
     deps:
-    - path: data/real_model/test.npz
-      hash: md5
-      md5: 234c66d77b1c28f4671da4cad58a06ff
-      size: 28583023
     - path: data/real_model/train.npz
       hash: md5
       md5: b7921c608413edfcdcce32fabee4afa6
@@ -100,8 +96,8 @@ stages:
       size: 27916492
     - path: scripts/real/train_real_cnn.py
       hash: md5
-      md5: 765c766d6bdbe81a6b5d6d8434255191
-      size: 3455
+      md5: 6326b35c35a07f3333f3933535475203
+      size: 4248
     params:
       configs/real_cnn_params.yaml:
         cnn_layers:
@@ -133,7 +129,7 @@ stages:
           units: 1
           activation: sigmoid
         training_and_compiling:
-          epochs: 5
+          epochs: 15
           batch_size: 32
           learning_rate: 0.0005
           weight_decay: 0.0001
@@ -143,9 +139,48 @@ stages:
     outs:
     - path: models/real_model.keras
       hash: md5
-      md5: 323a4f3ee6f223d8645baade97fe2b59
+      md5: 94b07b871157ba6b9c16bdce59330196
       size: 345230
     - path: results/real_metrics.json
       hash: md5
-      md5: 79f518eb12dbab08633ad425af1dba3c
-      size: 174
+      md5: c668116faa9543fefe7e4c2b78c6107d
+      size: 171
+    - path: results/training_history.json
+      hash: md5
+      md5: 57e5e4ba54e9b31c21b6907937d082cd
+      size: 1522
+  evaluate_real_cnn:
+    cmd: python scripts/real/real_cnn_model_evaluation.py
+    deps:
+    - path: data/real_model/test.npz
+      hash: md5
+      md5: 234c66d77b1c28f4671da4cad58a06ff
+      size: 28583023
+    - path: models/real_model.keras
+      hash: md5
+      md5: 94b07b871157ba6b9c16bdce59330196
+      size: 345230
+    - path: scripts/real/real_cnn_model_evaluation.py
+      hash: md5
+      md5: 11e4173ae422245f5ed7b741c69f5e12
+      size: 6519
+    params:
+      configs/evaluation_params.yaml:
+        threshold: 0.4
+    outs:
+    - path: results/evaluation.json
+      hash: md5
+      md5: ebddcfcc43a0ad3662d9cf8d5c32ed0a
+      size: 162
+    - path: results/plots/confusion_matrix.png
+      hash: md5
+      md5: 952b68a20cff165f1f1946085f9c85dc
+      size: 22204
+    - path: results/plots/training_accuracy_history.png
+      hash: md5
+      md5: da8fc3099330cf35906b3bf94393f1c1
+      size: 32926
+    - path: results/plots/training_loss_history.png
+      hash: md5
+      md5: 22a4120c654f244bcdef03656a2fabdb
+      size: 33408
