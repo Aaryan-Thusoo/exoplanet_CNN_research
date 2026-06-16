@@ -1,20 +1,26 @@
 from pathlib import Path
 import sys
+import numpy as np
+
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-import numpy as np
 from tensorflow import keras
 import json
 
 from scripts.helpers.yaml_reading import load_params
 from scripts.helpers.layers_helper import *
 
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+
 # Parameters file path
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.append(str(PROJECT_ROOT / "configs"))
-yaml_file = PROJECT_ROOT / "configs"/ "real_cnn_params.yaml"
+YAML_FILE = PROJECT_ROOT / "configs"/ "evaluation_params.yaml"
 
 DATA_DIR = PROJECT_ROOT / "data" / "real_model"
 MODEL_PATH = PROJECT_ROOT / "models" / "real_model.keras"
@@ -23,16 +29,55 @@ RESULTS_DIR = PROJECT_ROOT / "results"
 
 def data_loading():
 
-    test_data = np.load(data_path / "test.npz")
+    test_data = np.load(DATA_DIR / "test.npz")
 
     X_test = test_data["X"][..., np.newaxis]
     y_test = test_data["y"]
 
     return X_test, y_test
 
+def plot_training_history(path):
+
+    # Plotting and saving training history
+    with open(path) as f:
+        params = json.load(f)
+        accuracy = params["accuracy"]
+        val_accuracy = params["val_accuracy"]
+        loss = params["loss"]
+        val_loss = params["val_loss"]
+
+    epochs = np.arange(1, len(accuracy) + 1)
+
+    # Loss plot
+    plt.figure(figsize=(8, 5))
+    plt.plot(epochs, loss, label="Training Loss")
+    plt.plot(epochs, val_loss, label="Validation Loss")
+
+    ax = plt.gca()
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.title("Training and Validation Loss")
+    plt.legend()
+    plt.savefig(RESULTS_DIR / "plots" / "training_loss_history.png")
+
+    # Accuracy plot
+    plt.figure(figsize=(8, 5))
+    plt.plot(epochs, accuracy, label="Training Accuracy")
+    plt.plot(epochs, val_accuracy, label="Validation Accuracy")
+
+    ax = plt.gca()
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+
+    plt.xlabel("Epoch")
+    plt.ylabel("Accuracy")
+    plt.title("Training and Validation Accuracy")
+    plt.legend()
+    plt.savefig(RESULTS_DIR / "plots" / "training_accuracy_history.png")
 
 def plot_confusion_matrix(all_true, all_preds):
-    names = ["normal", "transit", "eclipsing"]
+    names = ["transit", "eclipsing"]
 
     conf_matrix = confusion_matrix(all_true, all_preds, normalize='true')
     n_classes = len(names)
@@ -56,18 +101,125 @@ def plot_confusion_matrix(all_true, all_preds):
     plt.ylabel('True')
     plt.colorbar(label="Fraction")
     plt.tight_layout()
-    plt.show()
+    plt.savefig(RESULTS_DIR / "plots" / "confusion_matrix.png")
 
+def calculate_classification_metrics(
+    y_true,
+    y_pred,
+    y_pred_prob,
+) -> dict:
+    """
+    Calculate binary classification metrics.
+
+    :param y_true: True binary labels.
+    :param y_pred: Predicted binary labels after thresholding.
+    :param y_pred_prob: Predicted probabilities for the positive class.
+    :return: Dictionary of evaluation metrics.
+    """
+    return {
+        "accuracy": float(accuracy_score(y_true, y_pred)),
+        "precision": float(precision_score(y_true, y_pred, zero_division=0)),
+        "recall": float(recall_score(y_true, y_pred, zero_division=0)),
+        "f1": float(f1_score(y_true, y_pred, zero_division=0)),
+        "roc_auc": float(roc_auc_score(y_true, y_pred_prob)),
+    }
+
+def plot_confidence_histogram(
+    y_pred_prob: np.ndarray
+) -> None:
+    """
+    Plot histogram of model prediction confidence.
+
+    Confidence is defined as the model's distance from uncertainty:
+    max(p, 1 - p), where p is the predicted probability for class 1.
+    """
+
+    confidence = np.maximum(y_pred_prob, 1 - y_pred_prob)
+
+    plt.figure(figsize=(8, 5))
+    plt.hist(confidence, bins=30, edgecolor="black")
+
+    plt.xlabel("Prediction Confidence")
+    plt.ylabel("Number of Samples")
+    plt.title("Model Prediction Confidence")
+    plt.xlim(0.5, 1.0)
+    plt.tight_layout()
+
+    plt.savefig(RESULTS_DIR / "plots" / "confidence_histogram.png", dpi=200)
+    plt.close()
+
+def plot_correct_incorrect_confidence(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    y_pred_prob: np.ndarray,
+    results_dir: Path,
+) -> None:
+    results_dir.mkdir(parents=True, exist_ok=True)
+
+    y_true = y_true.astype(int)
+    y_pred = y_pred.astype(int)
+    y_pred_prob = np.asarray(y_pred_prob).ravel()
+
+    confidence = np.maximum(y_pred_prob, 1 - y_pred_prob)
+
+    correct_confidence = confidence[y_pred == y_true]
+    incorrect_confidence = confidence[y_pred != y_true]
+
+    plt.figure(figsize=(8, 5))
+    plt.hist(
+        correct_confidence,
+        bins=30,
+        range=(0.5, 1.0),
+        alpha=0.7,
+        label="Correct",
+        edgecolor="black",
+    )
+    plt.hist(
+        incorrect_confidence,
+        bins=30,
+        range=(0.5, 1.0),
+        alpha=0.7,
+        label="Incorrect",
+        edgecolor="black",
+    )
+
+    plt.xlabel("Prediction Confidence")
+    plt.ylabel("Number of Samples")
+    plt.title("Prediction Confidence: Correct vs Incorrect")
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(results_dir / "confidence_correct_vs_incorrect.png", dpi=200)
+    plt.close()
 
 def main():
 
+    # Load test data
     X_test, y_test = data_loading()
 
-    model = keras.models.load_model("models/real_model.keras")
+    params = load_params(YAML_FILE)
 
-    y_pred = model.predict(X_train)
+    # Load model for testing
+    model = keras.models.load_model(MODEL_PATH)
 
+    plot_training_history(RESULTS_DIR / "training_history.json")
+
+    y_pred_prob = model.predict(X_test).ravel()
+    y_pred = (y_pred_prob >= params["threshold"]).astype(int)
     plot_confusion_matrix(y_test, y_pred)
+
+    plot_confidence_histogram(y_pred_prob)
+
+    plot_correct_incorrect_confidence(
+        y_true=y_test,
+        y_pred=y_pred,
+        y_pred_prob=y_pred_prob,
+        results_dir=RESULTS_DIR / "plots",
+    )
+
+    metrics = calculate_classification_metrics(y_test, y_pred, y_pred_prob)
+
+    with open(RESULTS_DIR / "evaluation.json", "w") as file:
+        json.dump(metrics, file, indent=2)
 
 if __name__ == "__main__":
     main()
