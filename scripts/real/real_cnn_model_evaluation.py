@@ -33,8 +33,9 @@ def data_loading():
 
     X_test = test_data["X"][..., np.newaxis]
     y_test = test_data["y"]
+    kepid_test = test_data["kepid"]
 
-    return X_test, y_test
+    return X_test, y_test, kepid_test
 
 def plot_training_history(path):
 
@@ -191,10 +192,51 @@ def plot_correct_incorrect_confidence(
     plt.savefig(results_dir / "confidence_correct_vs_incorrect.png", dpi=200)
     plt.close()
 
+def get_misclassified_lightcurves_by_type(
+    X_test: np.ndarray,
+    y_test: np.ndarray,
+    y_pred_prob: np.ndarray,
+    kepid_test: np.ndarray,
+    threshold: float = 0.5,
+) -> dict:
+    """
+    Split incorrectly classified test light curves by mistake type.
+
+    False positives: true label 0, predicted 1.
+    False negatives: true label 1, predicted 0.
+    """
+    y_test = y_test.astype(int)
+    y_pred_prob = np.asarray(y_pred_prob).ravel()
+    y_pred = (y_pred_prob >= threshold).astype(int)
+
+    confidence = np.maximum(y_pred_prob, 1 - y_pred_prob)
+
+    false_positive_mask = (y_test == 0) & (y_pred == 1)
+    false_negative_mask = (y_test == 1) & (y_pred == 0)
+
+    return {
+        "false_positives": {
+            "X": X_test[false_positive_mask],
+            "y_true": y_test[false_positive_mask],
+            "y_pred": y_pred[false_positive_mask],
+            "y_pred_prob": y_pred_prob[false_positive_mask],
+            "kepid": kepid_test[false_positive_mask],
+            "confidence": confidence[false_positive_mask],
+        },
+        "false_negatives": {
+            "X": X_test[false_negative_mask],
+            "y_true": y_test[false_negative_mask],
+            "y_pred": y_pred[false_negative_mask],
+            "y_pred_prob": y_pred_prob[false_negative_mask],
+            "kepid": kepid_test[false_negative_mask],
+            "confidence": confidence[false_negative_mask],
+        },
+    }
+
 def main():
 
     # Load test data
-    X_test, y_test = data_loading()
+    X_test, y_test, kepid_test = data_loading()
 
     params = load_params(YAML_FILE)
 
@@ -220,6 +262,26 @@ def main():
 
     with open(RESULTS_DIR / "evaluation.json", "w") as file:
         json.dump(metrics, file, indent=2)
+
+    misclassified = get_misclassified_lightcurves_by_type(X_test, y_test, y_pred_prob, kepid_test=kepid_test, threshold=params["threshold"])
+
+    np.savez_compressed(
+        RESULTS_DIR / "misclassified_lightcurves.npz",
+
+        false_positive_X=misclassified["false_positives"]["X"],
+        false_positive_y_true=misclassified["false_positives"]["y_true"],
+        false_positive_y_pred=misclassified["false_positives"]["y_pred"],
+        false_positive_y_pred_prob=misclassified["false_positives"]["y_pred_prob"],
+        false_positive_kepid=misclassified["false_positives"]["kepid"],
+        false_positive_confidence=misclassified["false_positives"]["confidence"],
+
+        false_negative_X=misclassified["false_negatives"]["X"],
+        false_negative_y_true=misclassified["false_negatives"]["y_true"],
+        false_negative_y_pred=misclassified["false_negatives"]["y_pred"],
+        false_negative_y_pred_prob=misclassified["false_negatives"]["y_pred_prob"],
+        false_negative_kepid=misclassified["false_negatives"]["kepid"],
+        false_negative_confidence=misclassified["false_negatives"]["confidence"],
+    )
 
 if __name__ == "__main__":
     main()

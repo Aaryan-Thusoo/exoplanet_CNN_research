@@ -52,8 +52,9 @@ def create_data_classification(df: pd.DataFrame, label: int) -> tuple[np.ndarray
 def shuffle(
     X: np.ndarray,
     y: np.ndarray,
+    kepids: np.ndarray,
     seed: int,
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Randomly shuffle X and y while keeping matching input/output pairs together.
 
@@ -65,7 +66,7 @@ def shuffle(
     rng = np.random.default_rng(seed)
     indices = rng.permutation(len(X))
 
-    return X[indices], y[indices]
+    return X[indices], y[indices], kepids[indices]
 
 def normalize(X: np.ndarray) -> np.ndarray:
     """
@@ -115,20 +116,31 @@ def main(seed, train_ratio, val_test_ratio) -> None:
     X_eb_val, y_eb_val = create_data_classification(eb_validation, 1)
     X_eb_test, y_eb_test = create_data_classification(eb_test, 1)
 
+    # Save kepids of each section
+    kepid_exo_training = exo_training["kepid"].to_numpy()
+    kepid_exo_val = exo_validation["kepid"].to_numpy()
+    kepid_exo_test = exo_test["kepid"].to_numpy()
+    kepid_eb_training = eb_training["kepid"].to_numpy()
+    kepid_eb_val = eb_validation["kepid"].to_numpy()
+    kepid_eb_test = eb_test["kepid"].to_numpy()
+
     # Combine exo and eb data sets
     X_train = np.concatenate([X_exo_training, X_eb_training], axis=0)
     y_train = np.concatenate([y_exo_training, y_eb_training], axis=0)
+    kepid_train = np.concatenate([kepid_exo_training, kepid_eb_training], axis=0)
 
     X_val = np.concatenate([X_exo_val, X_eb_val], axis=0)
     y_val = np.concatenate([y_exo_val, y_eb_val], axis=0)
+    kepid_val = np.concatenate([kepid_exo_val, kepid_eb_val], axis=0)
 
     X_test = np.concatenate([X_exo_test, X_eb_test], axis=0)
     y_test = np.concatenate([y_exo_test, y_eb_test], axis=0)
+    kepid_test = np.concatenate([kepid_exo_test, kepid_eb_test], axis=0)
 
     # Shuffle data
-    X_train, y_real_train = shuffle(X_train, y_train, seed)
-    X_val, y_real_val = shuffle(X_val, y_val, seed+1)
-    X_test, y_real_test = shuffle(X_test, y_test, seed+2)
+    X_train, y_real_train, kepid_train = shuffle(X_train, y_train, kepid_train, seed)
+    X_val, y_real_val, kepid_val = shuffle(X_val, y_val, kepid_val, seed+1)
+    X_test, y_real_test, kepid_test = shuffle(X_test, y_test, kepid_test, seed+2)
 
     # Normalize data
     X_real_train = normalize(X_train)
@@ -144,9 +156,9 @@ def main(seed, train_ratio, val_test_ratio) -> None:
     output_dir = REAL_MODEL_DIR
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    np.savez_compressed(output_dir / "train.npz", X=X_real_train, y=y_real_train)
-    np.savez_compressed(output_dir / "val.npz", X=X_real_val, y=y_real_val)
-    np.savez_compressed(output_dir / "test.npz", X=X_real_test, y=y_real_test)
+    np.savez_compressed(output_dir / "train.npz", X=X_real_train, y=y_real_train, kepid=kepid_train)
+    np.savez_compressed(output_dir / "val.npz", X=X_real_val, y=y_real_val, kepid=kepid_val)
+    np.savez_compressed(output_dir / "test.npz", X=X_real_test, y=y_real_test, kepid=kepid_test)
 
 if __name__ == "__main__":
     params = yr.load_params(yaml_file)
