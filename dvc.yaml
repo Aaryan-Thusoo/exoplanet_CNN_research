@@ -79,3 +79,11 @@ stages:
       - results/misclassified_lightcurves.npz
     metrics:
       - results/evaluation.json
+
+  misclassified_report:
+    cmd: python scripts/real/misclassified_report.py
+    deps:
+      - scripts/real/misclassified_report.py
+      - results/misclassified_lightcurves.npz
+    outs:
+      - results/misclassified_lightcurves.html
