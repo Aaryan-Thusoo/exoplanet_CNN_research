@@ -28,7 +28,7 @@ YAML_FILE = PROJECT_ROOT / "configs"/ "evaluation_params.yaml"
 
 DATA_DIR = PROJECT_ROOT / "data" / "real_model"
 MODEL_PATH = PROJECT_ROOT / "models" / "real_model.keras"
-RESULTS_DIR = PROJECT_ROOT / "results"
+RESULTS_DIR = PROJECT_ROOT / "results" / "misclassified_results"
 
 
 def lightcurve_plot_to_base64(lightcurve, title: str) -> str:
@@ -106,9 +106,63 @@ def save_misclassified_html_report(misclassified: dict, output_path: Path) -> No
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(html)
 
+
+def save_single_section_html_report(
+    group: dict,
+    output_path: Path,
+    heading: str,
+    description: str,
+) -> None:
+    html = f"""
+    <html>
+    <head>
+        <title>{heading}</title>
+        <style>
+            body {{ font-family: Arial, sans-serif; margin: 40px; }}
+            .sample {{ margin-bottom: 36px; border-bottom: 1px solid #ddd; padding-bottom: 24px; }}
+            img {{ max-width: 100%; }}
+            code {{ background: #f2f2f2; padding: 2px 4px; }}
+        </style>
+    </head>
+    <body>
+    <h1>{heading}</h1>
+    <p>{description}</p>
+    """
+
+    for i in range(len(group["X"])):
+        kepid = group["kepid"][i]
+        y_true = group["y_true"][i]
+        y_pred = group["y_pred"][i]
+        prob = group["y_pred_prob"][i]
+        confidence = group["confidence"][i]
+
+        title = (
+            f"KepID {kepid} | "
+            f"true={y_true}, pred={y_pred}, "
+            f"p={prob:.3f}, confidence={confidence:.3f}"
+        )
+
+        image = lightcurve_plot_to_base64(group["X"][i], title)
+
+        html += f"""
+        <div class="sample">
+            <h3>{title}</h3>
+            <img src="data:image/png;base64,{image}">
+        </div>
+        """
+
+    html += """
+    </body>
+    </html>
+    """
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(html)
+
 def main():
     misclassified = np.load(RESULTS_DIR / "misclassified_lightcurves.npz")
 
+    # True: 0, Predicted: 1
     false_positives = {
         "X": misclassified["false_positive_X"],
         "y_true": misclassified["false_positive_y_true"],
@@ -118,6 +172,7 @@ def main():
         "confidence": misclassified["false_positive_confidence"],
     }
 
+    # True: 1, Predicted: 0
     false_negatives = {
         "X": misclassified["false_negative_X"],
         "y_true": misclassified["false_negative_y_true"],
@@ -135,6 +190,41 @@ def main():
     save_misclassified_html_report(
         misclassified_groups,
         RESULTS_DIR / "misclassified_lightcurves.html",
+    )
+
+    # Looking at specific examples of high confidence results which are misclassified
+    fp_high_confidence_filter = false_positives["confidence"] > 0.8
+    fp_high_confidence = {
+        "X": misclassified["false_positive_X"][fp_high_confidence_filter],
+        "y_true": misclassified["false_positive_y_true"][fp_high_confidence_filter],
+        "y_pred": misclassified["false_positive_y_pred"][fp_high_confidence_filter],
+        "y_pred_prob": misclassified["false_positive_y_pred_prob"][fp_high_confidence_filter],
+        "kepid": misclassified["false_positive_kepid"][fp_high_confidence_filter],
+        "confidence": misclassified["false_positive_confidence"][fp_high_confidence_filter],
+    }
+
+    save_single_section_html_report(
+        fp_high_confidence,
+        RESULTS_DIR / "false_positive_high_confidence.html",
+        heading="High-Confidence False Positives",
+        description="True 0, predicted 1. Exoplanet/transit examples mistaken as eclipsing binaries.",
+    )
+
+    fn_high_confidence_filter = false_negatives["confidence"] > 0.8
+    fn_high_confidence = {
+        "X": misclassified["false_negative_X"][fn_high_confidence_filter],
+        "y_true": misclassified["false_negative_y_true"][fn_high_confidence_filter],
+        "y_pred": misclassified["false_negative_y_pred"][fn_high_confidence_filter],
+        "y_pred_prob": misclassified["false_negative_y_pred_prob"][fn_high_confidence_filter],
+        "kepid": misclassified["false_negative_kepid"][fn_high_confidence_filter],
+        "confidence": misclassified["false_negative_confidence"][fn_high_confidence_filter],
+    }
+
+    save_single_section_html_report(
+        fn_high_confidence,
+        RESULTS_DIR / "false_negative_high_confidence.html",
+        heading="High-Confidence False Negatives",
+        description="True 1, predicted 0. Eclipsing binaries mistaken as exoplanet/transit examples.",
     )
 
 if __name__ == "__main__":

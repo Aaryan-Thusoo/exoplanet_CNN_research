@@ -45,6 +45,10 @@ def prepare_layers(model_layers, input_shape):
             layers.append(max_pooling_layer(**layer_config))
         elif type == "dropout":
             layers.append(dropout_layer(**layer_config))
+        elif type == "batch_norm":
+            layers.append(batch_norm_layer())
+        elif type == "activation":
+            layers.append(activations_layer(**layer_config))
         elif type == "dense":
             layers.append(dense_layer(**layer_config))
         elif type == "global_max_pooling1d":

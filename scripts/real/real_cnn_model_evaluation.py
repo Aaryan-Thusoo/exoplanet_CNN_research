@@ -77,31 +77,52 @@ def plot_training_history(path):
     plt.savefig(RESULTS_DIR / "plots" / "training_accuracy_history.png")
 
 def plot_confusion_matrix(all_true, all_preds):
-    names = ["transit", "eclipsing"]
+    class_names = ["Transit", "Eclipsing Binary"]
 
-    conf_matrix = confusion_matrix(all_true, all_preds, normalize='true')
-    n_classes = len(names)
+    all_true = np.asarray(all_true).astype(int)
+    all_preds = np.asarray(all_preds).astype(int)
 
-    plt.figure(figsize=(6, 5))
-    plt.imshow(conf_matrix, cmap='Blues', vmin=0, vmax=1)
+    conf_counts = confusion_matrix(all_true, all_preds)
+    conf_rates = confusion_matrix(all_true, all_preds, normalize="true")
+    accuracy = np.mean(all_true == all_preds) * 100
 
-    for i in range(n_classes):
-        for j in range(n_classes):
-            num = conf_matrix[i, j] * 100
-            text = f"{num:.2f}%"
-            colour = 'white' if conf_matrix[i, j] > 0.6 else 'black'
-            plt.text(j, i, text, ha="center", va="center", color=colour)
+    fig, ax = plt.subplots(figsize=(7, 6))
+    image = ax.imshow(conf_rates, cmap="Blues", vmin=0, vmax=1)
 
-    accuracy = np.mean(np.array(all_true) == np.array(all_preds)) * 100
+    for row in range(conf_rates.shape[0]):
+        for col in range(conf_rates.shape[1]):
+            rate = conf_rates[row, col] * 100
+            count = conf_counts[row, col]
+            text_colour = "white" if conf_rates[row, col] >= 0.55 else "#1f2933"
 
-    plt.title(f"Accuracy: {accuracy:.4}")
-    plt.xticks(range(n_classes), names, rotation=45, ha='right')
-    plt.yticks(range(n_classes), names)
-    plt.xlabel('Predicted')
-    plt.ylabel('True')
-    plt.colorbar(label="Fraction")
-    plt.tight_layout()
-    plt.savefig(RESULTS_DIR / "plots" / "confusion_matrix.png")
+            ax.text(
+                col,
+                row,
+                f"{rate:.1f}%\n(n={count})",
+                ha="center",
+                va="center",
+                color=text_colour,
+                fontsize=12,
+                fontweight="bold",
+            )
+
+    ax.set_title(f"Confusion Matrix - Accuracy: {accuracy:.2f}%", fontsize=14, pad=14)
+    ax.set_xlabel("Predicted Class", fontsize=12)
+    ax.set_ylabel("True Class", fontsize=12)
+    ax.set_xticks(np.arange(len(class_names)), labels=class_names)
+    ax.set_yticks(np.arange(len(class_names)), labels=class_names)
+
+    ax.set_xticks(np.arange(-0.5, len(class_names), 1), minor=True)
+    ax.set_yticks(np.arange(-0.5, len(class_names), 1), minor=True)
+    ax.grid(which="minor", color="white", linestyle="-", linewidth=2)
+    ax.tick_params(which="minor", bottom=False, left=False)
+
+    colorbar = fig.colorbar(image, ax=ax, fraction=0.046, pad=0.04)
+    colorbar.set_label("Fraction of True Class", rotation=270, labelpad=18)
+
+    fig.tight_layout()
+    fig.savefig(RESULTS_DIR / "plots" / "confusion_matrix.png", dpi=200, bbox_inches="tight")
+    plt.close(fig)
 
 def calculate_classification_metrics(
     y_true,
@@ -233,6 +254,8 @@ def get_misclassified_lightcurves_by_type(
     }
 
 def main():
+    (RESULTS_DIR / "plots").mkdir(parents=True, exist_ok=True)
+    (RESULTS_DIR / "misclassified_results").mkdir(parents=True, exist_ok=True)
 
     # Load test data
     X_test, y_test, kepid_test = data_loading()
@@ -265,7 +288,7 @@ def main():
     misclassified = get_misclassified_lightcurves_by_type(X_test, y_test, y_pred_prob, kepid_test=kepid_test, threshold=params["threshold"])
 
     np.savez_compressed(
-        RESULTS_DIR / "misclassified_lightcurves.npz",
+        RESULTS_DIR / "misclassified_results" / "misclassified_lightcurves.npz",
 
         false_positive_X=misclassified["false_positives"]["X"],
         false_positive_y_true=misclassified["false_positives"]["y_true"],

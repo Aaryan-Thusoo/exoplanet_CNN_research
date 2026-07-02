@@ -1,4 +1,17 @@
 stages:
+  query_data:
+    cmd: python scripts/real/query_data.py
+    deps:
+      - scripts/real/query_data.py
+      - scripts/helpers/yaml_reading.py
+    params:
+      - configs/data_process_params.yaml:
+          - kep_query_cols
+          - eb_table_cols
+    outs:
+      - data/raw/Kepler_Confirmed_ExoPlanets.csv
+      - data/raw/Kepler_Confirmed_EB.csv
+
   prepare_kepler_exo_data:
     cmd: python scripts/real/prepare_kepler_exo_data.py
     deps:
@@ -76,7 +89,7 @@ stages:
       - results/plots/training_loss_history.png
       - results/plots/confidence_histogram.png
       - results/plots/confidence_correct_vs_incorrect.png
-      - results/misclassified_lightcurves.npz
+      - results/misclassified_results/misclassified_lightcurves.npz
     metrics:
       - results/evaluation.json
 
@@ -84,6 +97,8 @@ stages:
     cmd: python scripts/real/misclassified_report.py
     deps:
       - scripts/real/misclassified_report.py
-      - results/misclassified_lightcurves.npz
+      - results/misclassified_results/misclassified_lightcurves.npz
     outs:
-      - results/misclassified_lightcurves.html
+      - results/misclassified_results/misclassified_lightcurves.html
+      - results/misclassified_results/false_positive_high_confidence.html
+      - results/misclassified_results/false_negative_high_confidence.html

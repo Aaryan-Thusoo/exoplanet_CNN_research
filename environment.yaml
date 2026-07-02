@@ -1,10 +1,10 @@
 name: CNN_Exoplanets
 dependencies:
-  numpy
-  matplotlib
-  pandas
-  lightkurve
-  pyyaml
-  dvc
-  ast
-  json
+  - numpy
+  - matplotlib
+  - pandas
+  - lightkurve
+  - pyyaml
+  - dvc
+  - scikit-learn
+  - tensorflow

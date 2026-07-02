@@ -1,5 +1,5 @@
 training_and_compiling:
-  epochs: 15
+  epochs: 10
   batch_size: 32
   learning_rate: 5e-4
   weight_decay: 1e-4
@@ -9,8 +9,12 @@ training_and_compiling:
 cnn_layers:
   - type: "conv1d"
     channels: 32
-    kernel_size: 11
+    kernel_size: 7
     padding: "same"
+
+  - type: "batch_norm"
+
+  - type: "activation"
     activation: "relu"
 
   - type: "max_pooling1d"
@@ -21,8 +25,12 @@ cnn_layers:
 
   - type: "conv1d"
     channels: 64
-    kernel_size: 11
+    kernel_size: 7
     padding: "same"
+
+  - type: "batch_norm"
+
+  - type: "activation"
     activation: "relu"
 
   - type: "max_pooling1d"
@@ -30,6 +38,14 @@ cnn_layers:
 
   - type: "dropout"
     rate: 0.2
+
+  - type: "conv1d"
+    channels: 128
+    kernel_size: 5
+    padding: "same"
+
+  - type: "max_pooling1d"
+    pool_size: 2
 
   - type: "global_max_pooling1d"
 
