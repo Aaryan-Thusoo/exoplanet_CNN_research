@@ -5,8 +5,8 @@ stages:
     deps:
     - path: data/raw/Kepler_Confirmed_EB.csv
       hash: md5
-      md5: 7ee871427cee756438a72a12e2063ff0
-      size: 475814
+      md5: d893148bc80b969fb64d620b4f98eba0
+      size: 97900
     - path: scripts/real/prepare_kepler_eb_data.py
       hash: md5
       md5: 5bf3e8fb749176cf64d3dcfea022fdd7
@@ -21,16 +21,16 @@ stages:
     outs:
     - path: data/processed/eb_data
       hash: md5
-      md5: 4cde5e4b1eedf66e361eeb3c71975a32.dir
-      size: 886363215
+      md5: 03fa4f97ecf3d5d5e65e05b34cceff76.dir
+      size: 886361062
       nfiles: 16
   prepare_kepler_exo_data:
     cmd: python scripts/real/prepare_kepler_exo_data.py
     deps:
     - path: data/raw/Kepler_Confirmed_ExoPlanets.csv
       hash: md5
-      md5: 76e67b879ec5f85f7dc85056bced65a0
-      size: 69656
+      md5: 4b6d6fc3d42227b100f7078028e36583
+      size: 112347
     - path: scripts/real/prepare_kepler_exo_data.py
       hash: md5
       md5: 5af3fc4915e76cea347db0495861d13e
@@ -41,25 +41,25 @@ stages:
           /Users/aaryanthusoo/Desktop/UCL/CNN_Exoplanets/data/raw/Kepler_Confirmed_ExoPlanets.csv
         exo_output_folder: 
           /Users/aaryanthusoo/Desktop/UCL/CNN_Exoplanets/data/processed/exo_data
-        exo_skipped_rows: 11
+        exo_skipped_rows: 0
     outs:
     - path: data/processed/exo_data
       hash: md5
-      md5: c3f501011cb9d63b585edc6e46647ef9.dir
-      size: 850500918
+      md5: 4553562f6de74b5bfa9f958986ccae39.dir
+      size: 851082626
       nfiles: 11
   organize_data:
     cmd: python scripts/real/organize_data.py
     deps:
     - path: data/processed/eb_data
       hash: md5
-      md5: 4cde5e4b1eedf66e361eeb3c71975a32.dir
-      size: 886363215
+      md5: 03fa4f97ecf3d5d5e65e05b34cceff76.dir
+      size: 886361062
       nfiles: 16
     - path: data/processed/exo_data
       hash: md5
-      md5: c3f501011cb9d63b585edc6e46647ef9.dir
-      size: 850500918
+      md5: 4553562f6de74b5bfa9f958986ccae39.dir
+      size: 851082626
       nfiles: 11
     - path: scripts/helpers/temp_help_name.py
       hash: md5
@@ -81,27 +81,27 @@ stages:
     outs:
     - path: data/real_model/test.npz
       hash: md5
-      md5: 832e79a0a39f87ecb00a40945b364b24
-      size: 28587519
+      md5: a230553b316b2d32567905f581f30875
+      size: 28349878
     - path: data/real_model/train.npz
       hash: md5
-      md5: 1eaf701f333c1b4ff5ba23d2551f6538
-      size: 232821999
+      md5: 01e10b7b304e204522733cfae5ae939d
+      size: 231615606
     - path: data/real_model/val.npz
       hash: md5
-      md5: 3570295860d44c390af916abef6a46ae
-      size: 27920876
+      md5: 391421e4b1a88ff8251b655ed5e49a5e
+      size: 29360415
   train_real_cnn:
     cmd: python scripts/real/train_real_cnn.py
     deps:
     - path: data/real_model/train.npz
       hash: md5
-      md5: 1eaf701f333c1b4ff5ba23d2551f6538
-      size: 232821999
+      md5: 01e10b7b304e204522733cfae5ae939d
+      size: 231615606
     - path: data/real_model/val.npz
       hash: md5
-      md5: 3570295860d44c390af916abef6a46ae
-      size: 27920876
+      md5: 391421e4b1a88ff8251b655ed5e49a5e
+      size: 29360415
     - path: scripts/real/train_real_cnn.py
       hash: md5
       md5: 5d42f9876b7a6a6b976e1ff01c97b65e
@@ -157,74 +157,78 @@ stages:
     outs:
     - path: models/real_model.keras
       hash: md5
-      md5: 3a7cc294b74e2acaabb8fff52800809a
+      md5: bd47ef10c1975b5789c4d4af1128febd
       size: 789999
     - path: results/real_metrics.json
       hash: md5
-      md5: 7f1266551a5dd5fccc66281a424e9bd4
-      size: 175
+      md5: bc67d3af64c7a5c685e88e61f2c6464a
+      size: 176
     - path: results/training_history.json
       hash: md5
-      md5: b34e1e2a9db58c2e96c750d70a09ba00
-      size: 1049
+      md5: 81b69d893dc06587fc9ed773ede762d7
+      size: 1052
   evaluate_real_cnn:
     cmd: python scripts/real/real_cnn_model_evaluation.py
     deps:
     - path: data/real_model/test.npz
       hash: md5
-      md5: 832e79a0a39f87ecb00a40945b364b24
-      size: 28587519
+      md5: a230553b316b2d32567905f581f30875
+      size: 28349878
     - path: models/real_model.keras
       hash: md5
-      md5: 3a7cc294b74e2acaabb8fff52800809a
+      md5: bd47ef10c1975b5789c4d4af1128febd
       size: 789999
     - path: results/training_history.json
       hash: md5
-      md5: b34e1e2a9db58c2e96c750d70a09ba00
-      size: 1049
+      md5: 81b69d893dc06587fc9ed773ede762d7
+      size: 1052
     - path: scripts/real/real_cnn_model_evaluation.py
       hash: md5
-      md5: 9909f77d77fea601748c1abea94dd549
-      size: 10064
+      md5: 103cbfcd50dee73ca8cb712a6b92b733
+      size: 11203
     params:
       configs/evaluation_params.yaml:
         threshold: 0.5
     outs:
     - path: results/evaluation.json
       hash: md5
-      md5: 18e63ac0f64196e9126133f120d61a74
+      md5: 54c9e8bc2e034234eb304ecec70c0ec1
       size: 164
     - path: results/misclassified_results/misclassified_lightcurves.npz
       hash: md5
-      md5: 697487727c059e6fd58435131f2ed5ef
-      size: 3716543
+      md5: e93ecd8ada3a04fc30d6bd49169f007a
+      size: 3515894
     - path: results/plots/confidence_correct_vs_incorrect.png
       hash: md5
-      md5: e9acae6d484714f023729f4db7f0b3ba
-      size: 49397
+      md5: b5dbf64263b2652af888932d438aa9f2
+      size: 54787
     - path: results/plots/confidence_histogram.png
       hash: md5
-      md5: e8246c86c9ea035c9e9fbfa738941e73
-      size: 40469
+      md5: 844232d069bf7b452eba8a4c0def16ad
+      size: 46250
     - path: results/plots/confusion_matrix.png
       hash: md5
-      md5: 3ec989d7fed02cfe90563de1c129f41d
-      size: 81552
+      md5: a76d567cf2a4847762b3a60814d2e072
+      size: 81335
     - path: results/plots/training_accuracy_history.png
       hash: md5
-      md5: a82e5e6b7baa2729f4f8d71d6a464666
-      size: 31358
+      md5: d1ffe4a136ef12e1d0bec0d5d6f7eccb
+      size: 32294
     - path: results/plots/training_loss_history.png
       hash: md5
-      md5: 17122b79788351b4147ca0046f6760bf
-      size: 34141
+      md5: cb0154863ce72de345ddb4265e506bac
+      size: 34864
+    - path: results/test_predictions.csv
+      hash: md5
+      md5: b630209e21954e5a3d52149a3d698d2b
+      size: 65255
   misclassified_report:
     cmd: python scripts/real/misclassified_report.py
     deps:
     - path: results/misclassified_results/misclassified_lightcurves.npz
       hash: md5
-      md5: 2633f9d30d5c5f421aad5ca263fec610
-      size: 3975249
+      md5: e93ecd8ada3a04fc30d6bd49169f007a
+      size: 3515894
     - path: scripts/real/misclassified_report.py
       hash: md5
       md5: 35935fdf3f42af7151e23e3b27e32268
@@ -232,16 +236,16 @@ stages:
     outs:
     - path: results/misclassified_results/false_negative_high_confidence.html
       hash: md5
-      md5: 634bbf3b362c63fb4d0832c29eb24c90
-      size: 7638641
+      md5: 093acaa417d0cec3af04d7f701f264e1
+      size: 5551177
     - path: results/misclassified_results/false_positive_high_confidence.html
       hash: md5
-      md5: 84ba49e415162349e877d5957dc75700
-      size: 515662
+      md5: bae5a0c3b532095b4f786474062f82c5
+      size: 392790
     - path: results/misclassified_results/misclassified_lightcurves.html
       hash: md5
-      md5: 9e65b87860251ee30a4f5548c7748973
-      size: 20423050
+      md5: d706393264c60604fa604db628e8ed84
+      size: 18265520
   query_data:
     cmd: python scripts/real/query_data.py
     deps:
@@ -251,23 +255,122 @@ stages:
       size: 319
     - path: scripts/real/query_data.py
       hash: md5
-      md5: d648859f83fb3d2d8861f2d7daef3a06
-      size: 3246
+      md5: 04588ae7d579ba4ec71e47b4b5d52f6d
+      size: 3437
     params:
       configs/data_process_params.yaml:
         eb_table_cols:
         - kepid
+        - koi_disposition
         - koi_model_snr
+        - koi_depth
+        - koi_period
         kep_query_cols:
         - kepid
         - koi_disposition
         - koi_model_snr
+        - koi_depth
+        - koi_period
     outs:
     - path: data/raw/Kepler_Confirmed_EB.csv
       hash: md5
-      md5: 5b2af74b01f354200d9880a7686f953d
-      size: 35386
+      md5: d893148bc80b969fb64d620b4f98eba0
+      size: 97900
     - path: data/raw/Kepler_Confirmed_ExoPlanets.csv
       hash: md5
-      md5: b3db7d86f02bcf722f0b490c72c76600
-      size: 64244
+      md5: 4b6d6fc3d42227b100f7078028e36583
+      size: 112347
+  analyze_misclassified:
+    cmd: python scripts/real/analyze_misclassified.py
+    deps:
+    - path: results/misclassified_results/misclassified_lightcurves.npz
+      hash: md5
+      md5: e93ecd8ada3a04fc30d6bd49169f007a
+      size: 3515894
+    - path: scripts/helpers/misclassified_helper.py
+      hash: md5
+      md5: f9ea0fbbbca7d3c69ee0e1a5b457753a
+      size: 4431
+    - path: scripts/helpers/yaml_reading.py
+      hash: md5
+      md5: 51ca3f50ea74abfc26eda804de6a5624
+      size: 319
+    - path: scripts/real/analyze_misclassified.py
+      hash: md5
+      md5: fc33a228a434d4d9ef9cc7a85b925d18
+      size: 5385
+    params:
+      configs/evaluation_params.yaml:
+        plots_info:
+        - name: KOI Model SNR
+          col: koi_model_snr
+          log: true
+        - name: Calculated SNR
+          col: calculated_SNR
+          log: true
+        - name: Orbital Period
+          col: koi_period
+          log: true
+    outs:
+    - path: results/misclassified_results/fn_distribution_stats.json
+      hash: md5
+      md5: c293c5955ae6e4a1de8bab6728f8ce8e
+      size: 2892
+    - path: results/misclassified_results/fp_distribution_stats.json
+      hash: md5
+      md5: a0781ff6a2c6b2d3d243554f9d54cbcf
+      size: 2872
+    - path: results/misclassified_results/misclassified_plots
+      hash: md5
+      md5: ecac06cd27cfdae199fbbe42e1ce20fc.dir
+      size: 340712
+      nfiles: 12
+  analyze_prediction_groups:
+    cmd: python scripts/real/analyze_prediction_groups.py
+    deps:
+    - path: data/raw/Kepler_Confirmed_EB.csv
+      hash: md5
+      md5: d893148bc80b969fb64d620b4f98eba0
+      size: 97900
+    - path: data/raw/Kepler_Confirmed_ExoPlanets.csv
+      hash: md5
+      md5: 4b6d6fc3d42227b100f7078028e36583
+      size: 112347
+    - path: data/real_model/test.npz
+      hash: md5
+      md5: a230553b316b2d32567905f581f30875
+      size: 28349878
+    - path: results/test_predictions.csv
+      hash: md5
+      md5: b630209e21954e5a3d52149a3d698d2b
+      size: 65255
+    - path: scripts/helpers/yaml_reading.py
+      hash: md5
+      md5: 51ca3f50ea74abfc26eda804de6a5624
+      size: 319
+    - path: scripts/real/analyze_prediction_groups.py
+      hash: md5
+      md5: 7041e634982e219801361154db147bac
+      size: 9122
+    params:
+      configs/evaluation_params.yaml:
+        confidence_bins:
+        - 0.5
+        - 0.7
+        - 0.85
+        - 1.0
+        confidence_labels:
+        - Low
+        - Medium
+        - High
+        snr_group_labels:
+        - Low SNR
+        - Medium SNR
+        - High SNR
+        snr_quantile_groups: 3
+    outs:
+    - path: results/prediction_group_analysis
+      hash: md5
+      md5: 4dd90e598df33bc5f2496301a2c2ed2c.dir
+      size: 913544
+      nfiles: 11

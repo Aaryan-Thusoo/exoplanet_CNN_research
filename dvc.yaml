@@ -90,6 +90,7 @@ stages:
       - results/plots/confidence_histogram.png
       - results/plots/confidence_correct_vs_incorrect.png
       - results/misclassified_results/misclassified_lightcurves.npz
+      - results/test_predictions.csv
     metrics:
       - results/evaluation.json
 
@@ -102,3 +103,37 @@ stages:
       - results/misclassified_results/misclassified_lightcurves.html
       - results/misclassified_results/false_positive_high_confidence.html
       - results/misclassified_results/false_negative_high_confidence.html
+
+  analyze_misclassified:
+    cmd: python scripts/real/analyze_misclassified.py
+    deps:
+      - scripts/real/analyze_misclassified.py
+      - scripts/helpers/misclassified_helper.py
+      - scripts/helpers/yaml_reading.py
+      - results/misclassified_results/misclassified_lightcurves.npz
+    params:
+      - configs/evaluation_params.yaml:
+          - plots_info
+    outs:
+      - results/misclassified_results/misclassified_plots
+      - results/misclassified_results/fp_distribution_stats.json
+      - results/misclassified_results/fn_distribution_stats.json
+
+  analyze_prediction_groups:
+    cmd: python scripts/real/analyze_prediction_groups.py
+    deps:
+      - scripts/real/analyze_prediction_groups.py
+      - scripts/helpers/yaml_reading.py
+      - results/test_predictions.csv
+      - data/real_model/test.npz
+      - data/raw/Kepler_Confirmed_ExoPlanets.csv
+      - data/raw/Kepler_Confirmed_EB.csv
+    params:
+      - configs/evaluation_params.yaml:
+          - confidence_bins
+          - confidence_labels
+          - snr_quantile_groups
+          - snr_group_labels
+    outs:
+      - results/prediction_group_analysis
+
