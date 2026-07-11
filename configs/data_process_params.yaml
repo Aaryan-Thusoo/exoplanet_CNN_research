@@ -1,5 +1,5 @@
-kep_query_cols: ["kepid", "koi_disposition", "koi_model_snr", "koi_depth"]
-eb_table_cols: ["kepid", "koi_model_snr"]
+kep_query_cols: ["kepid", "koi_disposition", "koi_model_snr", "koi_depth", "koi_period"]
+eb_table_cols: ["kepid", "koi_disposition", "koi_model_snr", "koi_depth", "koi_period"]
 
 exo_input_file: "/Users/aaryanthusoo/Desktop/UCL/CNN_Exoplanets/data/raw/Kepler_Confirmed_ExoPlanets.csv"
 exo_skipped_rows: 0
