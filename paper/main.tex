@@ -1,0 +1,136 @@
+\documentclass[12pt]{article}%[12pt, twocolumn]{aastex631}
+
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{natbib}
+\usepackage{url}
+\usepackage{subcaption}
+
+\usepackage{afterpage}
+
+\usepackage{xcolor}
+\usepackage{listings}
+
+\lstdefinelanguage{SQL}{
+    keywords={SELECT, FROM, WHERE, AND, OR, AS, JOIN, LEFT, RIGHT, INNER, OUTER,
+              ON, GROUP, BY, ORDER, DESC, ASC, LIMIT, CASE, WHEN, THEN, ELSE,
+              END, IS, NOT, NULL, COUNT, AVG, SUM, MIN, MAX, DISTINCT},
+    keywordstyle=\color{blue}\bfseries,
+    comment=[l]{--},
+    commentstyle=\color{gray}\itshape,
+    stringstyle=\color{red},
+    morestring=[b]',
+}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    columns=fullflexible,
+    keepspaces=true,
+    showstringspaces=false,
+    captionpos=b
+}
+
+\bibliographystyle{plainnat}
+
+\usepackage[colorlinks=true,
+            linkcolor=blue,
+            citecolor=blue,
+            urlcolor=blue]{hyperref}
+
+\title{\textbf{Transit Exoplanet Surveys and False Positive Challenges}}
+
+\date{April 6th 2026}
+\author{\textbf{Author}: Aaryan Thusoo \\ \textbf{Supervisor}: Prof. Vincent Van Eylen}
+
+\begin{document}
+
+\maketitle
+
+\input{sections/introduction}
+\input{sections/extrasolar_detection}
+\input{sections/detection_challenges}
+\input{sections/missions}
+\input{sections/pipelines}
+\input{sections/methods}
+\input{sections/results}
+\input{sections/conclusion}
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\newpage 
+\appendix \label{sec:Appendix}
+
+\section{Transit Geometry} \label{sec:Transit_Geometry}
+
+Several parameters describing the geometry of a transiting exoplanet system can be derived from the transit light curve. One of the most important is the impact parameter $(b)$, defined as the projected distance between the centre of the stellar disk and the transit chord:
+
+\begin{align}
+    b = \frac{a\cos{i}}{R_*}
+\end{align}
+
+Here, $a$ is the semi-major axis of the orbit, $i$ is the inclination, and $R_*$ is the radius of the star. These values are found using other methods but when combined give a good estimate for the impact parameter. Alongside the impact parameter, astronomers can get an accurate calculation of the transits duration as well. 
+
+\begin{align}
+    T = \frac{P}{\pi}\arcsin{\left(\frac{R_*}{a}\frac{\sqrt{(1-R_p/R_*)^2-b^2}}{\sin{i}}\right)}
+\end{align}
+
+$P$ is the period of the entire orbit which is easily resolved from the light curve and $R_p$ is the planets radius found using Equation~\ref{eq:flux_depth} \citep{2010exop.book...55W}. 
+
+\section{Signal to Red Noise} \label{sec:Signal_to_Red_Noise}
+
+\begin{align}
+    S_{red}=\frac{\delta\sqrt{N_t}}{\sigma L^b}
+\end{align}
+
+$L$ is average number of data points in one transit and it is in a power law with b which quantifies covariance structure of the correlated noise. $\sigma$ is the weighted rms scatter of the unbinned data set. Lastly $\delta$ is the flux depth. \citep{2006MNRAS.373..799C} 
+
+\section{Transit Detection Statistic} \label{sec:Transit_Detection_Statistic}
+
+Many transit-search algorithms detect signals by comparing the average
+stellar flux inside and outside a proposed transit window. In the
+Box Least Squares (BLS) algorithm the transit depth can be expressed as
+
+\begin{equation}
+\delta = \overline{F}_{\mathrm{out}} - \overline{F}_{\mathrm{in}}
+\end{equation}
+
+where $\overline{F}_{\mathrm{in}}$ and $\overline{F}_{\mathrm{out}}$ denote
+the mean flux during and outside the transit respectively. The statistical
+significance of the detection can then be approximated by
+
+\begin{equation}
+S = \frac{\delta}{\sigma}\sqrt{N_{\mathrm{tr}}},
+\end{equation}
+
+where $\sigma$ is the photometric noise of the light curve and
+$N_{\mathrm{tr}}$ is the number of observations within the transit window \citep{BLS_Algorithm}.
+
+\section{Neural Network Metric Equations} \label{sec:NN_equations}
+
+The following are the equations used to calculate the metrics used in this paper. T and F stand for True while P and N stand for Positive and Negative. R means Rate so for example FPR means False Positive Rate.
+\begin{align}
+    \text{Precision} = \frac{TP}{TP+FP}
+\end{align}
+
+\begin{equation}
+    \text{Recall} = \frac{TP}{TP+FN}
+\end{equation}
+
+\begin{equation}
+    \text{False Positive Rate} = 1 - \text{Recall}
+\end{equation}
+
+\begin{equation}
+    F_1 = \frac{2TP}{2TP + FP + FN}
+\end{equation}
+
+\begin{align}
+    AUC &= \int_0^1{\text{Recall}(FPR)d(FPR)}, \textbf{ where} \\
+    FPR &= \frac{FP}{FP + TN}
+\end{align}
+
+\end{document}

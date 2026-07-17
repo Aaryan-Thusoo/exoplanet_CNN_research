@@ -1,0 +1,107 @@
+\section{Methodology}
+
+To conduct the research and run the algorithms the process was broken down into three sections. First data needed to be collected. This was done in two ways, creating synthetic data and querying from NASA archives. Next the data needs to be prepared and organized for the model. After this the data is usable in the training of the network and this leads us to our results.
+
+\subsection{Data Collection}
+
+
+\subsubsection{Synthetic Data}
+
+For the purpose of confirming the formed model works without error, synthetic data was made. This was developed in three stages with each being more and more realistic. The first stage contains straight lines with only dips representing transits and eclipsing binary cases. The model is expected to come back with nearly perfect results. Dips for transits are randomized between values of \textbf{(What percent to what percent coverage?)} while eclipsing binary dips are set randomly between \textbf{(What percent to what percent coverage?)} and \textbf{(What percent to what percent coverage?)}. This creates the main distinction physically seen between the two cases. Durations of full orbits are set to randomly range between \textbf{(What duration to what duration?)} which covers the majority of currently understood cases. Durations of transits by either planets or stars is set randomly between \textbf{(What length to what length?)}. The total data points come to 4894 which is roughly 100 days of data taking the time step to be \textit{Kepler's} cadence of 29.4 minutes.
+
+The second stage contains the same parameters as the initial stage but now with added noise. The noise is generated simply through Python's random library \textbf{(Is it Python's or NumPy's? Make sure to check)}. Using the uniform function, each data point is given a noise value between the values \textbf{(What percent to what percent coverage?)}. The model is expected to be slightly worse off compared to the first stage but overall the model will be tested on handing more randomized data.
+
+In the final stage, the noise is no longer generated through a function but is rather taken from real \textbf{Kepler} data. By pulling data collected from random real light curves, the noise the model encounters is much more realistic. The dips and patterns are more drowned out and thus the model is tested further on its ability to detect patterns. By checking the results of the model using the third stage of the synthetic data 
+
+\subsubsection{Kepler Extraction}
+
+Data was collected from the \textbf{(Give better naming?)} catalogue from two tables. The first is \textbf{(give a label with the link in the footnote)} where information on all KOI's are kept. The second is solely for eclipsing binaries and contains all of their KepIDs. KepID's (Kepler Identification \textbf{(Is this the expanded word?)}) is a unique number code for each object of interest. By using the second table, we are able to collect the full table data from the first table. 
+
+\begin{lstlisting}[language=SQL, caption={SQL query used to extract confirmed Kepler exoplanets data from Kepler Exoplanet Archive.}, label={lst:transit-query}]
+SELECT {kep_query_cols}
+FROM cumulative
+WHERE koi_disposition = 'CONFIRMED'
+\end{lstlisting}
+
+In order to collect the necessary data, a simple SQL query is used first for the confirmed exoplanets. Listed above in Listing~\ref{lst:transit-query}, this query contains a few labels. First kep\_query\_cols contains the following columns from the Kepler archive listed in Table~\ref{tab:kep_query_cols}. The name of the table is cumulative in the NASA Exoplanet Archive TAP service and so we use this naming. Finally as this is for confirmed planets only we specify the Exoplanet Archive Disposition to be "CONFIRMED". 
+
+\begin{table}[]
+    \centering
+    \begin{tabular}{|c|c|}\hline
+       Kepler Archive Column Name  & SQL Table Name \\\hline
+        KepID & kepid \\\hline
+        Exoplanet Archive Disposition & koi\_disposition\\\hline
+        Transit Signal to Noise & koi\_model\_snr \\\hline
+        Transit Depth [ppm] & koi\_depth \\\hline
+        Orbital Period [days] & koi\_period
+    \\ \hline\end{tabular}
+    \caption{This table lists all columns extracted from the Kepler Exoplanet Archive. The left column tells the label NASA provides in their table while the right is the SQL name used in querying.}
+    \label{tab:kep_query_cols}
+\end{table}
+
+Now for the eclipsing binaries, simply taking the disposition as "Eclipsing Binary" or "False Positive" does not work as the first is not an option and the second includes multiple possible cases. In order to gather the data a second table is required. This is the Kepler Eclipsing Binaries table and it contains the KepID's of all the EBs confirmed from the \textit{Kepler} mission. A simple web-scrape of the website provides the table data and after taking the KepID's another simple SQL query is used written out in Listing~\ref{lst:eb-query}. The list of KepID's is saved into kepid\_string and we simply specify this in the query to pull only the EB's and their column info. 
+
+\begin{lstlisting}[language=SQL, caption={SQL query used to extract eclipsing binary information from Kepler Exoplanet Archive.}, label={lst:eb-query}]
+SELECT {kep_query_cols}
+FROM cumulative
+WHERE kepid IN ({kepid_string})
+\end{lstlisting}
+
+A total of \textbf{(Make sure)} 2745 confirmed exoplanets are pulled from the Kepler Exoplanet Archive catalogue. Each input into the CNN model must be the same length and so we needed to determine how to limit the size of each light curve. We also wanted to expand the total number of training instances we could use which would improve the final metrics. The method chosen was to split each light curve into chunks of element length 4894. Given the time step of the \textit{Kepler} mission was 29.4 minutes, this means each chunk covers a length of $\sim 100$ days. Most confirmed planets can be split into three or more of these chunks increasing the total instances to \textbf{(How many?)}. 
+
+The overall process of downloading each light curve, saving its data and splitting it into chunks takes a few hours. To restrict errors in the process, the total batch is split into splits of size 200. Every 200 Kepler objects is saved into a csv file and so on until all light curves are processed. Only two columns are left over as we only need one for holding the list of 4894 data points as well as saving the associated KepID of each row. As now there are multiple rows per KepID it is important to keep them labelled for the modelling step. 
+
+This same process is repeated for the eclipsing binaries. The initial file we collect from NASA has 2878 \textbf{(Also check this one)} confirmed eclipsing binaries. Once again the KepID's are split into chunks of size roughly 100 days and 200 KepID's are saved per csv file. 
+
+
+
+\subsection{Data Preparation}
+
+The data now consists of two tables, one for the exoplanets and another for the eclipsing binaries. Each table contains the columns listed in the left column of Table~\ref{tab:kep_query_cols}. For the purpose of further analysis, after the model is done learning, we will need the signal to noise ratio of each test instance. While Kepler does provide a column, some rows especially in the eclipsing binary cases were missing values. In order to include SNR for all test cases, a simple formula is applied and is shown in Equation~\ref{eq:snr_calc}. This column is much more consistent in the table and so this allows us to come up with an SNR scale for the analysis of the model results. Using NumPy for the standard deviation and the transit depth values, the results for each instance is added to the updated table. 
+
+\begin{align}
+    \text{SNR} = \frac{\text{Transit Depth}}{\text{Standard Deviation}} \label{eq:snr_calc}
+\end{align}
+
+For the light curve data we needed to split the data into three parts. A training, validation, and testing set. First we make sure there are no overlaps in the exoplanet and eclipsing binary datasets. While this should not happen it is a good precaution to make sure no data is repeated in both classes. This would damage the efficiency of the model in correctly classifying future light curves. Next, training works best when the data set of trained on exoplanets and eclipsing binaries is the same. This gives equal importance to learning the patterns in each class. Thus the data sets are made to match the size of the smaller one. This takes the eclipsing binary dataset from \textbf{(How many total?)} to \textbf{(How many total?)}. 
+
+Now the data is ready to be split into the different sets. However it is very important to manage how the instances are split. For one KepID, we cannot have one of its chunks in the training set, while another is in the validation or test set. This is unfair to the model as it will likely recognize the exact pattern giving a false boost in the final algorithms score. This would be a form of over fitting which would be notable in the validation results. Thus to avoid this, we split the data into the three sets not by random but by the KepID's.
+
+The data is set to put 80\% of the data into the training set. So in the preparation, the data takes 80\% of the KepID's and saves them to the training set. The remaining 20\% is split in half to give 10\% to validation and 10\% to testing. Instead of taking the first 80\% of KepID's, a shuffle function was developed which shuffles around the data while keeping the KepID's together. This allows us to randomize which KepID's end up being used for training, validation, and testing while maintaining the rule of keeping associated KepID's in the same set. The randomization is set to a seed so the separation is reproducible for the exact results in this paper. 
+
+This overall process is done to the exoplanet and eclipsing binary data sets separately to make the shuffling step more concrete. Before concatenating the two classes, the arrays of the class values needs to be made. Class 0 is the label given to all confirmed exoplanets while for eclipsing binaries they are labelled class 1. Now the training, validation, and test inputs and outputs are combined giving the completed sets of data and their outputs. Each of the three sets now properly separated are given one last shuffle to randomize the order of class 0 and class 1 inputs for the model. Once more, a set seed is used to maintain reproducibility.  
+
+\subsection{Model}
+
+Table~\ref{tab:layer_order} shows the finalized order of layers used in the neural network. The input layer takes in a stacked numpy array with each of the light curves being analysed. From here each light curve is put into a convolutional layer which runs a kernal of size 11 across the entire time series. Rectified Linear Units (ReLU) activations are used here to limit risks of learning decay \textbf{(Is that what is called?)}. The next layers are pooling which takes the largest element in a group of 2 and saves it discarding the other. This lowers the computational load on the algorithm as it learns while retaining the important information. Following this a dropout layer is applied. These remove the usage of random neurons in the layer. This is done to keep the network from relying too heavily on one path or unit. This then reduces over fitting and helps to increase confidence in our results. The second convolution layer now has twice as many channels as the first convolution layer. This means each of the 32 channels from the first layer is split into 64 channel each with an applied filter learning and reading for patterns in the data. This gives a total of 64x32 channels totalling 2048 results to analyze dips and trends in the light curves. After the process is repeated with the max pooling and dropout, a global pooling layer is used to \textbf{(does what actually?)}. Now the results extracted from the 2048 channels is put into a dense layer then one more dropout at a higher rate. Lastly the output layer comes back with a single neuron which gives its guess of the light curve classification. 0 if it is certain the data shows a transiting exoplanet and 1 if certain it represents an eclipsing binary. 
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|l|}\hline
+           Layer Type&  Parameters\\\hline
+           Input&  \\\hline
+           Convolution& 32 channels, kernal size = 11, same padding, ReLU activation \\\hline
+           Max Pooling& Pool Size = 2 \\\hline
+           Dropout& Rate = 0.2 \\\hline
+           Convolution&  64 channels, kernal size = 11, same padding, ReLU activation\\\hline
+           Max Pooling& Pool Size = 2 \\\hline
+           Dropout& Rate = 0.2 \\\hline
+           Global Pooling &  \\\hline
+           Dense&  \\\hline
+           Dropout& Rate = 0.3 \\\hline
+           Output&  \\ \hline
+    \end{tabular}
+    \caption{Order of all layers used in the training of the neural network. All parameters applied are listed as well.}
+    \label{tab:layer_order}
+\end{table}
+
+\textbf{(Does some of this info go to the results section or is it good here?)}
+Upon running the model through with data, the history is saved into a keras file. This can then be referred back to and loaded to observe how the model performed at each epoch in its training process. Several metrics are chosen to record in the learning. Accuracy was chosen to represent how well the model does at prediction the correct class overall. As well, the loss is recorded to show if the model is making decisions with confidence or with blind guesses. Both have results recorded at each epoch for both the training data and validation data. The training results in loss and accuracy are taken into account for updating the model and the validation tells if the model is over or under fitting the data.
+
+Several other metrics are recorded upon the completion of the learning. Once the test data is used against the finalized model, a file is saved holding the recall, precision, F1 score, and ROC AUC. These results can then be monitored to understand more concretely what the model is good at and where it struggles.
+
+To further analyze the CNN, all misclassified light curves are saved in a compressed numpy (.npz) file. Their KepID, input, true class, predicted class, and confidence provided by the model are all saved. This is then split into all false positives and all false negatives to understand better the limitations of the current model. 
+
+\subsubsection{Analysis Setup \textbf{(Def need a better title name)}}
+
+In order to analyze the mistakes of the model, several steps are taken to visyalize the models errors. \textbf{(Do I need to write anything here?)}

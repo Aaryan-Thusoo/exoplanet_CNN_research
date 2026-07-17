@@ -1,0 +1,73 @@
+\section{Detection Pipelines}
+
+As mentioned before in Section~\ref{sec:Detection_Challenges}, several factors complicate exoplanet detection through the transit method. To address these challenges, modern astronomers use a variety of methods to mitigate these effects.
+
+\subsection{Preprocessing and Detrending}
+
+\textit{Kepler} and TESS data contain continuous variability that are not caused by the planet but by the stars and instrument limitations. To manage this, before conducting research and parameter estimation, a preprocessing step is required \citep{2018ApJS..235...38T}.  
+
+The most well-known and well-developed pipeline comes from the \textit{Kepler} mission. Their Science Processing Pipeline consists of several modules with the focus of slowly calibrating and filtering the raw collected data \citep{Jenkins_TCE_Label}. The order of processes is:
+
+\begin{enumerate}
+    \item Calibration (CAL) - Corrects detector level artifacts with focus on bias, gain variations, and electronic noise
+    \item Photometric Analysis (PA) - Conducts aperture photometry for each star at each cadence by summing flux within a predefined set of CCD pixels
+\end{enumerate}
+
+Following this, the \textit{Kepler} mission focuses on managing error and trends caused by spacecraft motion and temperature changes in the instrumentation. This is called Presearch Data Conditioning (PDC) and it works by fitting co-trending basis vectors to remove typical trends.
+
+From here, astronomers can take different approaches in handling the \textit{Kepler} processed data. The first aspect to focus on is typically brightness fluctuations caused by factors such as rotation, star spots, and magnetic activity. With planetary transits usually occurring over a few hours, these variations occur on much larger timescales \citep{2012IAUS..285..364M}. A simple high pass filter then helps to remove the low-frequency variability in a time series dataset. This process works to preserve the shorter duration transit signals in exoplanet detection. Furthermore, polynomial detrending, median filters, and spline fitting are also commonly used approaches \citep{2006MNRAS.373..231P, 2011ApJS..197....6G}.
+
+The next step is to normalize and stitch the various quadrants together. This gives a continuous light curve which can now be used for transit detection. This cleaning stage is critical because the transit signals targeted by surveys such as \textit{Kepler} are often extremely small. For example, the transit depth produced by an Earth-sized planet orbiting a Sun-like star is approximately 80 parts per million, requiring extremely precise noise removal to reliably detect \citep{2011ApJS..197....6G}. Although the overall philosophy of preprocessing is similar across missions, different surveys implement their filtering procedures with small variations. 
+
+For TESS, similar preprocessing is provided through mission pipeline products such as SAP and PDCSAP light curves, where instrumental trends are reduced prior to transit searches \citep{TCE_Labelling}. In addition, the Quick-Look Pipeline (QLP) produces detrended light curves for many full-frame image targets \citep{2020RNAAS...4..204H}. Although the implementation differs from \textit{Kepler}, the overall goal remains the same: to suppress instrumental errors and long-timescale variability while preserving short-duration transit signals. More generally, both missions rely on preprocessing to reduce instrumental and stellar noise so that periodic transit signals can be detected with sufficient signal-to-noise ratio.
+ 
+\subsection{Transit Search Algorithms}
+
+With the raw data detrended and processed, the next step is looking for potential transits within the time series. As there are a high number of light curves to search through, the process is primarily automated. By looking for the short dips and periodic repetition, researchers try to identify box shaped changes in the dataset.
+
+This introduces the most common search method known as the Box-Least Squares (BLS) algorithm. Originally developed by \cite{BLS_Algorithm}, BLS is a process which attempts to fit a box shape over the flux dip. Although it is less useful for parameter estimation, at this stage astronomers are primarily concerned with identifying candidate exoplanet signals rather than proof of an exoplanet. A signal-to-noise ratio is then calculated from this fit and used as a detection statistic for the candidate exoplanet. Appendix \ref{sec:Transit_Detection_Statistic} shows the calculation of this significance value. \cite{2019A&A...623A..39H} take the BLS method further and create the Transit Least Squares (TLS) method. It adds limb darkening into the fitting which improves detection and limits false confirmations. Figure~\ref{fig:BLS&TLS} provides a simple comparison of the BLS and TLS methods in terms of fitting and residuals.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1.0\linewidth]{Images/Lightcurves/BLS&TLS.pdf}
+    \caption{\citet{2019A&A...623A..39H} compare the BLS and TLS methods. The blue line represents the simple box-shaped model used to identify transit-like signals. TLS provides a more realistic representation of the transit shape, and the histogram illustrates the improvement in fit achieved relative to BLS. \cite{2019A&A...623A..39H} (Figure 2).}
+    \label{fig:BLS&TLS}
+\end{figure}
+
+The \textit{Kepler} mission conducts a specialized process called the Transiting Planet Search (TPS) algorithm \citep{Jenkins_TCE_Label}. It employs a wavelet based matched filter which looks for periodic transit-like signals with durations ranging from 1 to 16 hours. If a potential detection returns a transit detection statistic greater than 7.1$\sigma$, it is labelled as a Threshold Crossing Event (TCE). A TCE does not necessarily imply the presence of a planet. Many of these signals can come from the mentioned challenges in Section~\ref{sec:Detection_Challenges}. Consequently, additional vetting stages are required to determine whether a TCE corresponds to a genuine exoplanet candidate.
+
+The identification of TCEs is a major step in the detection pipeline. Moving forward from here, researchers finish signal detection and continue onto signal classification. The goal now is to distinguish true planetary transits from the wide variety of possible astrophysical and instrumental false positives.
+
+\subsection{Machine Learning}
+
+\subsubsection{Neural Networks for Transit Classification} 
+
+\textbf{Lets update this to be more general. Need this to be used for explaining all of machine learning I think. Ask Marina and Kendel about this.}
+
+\textbf{(This following passage needs to put somewhere appropriate)}
+
+In neural networks, a variety of metrics are needed to understand the strengths and weaknesses of the model. The most common is accuracy. This simply tells how often the model is correct in its predictions. If there is 1000 inputs and 900 are given the correct class label then the model has an accuracy of $90\%$. At a first glance this metric seems to tell exactly what researchers need to know. However, other metrics can show the failures of a model more clearly. There is also precision which tells out of all results the model claims to be transits, how many are actually transits. While it sounds similar to accuracy it actually points out when the model is overly guessing that instances are transits. If the model decides that a large chunk of eclipsing binaries are transits then while we get most of the transits correct, the precision will show all the mistakes made and how it adds up. The recall is another metric which is useful. Recall tells out of all the true transits, how many the model actually finds. A low value then tells that the model is not recognizing a large number of cases of transits. Each of these metrics works together to tell a full story of the models quality. \textbf{(Citation?)}
+
+Two more useful metrics are the F1 score and the ROC AUC \textbf{(Full name?)} values. The F1 score looks at the balance between the precision and recall. A higher number tells us the model is balanced and thus is able to predict both classes with the same efficacy. The ROC AUC value measures how well the model separates the positive and negative classes across all classification thresholds. All of these metrics were calculated using simple equations which are listed in Appendix~\ref{sec:NN_equations}.
+
+Machine learning is an ongoing and rapidly growing field of research. Its use allows for advanced automation and pattern recognition in large datasets. In the scope of transit photometry, researchers use neural networks (NN). Neural networks are inspired by the brain, where neurons work together and when combined produce an output. These layers of neurons learn through incorrect results and adjust their parameters to improve future performance \citep{2018AJ....155..147Z}. To achieve this, a large set of data is used as training data. The network learns from the data as it makes predictions and compares them with the correct answers in batches. Afterwards, a smaller set of test data is used to conduct a final examination of the quality of the model. 
+
+A very prominent form of NN used in pattern recognition is the convolutional neural network (CNN). They are designed to analyze data such as images and time-series signals and classify them into categories based on their features. CNNs are broken into several layers each with their own purpose. The first stage is the input layer, where the network is provided the raw light curve. Following this are the convolutional layers, where the main processes happens. These layers apply small filters, called kernels, which slide across the data. Each kernel detects specific patterns in the data such as edges, curves, or shapes. The output of this process is a set of feature maps, which highlight the location of discovered patterns. After the convolution is completed, an activation function such as a Rectified Linear Unit (ReLU) is applied. These activation functions allow the network to learn complex, non-linear relationships based on the feature maps. To reduce computational complexities in the model, a pooling layer is introduced. In this layer, the size of the feature maps is reduced by only keeping the most important values within small regions of data. Then, after several convolutional and pooling layers, the extracted data reaches the fully connected layer. In this stage, the layer leads the model to determine which features were found. Finally, the results are put into the output layer which predicts the classification of the input. Figure~\ref{fig:CNN_process} shows the layers a typical CNN is composed of. Applying these layers to transit light curves allows astronomers to classify light curves as potential transits or false positives \citep{2018AJ....155...94S}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{Images/CNN_process.png}
+    \caption{The general process CNNs follow is shown above. The inputted data runs through several convolutional and pooling layers in search of patterns in the data. The developed feature maps reach the fully connected layer to determine the patterns found, which then allow the output layer to make an informed prediction. Reproduced from \citet{oshea2015introductionconvolutionalneuralnetworks} (Figure 2).}
+    \label{fig:CNN_process}
+\end{figure}
+
+\subsubsection{Machine Learning Applications in Transit Detection}
+
+As modern surveys produce more light curves, the analysis of transit signals requires stronger computation. Traditional search algorithms such as the Box Least Squares (BLS) and the Transiting Planet Search (TPS) pipeline remain highly effective at identifying periodic transit-like signals in photometric data. However, these methods are primarily designed to detect periodic patterns and do not directly distinguish between genuine planetary transits and astrophysical false positives \citep{Ansdell_2018, Dattilo_2019}. Machine learning approaches have therefore been explored as a complementary tool for classifying transit candidates and identifying likely false positives. By analyzing the morphological features of light curves, these algorithms can learn to differentiate between planetary transits and signals produced by eclipsing binaries, stellar variability, or instrumental noise.
+
+Machine learning algorithms require large labelled datasets in order to achieve a reliable performance. Data from the \textit{Kepler} mission provides such training sets, consisting of confirmed planetary transits, eclipsing binaries, and other false positive signals that can be used to train and validate the algorithms \citep{2018ApJS..235...38T}. However, some machine learning pipelines require larger training datasets than are currently available from confirmed observations alone. This is where synthetic datasets are often generated to simulate light curves with known properties. These simulated datasets allow researchers to explore a wider range of planetary radii, orbital periods, and signal-to-noise ratios than may be present in the observed training sample.
+
+In order to maximize the effectiveness of machine learning processes, scientists process the data sets further. The most used technique is to phase-fold the light curve over the period to create one well defined dip. This helps to limit variability and generate a clear dip, which can be easily classified as a transit or false positives \citep{2018AJ....155...94S}.
+
+One of the most widely used machine learning approaches in exoplanet literature is the convolutional neural network (CNN). CNNs are well suited to analyzing time-series data such as stellar light curves because they can identify local patterns within the signal. The network processes the input light curve through multiple  layers that apply filters to detect characteristic features such as the shape and depth of transit events. During training, the network iteratively adjusts these filters to minimize classification errors, which allows it to distinguish between planetary transits and common false positives such as eclipsing binaries or stellar variability \citep{2018AJ....155..147Z}. A notable example is the work of \citep{2018AJ....155...94S}, who developed the Astronet CNN model and applied it to \textit{Kepler} light curves. Their model successfully identified several previously missed exoplanet candidates within the \textit{Kepler} dataset. Similar machine learning approaches are now being explored for application to TESS data.
+
