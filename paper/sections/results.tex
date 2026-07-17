@@ -7,14 +7,14 @@
 
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{History/loss_history.png}
+        \includegraphics[width=\textwidth]{figures/plots/loss_history.png}
         \caption{Changes in model loss over epochs}
         \label{fig:first}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{History/accuracy_history.png}
+        \includegraphics[width=\textwidth]{figures/plots/accuracy_history.png}
         \caption{Changes in model accuracy over epochs}
         \label{fig:second}
     \end{subfigure}
@@ -29,7 +29,7 @@ The confusion matrix is very important and efficient in showing the results of t
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.5\linewidth]{Images/Results/real_confusion_matrix}
+    \includegraphics[width=0.5\linewidth]{figures/plots/real_confusion_matrix}
     \caption{The above plot is a simple 2x2 confusion matrix. The results show that the model comfortably classifies the true transits but is not able to make confident predictions for eclipsing binary cases.}
     \label{fig:acc_conf_matrix}
 \end{figure}
@@ -53,7 +53,7 @@ Another pair of metrics we can use to see the quality of the model and its abili
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.5\linewidth]{Images/Histograms/confidence_correct_vs_incorrect.png}
+    \includegraphics[width=0.5\linewidth]{figures/plots/confidence_correct_vs_incorrect.png}
     \caption{A histogram showing the spread of frequency of each confidence value the model returned. All correct classifications shown in \textbf{(Insert colour)} while incorrect classifications shown in \textbf{(Insert colour)}. An interesting bump in mistakes by the model is found in the \textbf{(What range? I think 0.8 to 0.9)}}
     \label{fig:conf_corr_vs_incorr_hist}
 \end{figure}
