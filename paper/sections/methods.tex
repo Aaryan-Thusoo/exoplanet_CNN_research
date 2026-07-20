@@ -80,30 +80,47 @@ The final training, validation, and test data sets are saved separately into 3 c
 
 \subsection{Model}
 
-Table~\ref{tab:layer_order} shows the finalized order of layers used in the neural network. The input layer takes in a stacked numpy array with each of the light curves being analysed. From here each light curve is put into a convolutional layer which runs a kernal of size 11 across the entire time series. Rectified Linear Units (ReLU) activations are used here to limit risks of learning decay \textbf{(Is that what is called?)}. The next layers are pooling which takes the largest element in a group of 2 and saves it discarding the other. This lowers the computational load on the algorithm as it learns while retaining the important information. Following this a dropout layer is applied. These remove the usage of random neurons in the layer. This is done to keep the network from relying too heavily on one path or unit. This then reduces data leakage and helps to increase confidence in our results. The second convolution layer now has twice as many channels as the first convolution layer. This means each of the 32 channels from the first layer is split into 64 channel each with an applied filter learning and reading for patterns in the data. This gives a total of 64x32 channels totalling 2048 results to analyze dips and trends in the light curves. After the process is repeated with the max pooling and dropout, a global pooling layer is used to \textbf{(does what actually?)}. Now the results extracted from the 2048 channels is put into a dense layer then one more dropout at a higher rate. Lastly the output layer comes back with a single neuron which gives its guess of the light curve classification. 0 if it is certain the data shows a transiting exoplanet and 1 if certain it represents an eclipsing binary. 
+The task is to classify one dimensional time series data into two cases. The features such as dips and repeated structures make a convolutional neural network an appropriate model for research. The CNN will scan across the time axis looking for local patterns and shapes to determine what system created the overall data. Once the networks learned filter finishes passing over the data it returns an informed estimate of whether the data comes from a potential transiting planet or an eclipsing binary. As there are only two classes, the model outputs a binary classification value with a sigmoid score converted to a 0 or 1 for transit and eclipsing binary predictions respectively.
+
+
+To structure the CNN, the TensorFlow/Keras Python libraries were used. As CNNs are structured as layers, these libraries were chosen as they are simple to set up. Table~\ref{tab:layer_order} shows the finalized order of layers used in the neural network. This order follows a normal CNN architecture. 
 
 \begin{table}[h]
     \centering
-    \begin{tabular}{|c|l|}\hline
-           Layer Type&  Parameters\\\hline
-           Input&  \\\hline
-           Convolution& 32 channels, kernal size = 11, same padding, ReLU activation \\\hline
-           Max Pooling& Pool Size = 2 \\\hline
-           Dropout& Rate = 0.2 \\\hline
-           Convolution&  64 channels, kernal size = 11, same padding, ReLU activation\\\hline
-           Max Pooling& Pool Size = 2 \\\hline
-           Dropout& Rate = 0.2 \\\hline
-           Global Pooling &  \\\hline
-           Dense&  \\\hline
-           Dropout& Rate = 0.3 \\\hline
-           Output&  \\ \hline
+    \begin{tabular}{|c|c|l|}\hline
+            Layer \# &Layer Type&  Parameters\\\hline
+            1&Input& Input Length = 4897 or smth \\\hline
+            2&Convolution& 32 channels, kernel size=11, same padding, ReLU activation \\\hline
+            3&Max Pooling& Pool Size=2 \\\hline
+            4&Dropout& Rate = 0.2 \\\hline
+            5&Convolution&  64 channels, kernel size=11, same padding, ReLU activation\\\hline
+            6&Max Pooling& Pool Size=2 \\\hline
+            7&Dropout& Rate=0.2 \\\hline
+            8&Global Pooling &  \\\hline
+            9&Dense&  \\\hline
+            10&Dropout& Rate=0.3 \\\hline
+            11&Output&  \\ \hline
     \end{tabular}
     \caption{Order of all layers used in the training of the neural network. All parameters applied are listed as well.}
     \label{tab:layer_order}
 \end{table}
 
+The input layer takes in a stacked NumPy array with each of the light curves being analysed. From here each light curve is put into a one dimensional convolutional layer which runs a kernel of set size over the flux time series. The filters run through the data, learning during training and updating during back propagation. The goal of the filters is to search for local patterns in the light curve. These kernels can detect, transit/eclipse dips, ingress/egress shape, symmetry or asymmetry around dips. Multiple filters are learned and updated at once allowing the network to detect several features at a time. By utilizing multiple layers for convolution, simple features can be combined to detect more complex patterns.
+
+Rectified Linear Units (ReLU) activations are used to introduce non-linearity which helps the model learn more complex patterns. As well ReLU activations help reduce vanishing gradients problems during the iterative learning process. After the activation function of some convolutional layers, a batch normalization layer is applied. This was used to normalize the intermediate activation results while training was going on.  Thus the next layer receives values more appropriately scaled. This was done to reduce sensitivity to learning rate decisions. The next layers are pooling which takes the largest element within a local window and saves it, discarding the rest. This lowers the computational load on the algorithm as it learns while retaining the important information. Following this a dropout layer is applied. These randomly disable some neurons in the layer during training. This is done to keep the network from relying too heavily on one path or unit. 
+
+A global pooling layer is needed near the end of the models process in order to prepare the model for providing a result. Global pooling is a final pooling step used to reduce each feature map to its strongest response. It keeps the most strongly detected version of each learned pattern and converts them into a compact vector to prepare for the dense layers. The dense layers are meant for decision making. They combine the information from the convolutional layers and build a summary of the results. The final dense layer only has one neuron with a sigmoid activation function to produce the classification score. This score sits between 0 and 1 that is converted to a binary number. 0 is returned for transit predictions while 1 is for eclipsing binary predictions. The distance of this score from the classification threshold was used as a measure of model confidence using Equation~\ref{eq:confidence} below, where $p$ is the sigmoid classification score. A score close to either 0 or 1 was treated as high confidence, while scores close to the classification threshold of 0.5 were treated as lower confidence \textbf{(2 AI Sentences)}.
+
+\begin{align}
+    \text{confidence} = \max{(p, 1-p)}\label{eq:confidence}
+\end{align}
+
+The above information was for the training process of the CNN model. This process is repeated over several epochs with a back propagation step after each run. For the back propagation, an optimizer is required and for this paper the Adam optimizer is used. It was chosen as it is useful for adapting step sizes for different neuron weights making it more stable than more basic choices. Alongside the optimizer is the learning rate which controls how large each update step is. A choice of \textbf{(What number?)} was used to avoid too big steps and too small updates. Alongside this, a weight decay value of \textbf{(What number?)} is chosen. This value is used for regularization to discourage the model from making weights in the filter too large, preventing over-fitting.
+
+The loss function was needed to compare the results of each training iteration with the real answers and calculating a response to how well the model did. As the classification is binary, binary cross-entropy was the chosen loss function as it works well with the sigmoid classification score. As the total training data set is large, a random selection of $32$ light curve predictions were used to determine the weight updates during back propagation. The model was trained for up to 10 epochs. Early stopping was used to monitor the validation loss during training and restore the model weights from the best validation epoch. \textbf{(2 AI Sentences)}
+
 \textbf{(Does some of this info go to the results section or is it good here?)}
-Upon running the model through with data, the history is saved into a keras file. This can then be referred back to and loaded to observe how the model performed at each epoch in its training process. Several metrics are chosen to record in the learning. Accuracy was chosen to represent how well the model does at prediction the correct class overall. As well, the loss is recorded to show if the model is making decisions with confidence or with blind guesses. Both have results recorded at each epoch for both the training data and validation data. The training results in loss and accuracy are taken into account for updating the model and the validation tells if the model is over or under fitting the data.
+Upon completing the training epochs, the weights and model architecture are saved to a keras file which can be loaded and applied to any new data. As well, the history of the training is saved into a JSON file. This can then be referred back to and loaded to observe how the model performed at each epoch in its training process. Several metrics are chosen to record in the learning. Accuracy was chosen to represent how well the model does at prediction the correct class overall. As well, the loss is recorded to show if the model is making decisions with confidence or with blind guesses. Both have results recorded at each epoch for both the training data and validation data. The training results in loss and accuracy are taken into account for updating the model and the validation tells if the model is over or under fitting the data.
 
 Several other metrics are recorded upon the completion of the learning. Once the test data is used against the finalized model, a file is saved holding the recall, precision, F1 score, and ROC AUC. These results can then be monitored to understand more concretely what the model is good at and where it struggles.
 
@@ -111,4 +128,4 @@ To further analyze the CNN, all misclassified light curves are saved in a compre
 
 \subsubsection{Analysis Setup \textbf{(Def need a better title name)}}
 
-In order to analyze the mistakes of the model, several steps are taken to visyalize the models errors. \textbf{(Do I need to write anything here?)}
+In order to analyze the mistakes of the model, several steps are taken to visualize the models errors. \textbf{(Do I need to write anything here?)}
