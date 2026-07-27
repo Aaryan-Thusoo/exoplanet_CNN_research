@@ -1,6 +1,6 @@
 from tensorflow import keras
 
-def conv_layer(channels, kernel_size, padding, activation):
+def conv_layer(channels, kernel_size, padding, activation=None):
     return keras.layers.Conv1D(channels, kernel_size=kernel_size, padding=padding, activation=activation)
 
 def max_pooling_layer(pool_size):
@@ -14,3 +14,9 @@ def dense_layer(units, activation):
 
 def global_max_pooling_layer():
     return keras.layers.GlobalMaxPooling1D()
+
+def batch_norm_layer():
+    return keras.layers.BatchNormalization()
+
+def activations_layer(activation):
+    return keras.layers.Activation(activation)

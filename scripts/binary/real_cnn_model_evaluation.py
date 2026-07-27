@@ -77,7 +77,7 @@ def plot_training_history(path):
     plt.savefig(RESULTS_DIR / "plots" / "training_accuracy_history.png")
 
 def plot_confusion_matrix(all_true, all_preds):
-    class_names = ["Transit", "Eclipsing Binary"]
+    class_names = ["Eclipsing Binary", "Transit"]
 
     all_true = np.asarray(all_true).astype(int)
     all_preds = np.asarray(all_preds).astype(int)
@@ -134,7 +134,7 @@ def calculate_classification_metrics(
 
     :param y_true: True binary labels.
     :param y_pred: Predicted binary labels after thresholding.
-    :param y_pred_prob: Predicted probabilities for the positive class.
+    :param y_pred_prob: Predicted probabilities for the transit/exoplanet class.
     :return: Dictionary of evaluation metrics.
     """
     return {
@@ -152,7 +152,7 @@ def plot_confidence_histogram(
     Plot histogram of model prediction confidence.
 
     Confidence is defined as the model's distance from uncertainty:
-    max(p, 1 - p), where p is the predicted probability for class 1.
+    max(p, 1 - p), where p is the predicted probability for the transit/exoplanet class.
     """
 
     confidence = np.maximum(y_pred_prob, 1 - y_pred_prob)
@@ -212,6 +212,7 @@ def plot_correct_incorrect_confidence(
     plt.savefig(results_dir / "confidence_correct_vs_incorrect.png", dpi=200)
     plt.close()
 
+
 def get_misclassified_lightcurves_by_type(
     X_test: np.ndarray,
     y_test: np.ndarray,
@@ -222,8 +223,10 @@ def get_misclassified_lightcurves_by_type(
     """
     Split incorrectly classified test light curves by mistake type.
 
-    False positives: true label 0, predicted 1.
-    False negatives: true label 1, predicted 0.
+    Label convention: 0 = eclipsing binary, 1 = transit/exoplanet.
+
+    False positives: true eclipsing binary, predicted transit.
+    False negatives: true transit, predicted eclipsing binary.
     """
     y_test = y_test.astype(int)
     y_pred_prob = np.asarray(y_pred_prob).ravel()
@@ -269,6 +272,7 @@ def main():
 
     y_pred_prob = model.predict(X_test).ravel()
     y_pred = (y_pred_prob >= params["threshold"]).astype(int)
+
     plot_confusion_matrix(y_test, y_pred)
 
     plot_confidence_histogram(y_pred_prob)

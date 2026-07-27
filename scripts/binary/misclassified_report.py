@@ -66,8 +66,8 @@ def save_misclassified_html_report(misclassified: dict, output_path: Path) -> No
     """
 
     sections = [
-        ("False Positives", "false_positives", "True 0, predicted 1"),
-        ("False Negatives", "false_negatives", "True 1, predicted 0"),
+        ("False Positives", "false_positives", "True eclipsing binary, predicted transit"),
+        ("False Negatives", "false_negatives", "True transit, predicted eclipsing binary"),
     ]
 
     for heading, key, description in sections:
@@ -162,7 +162,7 @@ def save_single_section_html_report(
 def main():
     misclassified = np.load(RESULTS_DIR / "misclassified_lightcurves.npz")
 
-    # True: 0, Predicted: 1
+    # True eclipsing binary, predicted transit
     false_positives = {
         "X": misclassified["false_positive_X"],
         "y_true": misclassified["false_positive_y_true"],
@@ -172,7 +172,7 @@ def main():
         "confidence": misclassified["false_positive_confidence"],
     }
 
-    # True: 1, Predicted: 0
+    # True transit, predicted eclipsing binary
     false_negatives = {
         "X": misclassified["false_negative_X"],
         "y_true": misclassified["false_negative_y_true"],
@@ -207,7 +207,7 @@ def main():
         fp_high_confidence,
         RESULTS_DIR / "false_positive_high_confidence.html",
         heading="High-Confidence False Positives",
-        description="True 0, predicted 1. Exoplanet/transit examples mistaken as eclipsing binaries.",
+        description="True eclipsing binary, predicted transit. Eclipsing binary examples mistaken as exoplanet/transit cases.",
     )
 
     fn_high_confidence_filter = false_negatives["confidence"] > 0.8
@@ -224,7 +224,7 @@ def main():
         fn_high_confidence,
         RESULTS_DIR / "false_negative_high_confidence.html",
         heading="High-Confidence False Negatives",
-        description="True 1, predicted 0. Eclipsing binaries mistaken as exoplanet/transit examples.",
+        description="True transit, predicted eclipsing binary. Exoplanet/transit examples mistaken as eclipsing binaries.",
     )
 
 if __name__ == "__main__":

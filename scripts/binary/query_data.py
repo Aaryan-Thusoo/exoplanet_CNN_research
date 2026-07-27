@@ -90,33 +90,34 @@ def main():
         chunk_df = query_exoplanet_archive(query)
         all_results.append(chunk_df)
 
-    eb_snr_df = pd.concat(all_results, ignore_index=True)
-
-    eb_snr_max = (
-        eb_snr_df
-        .groupby("kepid", as_index=False)
-        .agg(koi_model_snr=("koi_model_snr", "max"))
-    )
+    eb_archive_df = pd.concat(all_results, ignore_index=True)
 
     eb_df["kepid"] = pd.to_numeric(eb_df["kepid"], errors="coerce")
-    eb_snr_max["kepid"] = pd.to_numeric(eb_snr_max["kepid"], errors="coerce")
+    eb_archive_df["kepid"] = pd.to_numeric(eb_archive_df["kepid"], errors="coerce")
 
     eb_df = eb_df.dropna(subset=["kepid"]).copy()
-    eb_snr_max = eb_snr_max.dropna(subset=["kepid"]).copy()
+    eb_archive_df = eb_archive_df.dropna(subset=["kepid"]).copy()
 
     eb_df["kepid"] = eb_df["kepid"].astype(int)
-    eb_snr_max["kepid"] = eb_snr_max["kepid"].astype(int)
+    eb_archive_df["kepid"] = eb_archive_df["kepid"].astype(int)
 
-    eb_with_snr = eb_df.merge(
-        eb_snr_max,
+    # Keep one archive row per EB KepID while preserving all requested archive columns.
+    eb_archive_df = (
+        eb_archive_df
+        .sort_values("koi_model_snr", ascending=False, na_position="last")
+        .drop_duplicates(subset="kepid", keep="first")
+    )
+
+    eb_with_archive_cols = eb_df.merge(
+        eb_archive_df,
         on="kepid",
         how="left"
     )
 
-    eb_with_snr = eb_with_snr[eb_table_cols].fillna("")
+    eb_with_archive_cols = eb_with_archive_cols[eb_table_cols].fillna("")
 
     transit_df.to_csv(SAVE_FILE / "Kepler_Confirmed_ExoPlanets.csv", index=False)
-    eb_with_snr.to_csv(SAVE_FILE / "Kepler_Confirmed_EB.csv", index=False)
+    eb_with_archive_cols.to_csv(SAVE_FILE / "Kepler_Confirmed_EB.csv", index=False)
 
 if __name__ == "__main__":
     main()

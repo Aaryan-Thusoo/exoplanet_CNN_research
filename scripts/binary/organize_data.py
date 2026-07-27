@@ -40,10 +40,10 @@ def files_to_df(file_list: List[str]) -> pd.DataFrame:
 
 def create_data_classification(df: pd.DataFrame, label: int) -> tuple[np.ndarray, np.ndarray]:
     """
-    Creates data classification real_model
-    :param df: data frame with "flux" columns to extract
-    :param label: Generates number classification
-    :return: Stacked data set
+    Creates model inputs and class labels from a dataframe of flux sequences.
+    :param df: Dataframe with a "flux" column to extract.
+    :param label: Class label assigned to every row in the dataframe.
+    :return: Stacked input data and matching class labels.
     """
     stacked = np.stack(df["flux"].apply(lambda x: np.array(ast.literal_eval(x), dtype=np.float32)))
     return stacked, np.ones(len(stacked)) * label
@@ -109,12 +109,12 @@ def main(seed, train_ratio, val_test_ratio) -> None:
                                                             val_test_ratio=val_test_ratio, seed=seed)
 
     # Label and Classify data sets
-    X_exo_training, y_exo_training = create_data_classification(exo_training, 0)
-    X_exo_val, y_exo_val = create_data_classification(exo_validation, 0)
-    X_exo_test, y_exo_test = create_data_classification(exo_test, 0)
-    X_eb_training, y_eb_training = create_data_classification(eb_training, 1)
-    X_eb_val, y_eb_val = create_data_classification(eb_validation, 1)
-    X_eb_test, y_eb_test = create_data_classification(eb_test, 1)
+    X_exo_training, y_exo_training = create_data_classification(exo_training, 1)
+    X_exo_val, y_exo_val = create_data_classification(exo_validation, 1)
+    X_exo_test, y_exo_test = create_data_classification(exo_test, 1)
+    X_eb_training, y_eb_training = create_data_classification(eb_training, 0)
+    X_eb_val, y_eb_val = create_data_classification(eb_validation, 0)
+    X_eb_test, y_eb_test = create_data_classification(eb_test, 0)
 
     # Save kepids of each section
     kepid_exo_training = exo_training["kepid"].to_numpy()
