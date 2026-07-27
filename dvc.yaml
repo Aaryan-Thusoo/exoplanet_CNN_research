@@ -1,8 +1,11 @@
 stages:
+  #=================================================================
+  # Data Preparation
+  #=================================================================
   query_data:
-    cmd: python scripts/real/query_data.py
+    cmd: python scripts/binary/query_data.py
     deps:
-      - scripts/real/query_data.py
+      - scripts/binary/query_data.py
       - scripts/helpers/yaml_reading.py
     params:
       - configs/data_process_params.yaml:
@@ -13,9 +16,9 @@ stages:
       - data/raw/Kepler_Confirmed_EB.csv
 
   prepare_kepler_exo_data:
-    cmd: python scripts/real/prepare_kepler_exo_data.py
+    cmd: python scripts/binary/prepare_kepler_exo_data.py
     deps:
-      - scripts/real/prepare_kepler_exo_data.py
+      - scripts/binary/prepare_kepler_exo_data.py
       - data/raw/Kepler_Confirmed_ExoPlanets.csv
     params:
       - configs/data_process_params.yaml:
@@ -26,9 +29,9 @@ stages:
       - data/processed/exo_data
 
   prepare_kepler_eb_data:
-    cmd: python scripts/real/prepare_kepler_eb_data.py
+    cmd: python scripts/binary/prepare_kepler_eb_data.py
     deps:
-      - scripts/real/prepare_kepler_eb_data.py
+      - scripts/binary/prepare_kepler_eb_data.py
       - data/raw/Kepler_Confirmed_EB.csv
     params:
       - configs/data_process_params.yaml:
@@ -39,9 +42,9 @@ stages:
       - data/processed/eb_data
 
   organize_data:
-    cmd: python scripts/real/organize_data.py
+    cmd: python scripts/binary/organize_data.py
     deps:
-      - scripts/real/organize_data.py
+      - scripts/binary/organize_data.py
       - scripts/helpers/temp_help_name.py
       - scripts/helpers/yaml_reading.py
       - data/processed/exo_data
@@ -56,10 +59,13 @@ stages:
       - data/real_model/val.npz
       - data/real_model/test.npz
 
+  #=================================================================
+  # Binary Model
+  #=================================================================
   train_real_cnn:
-    cmd: python scripts/real/train_real_cnn.py
+    cmd: python scripts/binary/train_real_cnn.py
     deps:
-      - scripts/real/train_real_cnn.py
+      - scripts/binary/train_real_cnn.py
       - data/real_model/train.npz
       - data/real_model/val.npz
     params:
@@ -74,9 +80,9 @@ stages:
       - results/real_metrics.json
 
   evaluate_real_cnn:
-    cmd: python scripts/real/real_cnn_model_evaluation.py
+    cmd: python scripts/binary/real_cnn_model_evaluation.py
     deps:
-      - scripts/real/real_cnn_model_evaluation.py
+      - scripts/binary/real_cnn_model_evaluation.py
       - models/real_model.keras
       - data/real_model/test.npz
       - results/training_history.json
@@ -90,14 +96,13 @@ stages:
       - results/plots/confidence_histogram.png
       - results/plots/confidence_correct_vs_incorrect.png
       - results/misclassified_results/misclassified_lightcurves.npz
-      - results/test_predictions.csv
     metrics:
       - results/evaluation.json
 
   misclassified_report:
-    cmd: python scripts/real/misclassified_report.py
+    cmd: python scripts/binary/misclassified_report.py
     deps:
-      - scripts/real/misclassified_report.py
+      - scripts/binary/misclassified_report.py
       - results/misclassified_results/misclassified_lightcurves.npz
     outs:
       - results/misclassified_results/misclassified_lightcurves.html
@@ -105,9 +110,9 @@ stages:
       - results/misclassified_results/false_negative_high_confidence.html
 
   analyze_misclassified:
-    cmd: python scripts/real/analyze_misclassified.py
+    cmd: python scripts/binary/analyze_misclassified.py
     deps:
-      - scripts/real/analyze_misclassified.py
+      - scripts/binary/analyze_misclassified.py
       - scripts/helpers/misclassified_helper.py
       - scripts/helpers/yaml_reading.py
       - results/misclassified_results/misclassified_lightcurves.npz
@@ -119,21 +124,22 @@ stages:
       - results/misclassified_results/fp_distribution_stats.json
       - results/misclassified_results/fn_distribution_stats.json
 
-  analyze_prediction_groups:
-    cmd: python scripts/real/analyze_prediction_groups.py
+  confidence_group_analysis:
+    cmd: python scripts/binary/confidence_group_analysis.py
     deps:
-      - scripts/real/analyze_prediction_groups.py
+      - scripts/binary/confidence_group_analysis.py
       - scripts/helpers/yaml_reading.py
-      - results/test_predictions.csv
       - data/real_model/test.npz
+      - models/real_model.keras
       - data/raw/Kepler_Confirmed_ExoPlanets.csv
       - data/raw/Kepler_Confirmed_EB.csv
     params:
       - configs/evaluation_params.yaml:
-          - confidence_bins
-          - confidence_labels
-          - snr_quantile_groups
-          - snr_group_labels
+          - threshold
+          - plots_info
     outs:
-      - results/prediction_group_analysis
+      - results/confidence_group_analysis
 
+  #=================================================================
+  # Multiclass Model
+  #=================================================================

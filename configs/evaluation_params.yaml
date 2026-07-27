@@ -12,9 +12,3 @@ plots_info:
   - name: Orbital Period
     col: "koi_period"
     log: True
-
-
-confidence_bins: [0.5, 0.7, 0.85, 1.0]
-confidence_labels: ["Low", "Medium", "High"]
-snr_quantile_groups: 3
-snr_group_labels: ["Low SNR", "Medium SNR", "High SNR"]

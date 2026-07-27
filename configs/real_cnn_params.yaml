@@ -39,14 +39,6 @@ cnn_layers:
   - type: "dropout"
     rate: 0.2
 
-  - type: "conv1d"
-    channels: 128
-    kernel_size: 5
-    padding: "same"
-
-  - type: "max_pooling1d"
-    pool_size: 2
-
   - type: "global_max_pooling1d"
 
   - type: "dense"
