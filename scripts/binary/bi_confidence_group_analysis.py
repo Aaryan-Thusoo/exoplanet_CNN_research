@@ -11,11 +11,11 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from scripts.helpers.yaml_reading import load_params
 
-DATA_DIR = PROJECT_ROOT / "data" / "real_model"
-MODEL_PATH = PROJECT_ROOT / "models" / "real_model.keras"
+DATA_DIR = PROJECT_ROOT / "data" / "binary_model"
+MODEL_PATH = PROJECT_ROOT / "models" / "binary_model.keras"
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
-RESULTS_DIR = PROJECT_ROOT / "results" / "confidence_group_analysis"
-YAML_FILE = PROJECT_ROOT / "configs" / "evaluation_params.yaml"
+RESULTS_DIR = PROJECT_ROOT / "results" / "binary" / "confidence_group_analysis"
+YAML_FILE = PROJECT_ROOT / "configs" / "bi_evaluation_params.yaml"
 
 
 def load_test_data():
@@ -40,6 +40,21 @@ def load_predictions(X_test):
     return y_pred_prob, y_pred, confidence
 
 
+def calculate_transit_depth(X: np.ndarray) -> np.ndarray:
+    """
+    Calculate transit depth using the median of the 10 lowest flux values
+    in each light-curve chunk.
+    """
+    lightcurves = np.squeeze(X)
+
+    if lightcurves.ndim == 1:
+        lightcurves = lightcurves.reshape(1, -1)
+
+    ten_lowest_values = np.sort(lightcurves, axis=1)[:, :10]
+
+    return np.median(ten_lowest_values, axis=1)
+
+
 def load_metadata():
     exo_df = pd.read_csv(RAW_DIR / "Kepler_Confirmed_ExoPlanets.csv")
     eb_df = pd.read_csv(RAW_DIR / "Kepler_Confirmed_EB.csv")
@@ -59,6 +74,7 @@ def load_metadata():
 
 def create_results_df(X_test, y_test, y_pred, y_pred_prob, confidence, kepid_test):
     lightcurve_std = np.std(X_test.squeeze(), axis=1)
+    transit_depth = calculate_transit_depth(X_test)
 
     results_df = pd.DataFrame({
         "kepid": kepid_test,
@@ -67,6 +83,7 @@ def create_results_df(X_test, y_test, y_pred, y_pred_prob, confidence, kepid_tes
         "y_pred_prob": y_pred_prob,
         "confidence": confidence,
         "lightcurve_std": lightcurve_std,
+        "transit_depth": transit_depth,
     })
 
     results_df["correct"] = results_df["y_true"] == results_df["y_pred"]

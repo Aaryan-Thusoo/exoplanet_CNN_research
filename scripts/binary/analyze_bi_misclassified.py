@@ -24,10 +24,10 @@ warnings.filterwarnings(
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-RESULTS_DIR = PROJECT_ROOT / 'results' / "misclassified_results"
+RESULTS_DIR = PROJECT_ROOT / "results" / "binary" / "misclassified_results"
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
-REAL_MODEL_DIR = PROJECT_ROOT / "data" / "real_model"
-YAML_DIR = PROJECT_ROOT / "configs" / "evaluation_params.yaml"
+REAL_MODEL_DIR = PROJECT_ROOT / "data" / "binary_model"
+YAML_DIR = PROJECT_ROOT / "configs" / "bi_evaluation_params.yaml"
 
 def load_data() -> tuple[DataFrame, DataFrame, Any, Any]:
     misclassified = np.load(RESULTS_DIR / "misclassified_lightcurves.npz")
@@ -58,6 +58,23 @@ def read_exo_eb_csv() -> tuple[DataFrame, DataFrame]:
     exo_df = pd.read_csv(RAW_DIR / "Kepler_Confirmed_ExoPlanets.csv")
     eb_df = pd.read_csv(RAW_DIR / "Kepler_Confirmed_EB.csv")
     return exo_df, eb_df
+
+
+def calculate_transit_depth(X: np.ndarray) -> np.ndarray:
+    """
+    Calculate transit depth using the median of the 10 lowest flux values
+    in each light-curve chunk.
+
+    Each returned value corresponds to one model input instance.
+    """
+    lightcurves = np.squeeze(X)
+
+    if lightcurves.ndim == 1:
+        lightcurves = lightcurves.reshape(1, -1)
+
+    ten_lowest_values = np.sort(lightcurves, axis=1)[:, :10]
+
+    return np.median(ten_lowest_values, axis=1)
 
 
 def plot_low_med_high_conf_hist(low_data, med_data, high_data, bins, value_name):
@@ -98,6 +115,9 @@ def main():
     fp_std = np.std(fp_X.squeeze(), axis=1)
     fn_std = np.std(fn_X.squeeze(), axis=1)
 
+    fp_transit_depth = calculate_transit_depth(fp_X)
+    fn_transit_depth = calculate_transit_depth(fn_X)
+
     exo_df, eb_df = read_exo_eb_csv()
 
     fp_df["kepid"] = fp_df["kepid"].astype(int)
@@ -136,6 +156,9 @@ def main():
 
     fp_with_eb["std"] = fp_std
     fn_with_exo["std"] = fn_std
+
+    fp_with_eb["transit_depth"] = fp_transit_depth
+    fn_with_exo["transit_depth"] = fn_transit_depth
 
     low_conf = 0.65
     med_conf = 0.8

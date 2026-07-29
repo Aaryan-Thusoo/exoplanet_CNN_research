@@ -24,11 +24,11 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 # Parameters file path
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.append(str(PROJECT_ROOT / "configs"))
-YAML_FILE = PROJECT_ROOT / "configs"/ "evaluation_params.yaml"
+YAML_FILE = PROJECT_ROOT / "configs"/ "bi_evaluation_params.yaml"
 
-DATA_DIR = PROJECT_ROOT / "data" / "real_model"
-MODEL_PATH = PROJECT_ROOT / "models" / "real_model.keras"
-RESULTS_DIR = PROJECT_ROOT / "results" / "misclassified_results"
+DATA_DIR = PROJECT_ROOT / "data" / "binary_model"
+MODEL_PATH = PROJECT_ROOT / "models" / "binary_model.keras"
+RESULTS_DIR = PROJECT_ROOT / "results" / "binary" / "misclassified_results"
 
 
 def lightcurve_plot_to_base64(lightcurve, title: str) -> str:
@@ -159,6 +159,48 @@ def save_single_section_html_report(
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(html)
 
+
+def load_correct_lightcurves_by_type() -> dict:
+    """
+    Load correctly classified test light curves split by true class.
+
+    Label convention: 0 = eclipsing binary, 1 = transit/exoplanet.
+    """
+    params = load_params(YAML_FILE)
+    threshold = params["threshold"]
+
+    test_data = np.load(DATA_DIR / "test.npz")
+    X_test = test_data["X"][..., np.newaxis]
+    y_test = test_data["y"].astype(int)
+    kepid_test = test_data["kepid"]
+
+    model = keras.models.load_model(MODEL_PATH)
+    y_pred_prob = model.predict(X_test).ravel()
+    y_pred = (y_pred_prob >= threshold).astype(int)
+    confidence = np.maximum(y_pred_prob, 1 - y_pred_prob)
+
+    correct_eb_mask = (y_test == 0) & (y_pred == 0)
+    correct_transit_mask = (y_test == 1) & (y_pred == 1)
+
+    return {
+        "correct_eb": {
+            "X": X_test[correct_eb_mask],
+            "y_true": y_test[correct_eb_mask],
+            "y_pred": y_pred[correct_eb_mask],
+            "y_pred_prob": y_pred_prob[correct_eb_mask],
+            "kepid": kepid_test[correct_eb_mask],
+            "confidence": confidence[correct_eb_mask],
+        },
+        "correct_transit": {
+            "X": X_test[correct_transit_mask],
+            "y_true": y_test[correct_transit_mask],
+            "y_pred": y_pred[correct_transit_mask],
+            "y_pred_prob": y_pred_prob[correct_transit_mask],
+            "kepid": kepid_test[correct_transit_mask],
+            "confidence": confidence[correct_transit_mask],
+        },
+    }
+
 def main():
     misclassified = np.load(RESULTS_DIR / "misclassified_lightcurves.npz")
 
@@ -225,6 +267,22 @@ def main():
         RESULTS_DIR / "false_negative_high_confidence.html",
         heading="High-Confidence False Negatives",
         description="True transit, predicted eclipsing binary. Exoplanet/transit examples mistaken as eclipsing binaries.",
+    )
+
+    correct_lightcurves = load_correct_lightcurves_by_type()
+
+    save_single_section_html_report(
+        correct_lightcurves["correct_eb"],
+        RESULTS_DIR / "correct_eclipsing_binary.html",
+        heading="Correctly Classified Eclipsing Binaries",
+        description="True eclipsing binary, predicted eclipsing binary. These examples can be compared against false positives.",
+    )
+
+    save_single_section_html_report(
+        correct_lightcurves["correct_transit"],
+        RESULTS_DIR / "correct_transit.html",
+        heading="Correctly Classified Transits",
+        description="True transit, predicted transit. These examples can be compared against false negatives.",
     )
 
 if __name__ == "__main__":

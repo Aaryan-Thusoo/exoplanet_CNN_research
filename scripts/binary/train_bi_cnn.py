@@ -12,12 +12,12 @@ from scripts.helpers.layers_helper import *
 
 # Parameters file path
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-RESULTS_DIR = PROJECT_ROOT / "results"
+RESULTS_DIR = PROJECT_ROOT / "results" / "binary"
 sys.path.append(str(PROJECT_ROOT / "configs"))
-yaml_file = PROJECT_ROOT / "configs"/ "real_cnn_params.yaml"
+yaml_file = PROJECT_ROOT / "configs"/ "bi_cnn_params.yaml"
 
 def data_loading():
-    data_path = PROJECT_ROOT / "data" / "real_model"
+    data_path = PROJECT_ROOT / "data" / "binary_model"
 
     train_data = np.load(data_path / "train.npz")
     val_data = np.load(data_path / "val.npz")
@@ -114,7 +114,7 @@ def main() -> None:
     # Load the data
     X_train, y_train, X_val, y_val = data_loading()
 
-    # Load the params from configs/real_cnn_params.yaml
+    # Load the params from configs/bi_cnn_params.yaml
     params = load_params(yaml_file)
 
     # Load the order of layers and set up the model
@@ -133,7 +133,7 @@ def main() -> None:
     # Save the model for use in evaluation
     model_dir = PROJECT_ROOT / "models"
     model_dir.mkdir(parents=True, exist_ok=True)
-    model.save(model_dir / "real_model.keras")
+    model.save(model_dir / "binary_model.keras")
 
 if __name__ == "__main__":
     main()

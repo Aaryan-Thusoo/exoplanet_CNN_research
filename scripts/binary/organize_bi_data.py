@@ -17,7 +17,7 @@ from scripts.helpers import yaml_reading as yr
 PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
 EXO_DIR = PROCESSED_DIR / "exo_data"
 EB_DIR = PROCESSED_DIR / "eb_data"
-REAL_MODEL_DIR = PROJECT_ROOT / "data" / "real_model"
+REAL_MODEL_DIR = PROJECT_ROOT / "data" / "binary_model"
 
 yaml_file = PROJECT_ROOT / "configs" / "data_process_params.yaml"
 

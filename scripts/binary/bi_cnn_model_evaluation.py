@@ -19,11 +19,11 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 # Parameters file path
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.append(str(PROJECT_ROOT / "configs"))
-YAML_FILE = PROJECT_ROOT / "configs"/ "evaluation_params.yaml"
+YAML_FILE = PROJECT_ROOT / "configs"/ "bi_evaluation_params.yaml"
 
-DATA_DIR = PROJECT_ROOT / "data" / "real_model"
-MODEL_PATH = PROJECT_ROOT / "models" / "real_model.keras"
-RESULTS_DIR = PROJECT_ROOT / "results"
+DATA_DIR = PROJECT_ROOT / "data" / "binary_model"
+MODEL_PATH = PROJECT_ROOT / "models" / "binary_model.keras"
+RESULTS_DIR = PROJECT_ROOT / "results" / "binary"
 
 
 def data_loading():
@@ -311,4 +311,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
