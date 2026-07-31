@@ -1,12 +1,15 @@
 \section{Results}
 
+The following section highlights the results the binary and multiclass convolutional neural networks returned. 
+The results of the synthetic cases is listed showing the models are created appropriately. Next the results using the real Kepler data is shown. Lastly, random forest models were used to stand as a baseline for the neural networks. 
+
 \subsection{Synthetic Data Results}
 
 \textbf{TO BE DETERMINED IF I NEED IT}
 
 
 
-\subsection{Training Behaviour}
+\subsection{Binary CNN Training History}
 
  The model trained over 10 epochs with no early stopping. During this time, the loss and accuracy of the training data at the end of each epoch was recorded. The validation data was also applied at the end of each epoch and was recorded as well. This was done to evaluate the improvements of the model over time to make sure to avoid training over too little or too many epochs. The final loss and accuracy results from the training data was \textbf{(Fill that in)}. The validation data ended at \textbf{(Fill that in)} and \textbf{(Fill that in)} respectively. Figure~\ref{fig:history_plots} shows line plots of the training and validation results over the epochs. As the lines have the same shape and do not spread far apart from one another, it is clear to conclude the model has not suffered from noticeable over fitting. If by the final epoch, the training and validation lines were heavily separated, this would indicate the model was learning individual features and not the general features that separate transits from eclipsing binaries.  
 
@@ -31,10 +34,9 @@
     \label{fig:side_by_side}
 \end{figure}
 
+Pipelines using higher or lower epochs led to a consistent trend of over or under fitting cases. After the completion of the training, the model was given the test data to determine the networks quality. In total there were \textbf{(How many?)} test instances used with there being an equal split of transits and eclipsing binaries. After the evaluation of the model, the most important metrics were saved and are recorded below in Table~\ref{tab:metrics_table}. 
 
-\subsection{Real Model Results}
-
-The real model is the name given to the convolutional neural network trained on the real \textit{Kepler} data. Tests using higher or lower epochs led to a consistent trend of over or under fitting cases. After the completion of the training, the model was given the test data to determine the networks quality. In total there were \textbf{(How many?)} test instances used with there being an equal split of transits and eclipsing binaries. After the evaluation of the model, the most important metrics were saved and are recorded below in Table~\ref{tab:metrics_table}. 
+\subsection{Binary CNN Test Performance}
 
 \begin{table}[]
     \centering
@@ -60,7 +62,7 @@ Another helpful method for evaluating the model results is through a confusion m
     \label{fig:acc_conf_matrix}
 \end{figure}
 
-\subsection{Misclassified Light Curves}
+\subsection{Binary CNN Confidence and Misclassification Analysis}
 
 Of the \textbf{(How many total?)} test instances used, \textbf{(How many misclassified?)} were misclassified. There were \textbf{(How many false positives?)} and \textbf{(How many false negatives?)} and to understand where the model is making mistakes it is important to analyse the properties of these light curve instances. The first feature to analyse was the distribution of confidence for all test instances. Classifications with low confidence indicate the model was not making an informed prediction and guessed. Misclassified instances with high confidence are the most interesting focus as they tricked the model into being certain of its prediction. Figure~\ref{fig:conf_corr_vs_incorr_hist} shows the confidence distribution of all test instances split by correct and incorrect classifications. With any model, especially in a binary classification model, it is expected to see incorrect instances with low confidence. Thus it is important to analyse the incorrect cases which came back with higher confidences. 
 
