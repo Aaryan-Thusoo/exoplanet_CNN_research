@@ -45,6 +45,7 @@ def box_jitter(df: pd.DataFrame, column: str, title: str, output_dir: Path, case
 
     plt.title(title)
 
+    np.random.seed(42)
     sns.boxplot(
         data=df,
         x="confidence_group",

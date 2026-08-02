@@ -190,7 +190,7 @@ def plot_correct_incorrect_confidence(
     plt.hist(
         correct_confidence,
         bins=30,
-        range=(0.5, 1.0),
+        range=(1/3, 1.0),
         alpha=0.7,
         label="Correct",
         edgecolor="black",
@@ -198,7 +198,7 @@ def plot_correct_incorrect_confidence(
     plt.hist(
         incorrect_confidence,
         bins=30,
-        range=(0.5, 1.0),
+        range=(1/3, 1.0),
         alpha=0.7,
         label="Incorrect",
         edgecolor="black",

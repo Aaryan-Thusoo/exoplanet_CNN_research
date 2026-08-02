@@ -474,7 +474,7 @@ stages:
         cnn_layers:
         - type: conv1d
           channels: 32
-          kernel_size: 7
+          kernel_size: 11
           padding: same
         - type: batch_norm
         - type: activation
@@ -494,6 +494,17 @@ stages:
           pool_size: 2
         - type: dropout
           rate: 0.2
+        - type: conv1d
+          channels: 128
+          kernel_size: 5
+          padding: same
+        - type: batch_norm
+        - type: activation
+          activation: relu
+        - type: max_pooling1d
+          pool_size: 2
+        - type: dropout
+          rate: 0.2
         - type: global_max_pooling1d
         - type: dense
           units: 32
@@ -504,7 +515,7 @@ stages:
           units: 3
           activation: softmax
         training_and_compiling:
-          epochs: 10
+          epochs: 20
           batch_size: 32
           learning_rate: 0.0005
           weight_decay: 0.0001
@@ -514,16 +525,16 @@ stages:
     outs:
     - path: models/multi_model.keras
       hash: md5
-      md5: 77f6cc8b294f5e164751dda36729e268
-      size: 265948
+      md5: e960ea5eed9e30502491848881c5a143
+      size: 806828
     - path: results/multiclass/mc_metrics.json
       hash: md5
-      md5: 6cce3f986772e06eab04cdd14e48a0da
+      md5: 002a0905a882c5e3515f4de16f60a17b
       size: 174
     - path: results/multiclass/mc_training_history.json
       hash: md5
-      md5: 9f82ba86cbb81fa4535ece5fd5b2c07b
-      size: 1037
+      md5: 03194833141410c14ca4809e4c3c842f
+      size: 1997
   evaluate_mc_cnn:
     cmd: python scripts/multiclass/mc_cnn_model_evaluation.py
     deps:
@@ -533,12 +544,12 @@ stages:
       size: 44754627
     - path: models/multi_model.keras
       hash: md5
-      md5: 77f6cc8b294f5e164751dda36729e268
-      size: 265948
+      md5: e960ea5eed9e30502491848881c5a143
+      size: 806828
     - path: results/multiclass/mc_training_history.json
       hash: md5
-      md5: 9f82ba86cbb81fa4535ece5fd5b2c07b
-      size: 1037
+      md5: 03194833141410c14ca4809e4c3c842f
+      size: 1997
     - path: scripts/multiclass/mc_cnn_model_evaluation.py
       hash: md5
       md5: cf69ed1d9110f9ae2fea22b72da0b28c
@@ -549,33 +560,33 @@ stages:
     outs:
     - path: results/multiclass/evaluation.json
       hash: md5
-      md5: 4be954724a300240cc8246d4d13407d7
-      size: 131
+      md5: 38b5fcad1ae1967c222447109eefdddf
+      size: 118
     - path: 
         results/multiclass/misclassified_results/misclassified_lightcurves.npz
       hash: md5
-      md5: cc17a09b7c0116fd502bec0b4694cb5e
-      size: 11045188
+      md5: 6d20fa37468de85a4e98adf876e84790
+      size: 10048855
     - path: results/multiclass/plots/confidence_correct_vs_incorrect.png
       hash: md5
-      md5: 802a4f3e960aac5b7be950cf7d18672b
-      size: 54821
+      md5: abb3eb66cfe95cfcf5a9f6cc77047ce9
+      size: 51824
     - path: results/multiclass/plots/confidence_histogram.png
       hash: md5
-      md5: 11d5905ed1090fb86353e30aac5c9170
-      size: 41405
+      md5: 1a760b2915774d3e97af2a33a006b4d2
+      size: 42929
     - path: results/multiclass/plots/confusion_matrix.png
       hash: md5
-      md5: f6592b99ee72aaa01783998edd04f41f
-      size: 106788
+      md5: 4692d28d84e37507d8f637e69fcd2e65
+      size: 108426
     - path: results/multiclass/plots/training_accuracy_history.png
       hash: md5
-      md5: 248677110dadf447b21438fb187bc7e8
-      size: 33691
+      md5: 32eaf0875ac84e0fda5b7ff736a90736
+      size: 37913
     - path: results/multiclass/plots/training_loss_history.png
       hash: md5
-      md5: 89ff921ac4510094a6cbb12872868424
-      size: 29264
+      md5: 6eb40ba17ad1e4f06315e5656477879e
+      size: 31852
   organize_bi_data:
     cmd: python scripts/binary/organize_bi_data.py
     deps:

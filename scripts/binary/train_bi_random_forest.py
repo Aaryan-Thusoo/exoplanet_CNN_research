@@ -21,6 +21,7 @@ RAW_DIR = PROJECT_ROOT / "data" / "raw"
 MODEL_DIR = PROJECT_ROOT / "models"
 RESULTS_DIR = PROJECT_ROOT / "results" / "binary" / "random_forest"
 PARAMS_DIR = PROJECT_ROOT / "configs" / "bi_randf_params.yaml"
+PAPER_DIR = PROJECT_ROOT / "paper" / "figures"/ "plots"
 RF_GREEN = "#2e7d32"
 
 
@@ -118,7 +119,7 @@ def plot_confusion_matrix(all_true, all_preds):
     colorbar.set_label("Fraction of True Class", rotation=270, labelpad=18)
 
     fig.tight_layout()
-    fig.savefig(RESULTS_DIR / "confusion_matrix.png", dpi=200, bbox_inches="tight")
+    fig.savefig(PAPER_DIR / "bi_rf_confusion_matrix.png", dpi=200, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -131,7 +132,7 @@ def plot_feature_importance(model, feature_names):
     plt.title("Random Forest Feature Importance")
     plt.xticks(rotation=45, ha="right")
     plt.tight_layout()
-    plt.savefig(RESULTS_DIR / "feature_importance.png", dpi=200)
+    plt.savefig(PAPER_DIR / "bi_feature_importance.png", dpi=200)
     plt.close()
 
 

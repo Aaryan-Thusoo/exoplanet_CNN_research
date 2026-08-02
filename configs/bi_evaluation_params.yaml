@@ -13,6 +13,6 @@ plots_info:
     col: "koi_period"
     log: True
 
-  - name: "Transit Depth"
-    col: "transit_depth"
-    log: False
+  - name: "Absolute Transit Depth"
+    col: "transit_depth_abs"
+    log: True

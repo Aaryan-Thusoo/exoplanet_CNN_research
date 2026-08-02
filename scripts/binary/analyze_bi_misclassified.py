@@ -220,6 +220,7 @@ def main():
         df["calculated_SNR"] = df["koi_depth"] / df["std"]
 
         df_clean = df.dropna().copy()
+        df_clean["transit_depth_abs"] = df_clean["transit_depth"].abs()
 
         df_clean["confidence_group"] = np.select(
             [
@@ -232,9 +233,14 @@ def main():
         )
 
         for par in params:
-            box_jitter(df_clean, par["col"], par["name"], PAPER_DIR, case, par["log"])
-            ecdf_plotting(df_clean, par["col"], par["name"], ecdf_results_dir, case, par["log"])
-            write_stats(df_clean, par["col"], RESULTS_DIR / f"{case}_distribution_stats.json")
+            if case == "fp":
+                box_jitter(df_clean, par["col"], f"False Positive {par["name"]}", PAPER_DIR, case, par["log"])
+                ecdf_plotting(df_clean, par["col"], par["name"], ecdf_results_dir, case, par["log"])
+                write_stats(df_clean, par["col"], RESULTS_DIR / f"{case}_distribution_stats.json")
+            else:
+                box_jitter(df_clean, par["col"], f"False Negative {par["name"]}", PAPER_DIR, case, par["log"])
+                ecdf_plotting(df_clean, par["col"], par["name"], ecdf_results_dir, case, par["log"])
+                write_stats(df_clean, par["col"], RESULTS_DIR / f"{case}_distribution_stats.json")
 
 
 if __name__ == "__main__":
