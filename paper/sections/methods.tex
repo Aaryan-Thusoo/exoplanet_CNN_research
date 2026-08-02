@@ -146,6 +146,8 @@ To provide a comparison to the CNN model, a random forest model was used. It ser
 
 This model was trained where the prepared training and validation sets were combined to become the full training set with the test set being kept untouched. The same metrics as the convolutional neural network were collected and used for later comparison between the two models. This process was also applied to the multiclass case. 
 
+\textbf{(YOU HAVE TO MENTION HOW MANY TREES AND OTHER PARAMS FOR BOTH MODELS)
+
 \subsubsection{Error Analysis}
 
 To further analyse the CNN, all misclassified light curves needed to be separated from the overall test set. Their KepID, flux input array, true class, predicted class, and confidence value calculated from the sigmoid score were saved. The misclassified instances were then split into all false positives and all false negatives to better understand the limitations of the current model. Standard classification metrics quantify the overall performance of the model. However, they cannot explain which properties or examples the model misclassified. Thus, the incorrect results needed to be saved into a separate dataset. To do so the test results were compared to the true classifications and those which did not match were saved into a compressed NumPy file. For the binary model, false positives were saved as instances which were predicted to be transits but are labelled eclipsing binaries samples while false negatives were for true transits predicted to be eclipsing binaries. 

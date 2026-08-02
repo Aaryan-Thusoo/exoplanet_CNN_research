@@ -49,7 +49,7 @@ Pipelines using higher or lower epochs led to a consistent trend of over or unde
         F1 Score & 0.86\\ \hline
         ROC AUC & 0.89
     \end{tabular}
-    \caption{The above table shows the final metrics of the model. All scores are fine but for use on new data the results need to be improved to increase reliability.}
+    \caption{The above table shows the final metrics of the binary model. All scores are fine but for use on new data the results need to be improved to increase reliability.}
     \label{tab:metrics_table}
 \end{table}
 
@@ -156,18 +156,18 @@ With the SNR not returning a direct correlation, it is therefore useful to look 
 
 \subsection{Multiclass CNN Training History}
 
-The process for the multiclass case was the same as the binary case. However now with three classes the expected results are different. First to look into the model training through the history the loss and accuracy plots are used. Below in Figure~\ref{fig:mc_history}, it is seen the multiclass model ran for \textbf{(How many epochs?)} epochs with \textbf{(no)} early stopping. The 
+The process for the multiclass case was the same as the binary case. However now with three classes the expected results are different. First to look into the model training through the history the loss and accuracy plots are used. Below in Figure~\ref{fig:mc_history}, it is seen the multiclass model ran for \textbf{(How many epochs?)} epochs with \textbf{(no)} early stopping. Once again, no critical separation between the training and validation data indicating no prominent fitting problems. It is noticeable that the loss results are larger over the history compared to the binary model. The accuracy is also lower across the epochs.  
 
 \begin{figure}[htbp]
     \centering
-    \begin{subfigure}[b]{0.8\textwidth}
+    \begin{subfigure}[b]{0.49\textwidth}
         \centering
         \includegraphics[width=\textwidth]{figures/plots/multiclass/mc_training_loss_history.png}
         \caption{Changes in the multiclass model's loss over epochs}
         \label{fig:mc_loss_history}
     \end{subfigure}
     \hfill
-    \begin{subfigure}[b]{0.8\textwidth}
+    \begin{subfigure}[b]{0.49\textwidth}
         \centering
         \includegraphics[width=\textwidth]{figures/plots/multiclass/mc_training_accuracy_history.png}
         \caption{Changes in the multiclass model's accuracy over epochs}
@@ -178,16 +178,75 @@ The process for the multiclass case was the same as the binary case. However now
     \label{fig:mc_history}
 \end{figure}
 
-\begin{figure}
+Taking a look at the multiclass model's confusion matrix in Figure~\ref{fig:mc_confusion_matrix}, it is easier to see where the model is running into issues. The transits which are class 0 now, are most correctly determined by the model with nearly 90\% of all transiting exoplanets being found. The deep eclipsing binaries which have deeper dips in the flux also have a relatively high number of correctly classified instances. It is class 1, the shallow eclipsing binaries where the model struggles the most. It is important to note how the majority of misclassified shallow eclipsing binaries were mistaken for transits. This was to be expected as the purpose of splitting the eclipsing binary into two sections was to see if the model had difficulty separating transits from eclipsing binary systems with dips similar to those made by exoplanets. There is still a good batch of instances in the shallow and deep cases which were mixed with the other. This is likely to come from the threshold determined for splitting the eclipsing binary groups.
+
+\begin{figure}[h]
     \centering
-    \includegraphics[width=0.5\linewidth]{figures/plots/multiclass/mc_confusion_matirx.png}
+    \includegraphics[width=0.9\linewidth]{figures/plots/multiclass/mc_confusion_matrix.png}
     \caption{Caption}
     \label{fig:mc_confusion_matrix}
 \end{figure}
 
-\begin{figure}
+\begin{table}[]
     \centering
-    \includegraphics[width=0.5\linewidth]{figures/plots/multiclass/mc_confidence_correct_vs_incorrect.png}
+    \begin{tabular}{c|c}
+        Accuracy & 0.85 \\ \hline
+        Macro-Averaged Precision & 0.78 \\ \hline
+        Macro-Averaged Recall & 0.96\\ \hline
+        Macro-Averaged F1 Score & 0.86\\ \hline
+    \end{tabular}
+    \caption{The above table shows the final metrics of the model. All scores are fine but for use on new data the results need to be improved to increase reliability.}
+    \label{tab:metrics_table}
+\end{table}
+
+Figure~\ref{fig:mc_confidence_correct_vs_incorrect} shows the distribution of confidence results the model returned similar to what was done in the binary class case. 
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/plots/multiclass/mc_confidence_correct_vs_incorrect.png}
     \caption{Caption}
     \label{fig:mc_confidence_correct_vs_incorrect}
+\end{figure}
+
+\subsection{Baseline Random Forest Models}
+
+To determine if the models are an improvement against simpler models a Random forest model was used. Upon running a random forest classifier first for the binary model, Figure~\ref{fig:bi_rf_cols} shows how important each physical property of the model is. The most important property is the chunk depth with the largest feature importance value. This can be expected as eclipsing binaries typically produce deeper dips compared to exoplanets due to the size of stars compared to planets. 
+
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/plots/bi_feature_importance.png}
+        \caption{???}
+        \label{fig:bi_rf_cols}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/plots/bi_rf_confusion_matrix.png}
+        \caption{???}
+        \label{fig:bi_rf_confusion_matrix}
+    \end{subfigure}
+
+    \caption{??????}
+    \label{fig:mc_history}
+\end{figure}
+
+Using now a random forest classifier on the  multiclass model, Figure~\ref{fig:mc_rf_cols} shows the property importance. It is seen that the maximum value and standard deviation of the flux have the most importance but overall no single property makes enough difference on its own. For normalized light curves, there can still be flux values above 1.0 which create an upper shape. This may be correlated with eclipsing binaries which are understood to have a slight rise in flux when the two stars are perfectly side by side in our line of sight. The other features show importance as well with the chunk depth and average flux values likely being from separating transits from deep eclipsing binaries. 
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{paper/figures/plots/mc_feature_importance.png}
+    \caption{The above figure shows the results of the random forest model run for the binary case. It can be seen that \textbf{(Which columns)} have the most influence in the model predictions.}
+    \label{fig:mc_rf_cols}
+\end{figure}
+
+Figure~\ref{fig:mc_rf_confusion_matrix} looks at the confusion matrix generated from the multiclass test data through the random forest, the results appear to be slightly better than the convolution neural network. The multiclass random forest managed to be the best in classifying deep eclipsing binaries, at a higher rate than the CNN. Its transit accuracy was slightly lower while the shallow eclipsing binaries showed an improvement as well. Similar to the multiclass CNN, the majority of misclassification by the random forest is between the transits and shallow eclipsing binaries. This is again likely due to the similarity in depth by these two groups. In cases where two eclipsing binary stars are similar in size, their odd and even depths may look too similar and confuse the model into thinking it is a single exoplanet transit. 
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{paper/figures/plots/mc_rf_confusion_matrix.png}
+    \caption{Caption}
+    \label{fig:mc_rf_confusion_matrix}
 \end{figure}
