@@ -1,6 +1,31 @@
+# Python
 __pycache__/
-*.pyc
-.DS_Store
-.venv/
+*.py[cod]
+*.pyo
+*.pyd
 .ipynb_checkpoints/
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# PyCharm / macOS
+.idea/
+.DS_Store
+
+# DVC / generated pipeline outputs
+data/
+models/
+results/
+dvc_plots/
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Local secrets / environment variables
+.env
+.env.*
+
 commads.txt

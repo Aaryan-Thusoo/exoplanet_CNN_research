@@ -16,7 +16,7 @@ MODEL_PATH = PROJECT_ROOT / "models" / "binary_model.keras"
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
 RESULTS_DIR = PROJECT_ROOT / "results" / "binary" / "confidence_group_analysis"
 YAML_FILE = PROJECT_ROOT / "configs" / "bi_evaluation_params.yaml"
-
+PAPER_DIR = PROJECT_ROOT / "paper" / "figures" / "plots"
 
 def load_test_data():
     test_data = np.load(DATA_DIR / "test.npz")
@@ -269,8 +269,27 @@ def plot_mistake_subplots(false_positive_summary, false_negative_summary, summar
     fig.tight_layout()
 
     file_name = clean_file_name(plot_name)
-    fig.savefig(RESULTS_DIR / f"mistake_ratios_by_{file_name}_and_confidence.png", dpi=200)
+    fig.savefig(RESULTS_DIR / f"bi_mistake_ratios_by_{file_name}_and_confidence.png", dpi=200)
     plt.close(fig)
+
+    PAPER_DIR.mkdir(parents=True, exist_ok=True)
+    bottom_fig, bottom_ax = plt.subplots(figsize=(9, 4.5))
+    plot_ratio_axis(
+        bottom_ax,
+        summary,
+        ratio_column="incorrect_ratio",
+        count_column="incorrect",
+        ylabel="All Incorrect Ratio",
+        title=f"Mistake Ratios by {plot_name} and Confidence",
+    )
+    bottom_ax.set_xlabel(f"{plot_name} Group")
+    bottom_fig.tight_layout()
+    bottom_fig.savefig(
+        PAPER_DIR / f"bi_mistake_ratios_by_{file_name}_and_confidence_bottom.png",
+        dpi=200,
+        bbox_inches="tight",
+    )
+    plt.close(bottom_fig)
 
 
 def add_result_type(results_df):

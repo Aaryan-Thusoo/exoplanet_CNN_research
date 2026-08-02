@@ -28,6 +28,7 @@ RESULTS_DIR = PROJECT_ROOT / "results" / "binary" / "misclassified_results"
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
 REAL_MODEL_DIR = PROJECT_ROOT / "data" / "binary_model"
 YAML_DIR = PROJECT_ROOT / "configs" / "bi_evaluation_params.yaml"
+PAPER_DIR = PROJECT_ROOT / "paper" / "figures" / "plots"
 
 def load_data() -> tuple[DataFrame, DataFrame, Any, Any]:
     misclassified = np.load(RESULTS_DIR / "misclassified_lightcurves.npz")
@@ -231,7 +232,7 @@ def main():
         )
 
         for par in params:
-            box_jitter(df_clean, par["col"], par["name"], box_results_dir, case, par["log"])
+            box_jitter(df_clean, par["col"], par["name"], PAPER_DIR, case, par["log"])
             ecdf_plotting(df_clean, par["col"], par["name"], ecdf_results_dir, case, par["log"])
             write_stats(df_clean, par["col"], RESULTS_DIR / f"{case}_distribution_stats.json")
 

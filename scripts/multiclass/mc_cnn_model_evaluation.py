@@ -24,7 +24,7 @@ YAML_FILE = PROJECT_ROOT / "configs"/ "mc_evaluation_params.yaml"
 DATA_DIR = PROJECT_ROOT / "data" / "multi_model"
 MODEL_PATH = PROJECT_ROOT / "models" / "multi_model.keras"
 RESULTS_DIR = PROJECT_ROOT / "results" / "multiclass"
-
+PAPER_DIR = PROJECT_ROOT / "paper" / "figures"/ "plots" / "multiclass"
 
 def data_loading():
 
@@ -60,7 +60,7 @@ def plot_training_history(path):
     plt.ylabel("Loss")
     plt.title("Training and Validation Loss")
     plt.legend()
-    plt.savefig(RESULTS_DIR / "plots" / "training_loss_history.png")
+    plt.savefig(PAPER_DIR / "mc_training_loss_history.png")
 
     # Accuracy plot
     plt.figure(figsize=(8, 5))
@@ -74,7 +74,7 @@ def plot_training_history(path):
     plt.ylabel("Accuracy")
     plt.title("Training and Validation Accuracy")
     plt.legend()
-    plt.savefig(RESULTS_DIR / "plots" / "training_accuracy_history.png")
+    plt.savefig(PAPER_DIR / "mc_training_accuracy_history.png")
 
 def plot_confusion_matrix(all_true, all_preds):
     class_names = ["Transit", "Shallow EB", "Deep EB"]
@@ -121,7 +121,7 @@ def plot_confusion_matrix(all_true, all_preds):
     colorbar.set_label("Fraction of True Class", rotation=270, labelpad=18)
 
     fig.tight_layout()
-    fig.savefig(RESULTS_DIR / "plots" / "confusion_matrix.png", dpi=200, bbox_inches="tight")
+    fig.savefig(PAPER_DIR / "mc_confusion_matrix.png", dpi=200, bbox_inches="tight")
     plt.close(fig)
 
 def calculate_classification_metrics(
@@ -209,7 +209,7 @@ def plot_correct_incorrect_confidence(
     plt.title("Prediction Confidence: Correct vs Incorrect")
     plt.legend()
     plt.tight_layout()
-    plt.savefig(results_dir / "confidence_correct_vs_incorrect.png", dpi=200)
+    plt.savefig(PAPER_DIR / "mc_confidence_correct_vs_incorrect.png", dpi=200)
     plt.close()
 
 
