@@ -151,6 +151,28 @@ Another expression of the signal to noise results is shown in Figure~\ref{fig:sn
     \label{fig:snr_ratio_bottom}
 \end{figure}
 
+While the two SNR labels show roughly the same results, the transit depth is a useful category as well. Although the calculated SNR used this column, the depth on its own tells about the system with little inclusion of noise. Figure~\ref{fig:depth_boxplot} shows the box plot results of the misclassified instances for the depth.
+
+\begin{figure}[htbp]
+    \centering
+
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{paper/figures/plots/fp_boxplot_transit_depth_abs.png}
+        \caption{Boxplot of absolute depth values for false positives}
+        \label{fig:depth_boxplot_fp}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/plots/fn_boxplot_transit_depth_abs.png}
+        \caption{Boxplot of absolute depth values for false negatives}
+        \label{fig:depth_boxplot_fn}
+    \end{subfigure}
+
+    \caption{Boxplots of the Kepler archive SNR values of misclassified test light curves. They are split by low, medium, and high confidence values.}
+    \label{fig:koi_snr_boxplot}
+\end{figure}
 
 \subsection{Multiclass CNN Training History}
 
