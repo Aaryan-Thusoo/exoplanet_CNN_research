@@ -11,7 +11,9 @@ The results of the synthetic cases is listed showing the models are created appr
 
 \subsection{Binary CNN Training History}
 
- The model trained over 10 epochs with no early stopping. During this time, the loss and accuracy of the training data at the end of each epoch was recorded. The validation data was also applied at the end of each epoch and was recorded as well. This was done to evaluate the improvements of the model over time to make sure to avoid training over too little or too many epochs. The final loss and accuracy results from the training data was \textbf{(Fill that in)}. The validation data ended at \textbf{(Fill that in)} and \textbf{(Fill that in)} respectively. Figure~\ref{fig:history_plots} shows line plots of the training and validation results over the epochs. As the lines have the same shape and do not spread far apart from one another, it is clear to conclude the model has not suffered from noticeable over fitting. If by the final epoch, the training and validation lines were heavily separated, this would indicate the model was learning individual features and not the general features that separate transits from eclipsing binaries.  
+ The model trained over 10 epochs with no early stopping. During this time, the loss and accuracy of the training data was recorded at the end of each epoch. The validation data was not used in the updating of weights but was also applied at the end of each epoch and recorded as well. This was done to evaluate the improvements of the model over time to make sure to avoid training over too little or too many epochs. The final loss and accuracy results from the training data was \textbf{(Fill that in)}. The validation data ended at \textbf{(Fill that in)} and \textbf{(Fill that in)} respectively. The results throughout the epoch are recorded to check learning progress and overfitting.
+ 
+Figure~\ref{fig:bi_history} shows line plots of the training and validation results over the epochs. Loss decreases over the first epochs and begins to stabilize showing the model starts to learn the patterns but eventually hits a rough limit on its performance. The accuracy increases over the first epochs but also stabilizes showing improvements in the classification. The flattening of the curves suggest adding more epochs likely will not strongly improve performance. As in both cases the training and validation lines have the same shape and do not spread far apart from one another, it is clear to conclude the model has not suffered from noticeable over fitting. If by the final epoch, the training and validation lines were heavily separated, this would indicate the model was learning individual features and not the general features that separate transits from eclipsing binaries. 
 
 \begin{figure}[htbp]
     \centering
@@ -20,40 +22,42 @@ The results of the synthetic cases is listed showing the models are created appr
         \centering
         \includegraphics[width=\textwidth]{figures/plots/loss_history.png}
         \caption{Changes in the model's loss over epochs}
-        \label{fig:first}
+        \label{fig:bi_history_loss}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{figures/plots/accuracy_history.png}
         \caption{Changes in the model's accuracy over epochs}
-        \label{fig:history_plots}
+        \label{fig:bi_history_acc}
     \end{subfigure}
 
     \caption{The above models show the progress of the models (a) loss and (b) accuracy. By looking at the separation between the training and validation curves, we can understand the model is not over fitting the training data. As the plots begin to flatten out, it shows the limit of the model as increasing the number of epochs will not improve the model by meaningful amounts.}
-    \label{fig:side_by_side}
+    \label{fig:bi_history}
 \end{figure}
 
-Pipelines using higher or lower epochs led to a consistent trend of over or under fitting cases. After the completion of the training, the model was given the test data to determine the networks quality. In total there were \textbf{(How many?)} test instances used with there being an equal split of transits and eclipsing binaries. After the evaluation of the model, the most important metrics were saved and are recorded below in Table~\ref{tab:metrics_table}. 
-
 \subsection{Binary CNN Test Performance}
+
+Pipelines using higher or lower epochs led to a consistent trend of over or under fitting cases. After the completion of the training, the model was given the test data to determine the networks quality. The test data was never seen by the model throughout the training and was now useful for evaluating the models ability to detect general patterns made by each class. In total there were \textbf{(How many?)} test instances used with there being an equal split of transits and eclipsing binaries. After the evaluation of the model, the most important metrics were saved and are recorded below in Table~\ref{tab:metrics_table}. 
 
 \begin{table}[]
     \centering
     \begin{tabular}{c|c}
-        Accuracy & 0.8637 \\ \hline
-        Precision & 0.9236 \\ \hline
-        Recall & 0.7956\\ \hline
-        F1 Score & 0.8548\\ \hline
-        ROC AUC & 0.9113
+        Accuracy & 0.85 \\ \hline
+        Precision & 0.78 \\ \hline
+        Recall & 0.96\\ \hline
+        F1 Score & 0.86\\ \hline
+        ROC AUC & 0.89
     \end{tabular}
     \caption{The above table shows the final metrics of the model. All scores are fine but for use on new data the results need to be improved to increase reliability.}
     \label{tab:metrics_table}
 \end{table}
 
-First, the accuracy explains the model correctly classified about 86.4\% of all the test light curves. Overall this is a strong performance indicating the model can clearly be utilized in further research. On its own however, accuracy is not enough to confirm the model performs equally for both classes. This is why the precision and recall metrics were required. The precision is high while the recall returned a relatively lower result. Thus it is understood that the model does a better job classifying exoplanet transits than it does eclipsing binaries. It is much more common for the network to falsely identify an eclipsing binary as a transit then it is to do the opposite. Next the F1 score works as a balance of the precision and recall. The result in the table depicts a model that maintains a good balance between identifying eclipsing binaries and avoiding false positives, although recall remains the weaker component. Finally, the ROC AUC result is strong and thus the classification threshold of 0.5 separates the two classes well across possible thresholds. There is however still room to try slight variations in the threshold to potentially improve the model further.
+First, the accuracy shows the model correctly classified about $85\%$ of all the test light curves. Overall this is a strong performance indicating the model could be useful in further research. On its own however, accuracy is not enough to confirm the model performs equally for both classes. This is why the precision and recall metrics were required. A precision of $78\%$ means most of the instances the binary model classified as a transit were actual transiting exoplanets. However a good number of them were incorrectly labelled and $22\%$ of them were false transit detections. The recall of $96\%$ means the model barely missed any of the true transits. While this is good it may be due to the model predicting more instances in general as transiting exoplanets. 
 
-Another helpful method for evaluating the model results is through a confusion matrix. It efficiently displays the values of the true and false positives and negatives. Figure~\ref{fig:acc_conf_matrix} shows the accuracy confusion matrix and how well the test went. By looking at the figure, it matches to the metrics observed earlier. \textbf{(What percent?)}\% of eclipsing binaries were incorrectly classified compared to only \textbf{(What percent?)}\% of transits. It is shown in clearer view how the model missed many more eclipsing binaries than transits and thus the network prefers to call instances as transits in more cases than not. 
+The F1 score of $0.86$ works as a balance of the precision and recall. The result in the table depicts a model that maintains a good balance between recovering true transits and avoiding false transit detections, although precision remains the weaker component. Finally, the ROC AUC result of $0.89$ is strong and thus the model separates classes well over all possible thresholds. There is however still room to try slight variations in the threshold to potentially improve the model further. 
+
+A confusion matrix is also helpful evaluating the model results. It efficiently displays the values of the true and false positives and negatives. Figure~\ref{fig:acc_conf_matrix} shows the confusion matrix and depicts how well the model performed. By looking at the figure, it matches to the metrics observed earlier. \textbf{(What percent?)}\% of eclipsing binaries were incorrectly classified compared to only \textbf{(What percent?)}\% of transits. It is shown in clearer view how the model missed many more eclipsing binaries than transits and thus the network prefers to call instances as transits in more cases than not. 
 
 \begin{figure}
     \centering
@@ -64,61 +68,65 @@ Another helpful method for evaluating the model results is through a confusion m
 
 \subsection{Binary CNN Confidence and Misclassification Analysis}
 
-Of the \textbf{(How many total?)} test instances used, \textbf{(How many misclassified?)} were misclassified. There were \textbf{(How many false positives?)} and \textbf{(How many false negatives?)} and to understand where the model is making mistakes it is important to analyse the properties of these light curve instances. The first feature to analyse was the distribution of confidence for all test instances. Classifications with low confidence indicate the model was not making an informed prediction and guessed. Misclassified instances with high confidence are the most interesting focus as they tricked the model into being certain of its prediction. Figure~\ref{fig:conf_corr_vs_incorr_hist} shows the confidence distribution of all test instances split by correct and incorrect classifications. With any model, especially in a binary classification model, it is expected to see incorrect instances with low confidence. Thus it is important to analyse the incorrect cases which came back with higher confidences. 
+Of the \textbf{(How many total?)} test instances used, \textbf{(How many misclassified?)} were misclassified. There were \textbf{(How many false positives?)} false positives and \textbf{(How many false negatives?)} false negatives and to understand where the model is making mistakes it is important to analyse the properties of these light curve instances. The first feature to analyse was the distribution of confidence for all test instances. Classifications with low confidence indicate the model was not making an informed prediction and guessed. Misclassified instances with high confidence are the most interesting focus as the model assigns high confidence to its prediction. 
 
-\begin{figure}
+Figure~\ref{fig:conf_corr_vs_incorr_hist} shows the confidence distribution of all test instances split by correct and incorrect classifications. With any model, especially in a binary classification model, it is expected to see incorrect instances with low confidence. Thus it is important to analyse the incorrect cases which came back with higher confidence values. 
+
+\begin{figure}[h]
     \centering
-    \includegraphics[width=0.5\linewidth]{figures/plots/confidence_correct_vs_incorrect.png}
+    \includegraphics[width=1.0\linewidth]{figures/plots/confidence_correct_vs_incorrect.png}
     \caption{A histogram showing the spread of frequency of each confidence value the model returned. All correct classifications shown in \textbf{(Insert colour)} while incorrect classifications shown in \textbf{(Insert colour)}. An interesting bump in mistakes by the model is found in the \textbf{(What range? I think 0.8 to 0.9)}}
     \label{fig:conf_corr_vs_incorr_hist}
 \end{figure}
 
 To understand where the model is getting high confidence misclassification from, it is helpful to look at features of those light curve instances. The features chosen to be looked into are labelled in Table~\ref{tab:kep_query_cols} and were collected during the query steps in the Methodology. Apart from the \texttt{kepid} label and \texttt{koi\_disposition}, the remaining columns all contain measured features of each light curve used. It is important to note that the calculated SNR developed in the methodology was added to this list for comparison against the \texttt{koi\_model\_snr}. Each of these features are plotted comparing their numbers to the confidence the model returned in its classification. By then looking trends it is possible to look for what features affect the model the most.
 
-The first evaluation is of the signal-to-noise ratios. This is the most important as previous papers work to improve this result before applying any classification models. As the data used in this model has not undergone any heavy filtering, binning, or cleaning steps it is understood the SNR values will be smaller than other papers. To then first compare SNR values, this is done by splitting all instances into a low, medium, and high confidence ranges. All misclassified light curves were then plotted onto Figure~\ref{fig:calc_snr_boxplot} which shows the spread of SNR values for the 3 categories. As the values of SNR scale over large ranges, the y-axis is log-scaled. Figure~\ref{fig:calc_snr_boxplot_fp} shows all false positive cases and Figure~\ref{fig:calc_snr_boxplot_fn} is for the false negative cases.
+The first property evaluated is the signal-to-noise ratios. SNR was considered first as low SNR makes transit/eclipse signals harder to detect. As the data used in this model has not undergone any heavy filtering, binning, or cleaning steps it is expected the SNR values are smaller than other papers. To then first compare SNR values, this is done by splitting all misclassified instances into a low, medium, and high confidence ranges. All misclassified light curves were then plotted onto Figure~\ref{fig:calc_snr_boxplot} which shows the spread of SNR values for the three categories. As the values of SNR scale over large ranges, the y-axis is log-scaled. Figure~\ref{fig:calc_snr_boxplot_fp} shows all false positive cases and Figure~\ref{fig:calc_snr_boxplot_fn} is for the false negative cases.
 
 \begin{figure}[htbp]
     \centering
 
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{figures/images/fp_boxplot_calculated_SNR.png}
+        \includegraphics[width=\textwidth]{figures/plots/fp_boxplot_calculated_SNR.png}
         \caption{Boxplot of calculated SNR values for false positives}
         \label{fig:calc_snr_boxplot_fp}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{figures/images/fn_boxplot_calculated_SNR.png}
+        \includegraphics[width=\textwidth]{figures/plots/fn_boxplot_calculated_SNR.png}
         \caption{Boxplot of calculated SNR values for false negatives}
         \label{fig:calc_snr_boxplot_fn}
     \end{subfigure}
 
-    \caption{Boxplots of calculated SNR values of misclassified test light curves. They are split by low, medium, and high confidence values. \textbf{(Now explain what we see)}}
+    \caption{Boxplots of calculated SNR values of misclassified test light curves. They are split by low, medium, and high confidence values.}
     \label{fig:calc_snr_boxplot}
 \end{figure}
 
-The same can be done with the signal-to-noise ratio saved in the Kepler archive. Below in Figure~\ref{fig:koi_snr_boxplot}, the same process as the calculated SNR is followed leading to the following box plots. Compared to the calculated SNR, \textbf{(Moreeeee)}
+First, in the false positive plot, there is a large spread of SNR values in the low and medium confidence ranges. Thus the misclassified results range across a wide range of calculated SNR values. It is difficult to come to strong conclusions about the high confidence range as few samples fall in that region for situations where the model labelled an eclipsing binary as a transit. Similarly, in the false negative case, the low confidence results are spread across several orders of magnitude of calculated SNR values as well. The medium and high confidence groups have SNR values covering the same range as the low confidence group. The calculated SNR may contribute to some errors in the model which can be seen in the low confidence group. However it does not seem that the calculated signal to noise ratio can explain the model's limitations by itself as high confidence errors occur across similar SNR ranges.
+
+The same analysis was repeated using the signal-to-noise ratio saved in the Kepler archive. The values are not on the same scale as the calculated SNR so the distributional pattern is the more important feature to observe. Below, Figure~\ref{fig:koi_snr_boxplot} shows the box plots for the archive SNR split again into confidence groups. Similar to the calculated SNR, the false positive cases with low to medium confidence display a wide range of archive SNR values. There are also few high confidence false positive values so no clear conclusion can be made. In the false negative case, all three confidence groups again do not show a clear separation by confidence groups.
 
 \begin{figure}[htbp]
     \centering
 
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{figures/images/fp_boxplot_koi_model_snr.png}
+        \includegraphics[width=\textwidth]{figures/plots/fp_boxplot_koi_model_snr.png}
         \caption{Boxplot of Kepler SNR values for false positives}
         \label{fig:koi_snr_boxplot_fp}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{figures/images/fn_boxplot_koi_model_snr.png}
+        \includegraphics[width=\textwidth]{figures/plots/fn_boxplot_koi_model_snr.png}
         \caption{Boxplot of Kepler SNR values for false negatives}
         \label{fig:koi_snr_boxplot_fn}
     \end{subfigure}
 
-    \caption{Boxplots of the Kepler archive SNR values of misclassified test light curves. They are split by low, medium, and high confidence values. \textbf{(Now explain what we see)}}
+    \caption{Boxplots of the Kepler archive SNR values of misclassified test light curves. They are split by low, medium, and high confidence values.}
     \label{fig:koi_snr_boxplot}
 \end{figure}
 
-
+With the SNR not returning a direct correlation, it is therefore useful to look into other properties of the light curves. This includes the orbital period as smaller periods allow for more repetition of the signal patterns. This may allow the model to better learn in the 100 day chunk. By plotting the same box plot format for misclassified cases the following is seen shown in Figure~\ref{}
