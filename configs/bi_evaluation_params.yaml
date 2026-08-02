@@ -9,6 +9,10 @@ plots_info:
     col: "calculated_SNR"
     log: True
 
-  - name: Orbital Period
+  - name: "Orbital Period"
     col: "koi_period"
     log: True
+
+  - name: "Transit Depth"
+    col: "transit_depth"
+    log: False

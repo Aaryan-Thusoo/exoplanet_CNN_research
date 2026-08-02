@@ -1,0 +1,18 @@
+threshold: 0.5
+
+plots_info:
+  - name: "KOI Model SNR"
+    col: "koi_model_snr"
+    log: True
+
+  - name: "Calculated SNR"
+    col: "calculated_SNR"
+    log: True
+
+  - name: "Orbital Period"
+    col: "koi_period"
+    log: True
+
+  - name: "Transit Depth"
+    col: "transit_depth"
+    log: False

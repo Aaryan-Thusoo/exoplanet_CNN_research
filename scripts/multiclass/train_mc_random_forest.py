@@ -16,55 +16,39 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from scripts.helpers.yaml_reading import *
 
-DATA_DIR = PROJECT_ROOT / "data" / "binary_model"
-RAW_DIR = PROJECT_ROOT / "data" / "raw"
+DATA_DIR = PROJECT_ROOT / "data" / "multi_model"
 MODEL_DIR = PROJECT_ROOT / "models"
-RESULTS_DIR = PROJECT_ROOT / "results" / "binary" / "random_forest"
-PARAMS_DIR = PROJECT_ROOT / "configs" / "bi_randf_params.yaml"
+RESULTS_DIR = PROJECT_ROOT / "results" / "multiclass" / "random_forest"
+PARAMS_DIR = PROJECT_ROOT / "configs" / "mc_randf_params.yaml"
 RF_GREEN = "#2e7d32"
 
 
-def load_metadata():
-    exo_df = pd.read_csv(RAW_DIR / "Kepler_Confirmed_ExoPlanets.csv")
-    eb_df = pd.read_csv(RAW_DIR / "Kepler_Confirmed_EB.csv")
-
-    metadata = pd.concat([exo_df, eb_df], ignore_index=True)
-    metadata["kepid"] = metadata["kepid"].astype(int)
-
-    metadata = (
-        metadata
-        .drop_duplicates(subset="kepid", keep="first")
-        .copy()
-    )
-
-    metadata_cols = [
-        col
-        for col in metadata.columns
-        if col not in ["kepid", "koi_disposition"]
-    ]
-
-    for col in metadata_cols:
-        metadata[col] = pd.to_numeric(metadata[col], errors="coerce")
-
-    return metadata[["kepid"] + metadata_cols]
+def find_chunk_depth(X: np.ndarray) -> np.ndarray:
+    """
+    Estimate each chunk depth using the median of the ten lowest flux points.
+    :param X: Light curve input array.
+    :return: Chunk depth estimate for each row.
+    """
+    ten_lowest = np.sort(X, axis=1)[:, :10]
+    return 1 - np.median(ten_lowest, axis=1)
 
 
-def make_features(data, metadata):
+def make_features(data):
+    """
+    Create simple summary features from each light curve chunk.
+    :param data: Loaded .npz data file.
+    :return: Feature dataframe and labels.
+    """
     X = data["X"]
     y = data["y"].astype(int)
-    kepid = data["kepid"].astype(int)
 
     features = pd.DataFrame({
-        "kepid": kepid,
         "mean_flux": np.mean(X, axis=1),
         "std_flux": np.std(X, axis=1),
         "min_flux": np.min(X, axis=1),
         "max_flux": np.max(X, axis=1),
-        "chunk_depth": data["chunk_depth"],
+        "chunk_depth": find_chunk_depth(X),
     })
-
-    #features = features.merge(metadata, on="kepid", how="left")
-    features = features.drop(columns=["kepid"])
 
     return features, y
 
@@ -74,7 +58,7 @@ def set_up_model(n_est, seed, class_weight):
 
 
 def plot_confusion_matrix(all_true, all_preds):
-    class_names = ["Eclipsing Binary", "Transit"]
+    class_names = ["Transit", "Shallow EB", "Deep EB"]
 
     all_true = np.asarray(all_true).astype(int)
     all_preds = np.asarray(all_preds).astype(int)
@@ -83,7 +67,7 @@ def plot_confusion_matrix(all_true, all_preds):
     conf_rates = confusion_matrix(all_true, all_preds, normalize="true")
     accuracy = np.mean(all_true == all_preds) * 100
 
-    fig, ax = plt.subplots(figsize=(7, 6))
+    fig, ax = plt.subplots(figsize=(8, 7))
     image = ax.imshow(conf_rates, cmap="Greens", vmin=0, vmax=1)
 
     for row in range(conf_rates.shape[0]):
@@ -99,7 +83,7 @@ def plot_confusion_matrix(all_true, all_preds):
                 ha="center",
                 va="center",
                 color=text_colour,
-                fontsize=12,
+                fontsize=11,
                 fontweight="bold",
             )
 
@@ -136,22 +120,21 @@ def plot_feature_importance(model, feature_names):
 
 
 def main():
-
     params = load_params(PARAMS_DIR)
 
-    model = set_up_model(params["n_estimators"],
-                 params["seed"],
-                 params["class_weight"])
+    model = set_up_model(
+        params["n_estimators"],
+        params["seed"],
+        params["class_weight"],
+    )
 
     train_data = np.load(DATA_DIR / "train.npz")
     val_data = np.load(DATA_DIR / "val.npz")
     test_data = np.load(DATA_DIR / "test.npz")
 
-    metadata = load_metadata()
-
-    train_features, y_train = make_features(train_data, metadata)
-    val_features, y_val = make_features(val_data, metadata)
-    test_features, y_test = make_features(test_data, metadata)
+    train_features, y_train = make_features(train_data)
+    val_features, y_val = make_features(val_data)
+    test_features, y_test = make_features(test_data)
 
     X_train_full = pd.concat([train_features, val_features], ignore_index=True)
     y_train_full = np.concatenate([y_train, y_val])
@@ -163,27 +146,31 @@ def main():
     model.fit(X_train_full, y_train_full)
 
     y_pred = model.predict(test_features)
-    y_pred_prob = model.predict_proba(test_features)[:, 1]
+    y_pred_prob = model.predict_proba(test_features)
 
     MODEL_DIR.mkdir(parents=True, exist_ok=True)
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
     metrics = {
         "accuracy": float(accuracy_score(y_test, y_pred)),
-        "precision": float(precision_score(y_test, y_pred, zero_division=0)),
-        "recall": float(recall_score(y_test, y_pred, zero_division=0)),
-        "f1": float(f1_score(y_test, y_pred, zero_division=0)),
-        "roc_auc": float(roc_auc_score(y_test, y_pred_prob)),
+        "precision_macro": float(precision_score(y_test, y_pred, average="macro", zero_division=0)),
+        "recall_macro": float(recall_score(y_test, y_pred, average="macro", zero_division=0)),
+        "f1_macro": float(f1_score(y_test, y_pred, average="macro", zero_division=0)),
+        "precision_weighted": float(precision_score(y_test, y_pred, average="weighted", zero_division=0)),
+        "recall_weighted": float(recall_score(y_test, y_pred, average="weighted", zero_division=0)),
+        "f1_weighted": float(f1_score(y_test, y_pred, average="weighted", zero_division=0)),
+        "roc_auc_ovr_macro": float(roc_auc_score(y_test, y_pred_prob, multi_class="ovr", average="macro")),
     }
 
     with open(RESULTS_DIR / "metrics.json", "w") as file:
         json.dump(metrics, file, indent=2)
 
-    with open(MODEL_DIR / "binary_random_forest.pkl", "wb") as file:
+    with open(MODEL_DIR / "multiclass_random_forest.pkl", "wb") as file:
         pickle.dump(model, file)
 
     plot_confusion_matrix(y_test, y_pred)
     plot_feature_importance(model, train_features.columns)
+
 
 if __name__ == "__main__":
     main()

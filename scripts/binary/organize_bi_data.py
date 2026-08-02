@@ -53,8 +53,9 @@ def shuffle(
     X: np.ndarray,
     y: np.ndarray,
     kepids: np.ndarray,
+    chunk_depth: np.ndarray,
     seed: int,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Randomly shuffle X and y while keeping matching input/output pairs together.
 
@@ -66,7 +67,7 @@ def shuffle(
     rng = np.random.default_rng(seed)
     indices = rng.permutation(len(X))
 
-    return X[indices], y[indices], kepids[indices]
+    return X[indices], y[indices], kepids[indices], chunk_depth[indices]
 
 def normalize(X: np.ndarray) -> np.ndarray:
     """
@@ -77,6 +78,11 @@ def normalize(X: np.ndarray) -> np.ndarray:
     X = (X - np.median(X, axis=1, keepdims=True)) / (np.std(X, axis=1, keepdims=True) + 1e-8)
     X = X[..., np.newaxis]
     return X
+
+def find_chunk_depth(flux):
+    flux = np.array(ast.literal_eval(flux), dtype=np.float32)
+    lowest_10 = np.sort(flux)[:10]
+    return 1 - np.median(lowest_10)
 
 
 def main(seed, train_ratio, val_test_ratio) -> None:
@@ -124,23 +130,34 @@ def main(seed, train_ratio, val_test_ratio) -> None:
     kepid_eb_val = eb_validation["kepid"].to_numpy()
     kepid_eb_test = eb_test["kepid"].to_numpy()
 
+    # Save the depth of each chunk before model normalization
+    chunk_depth_exo_training = exo_training["flux"].apply(find_chunk_depth).to_numpy()
+    chunk_depth_exo_val = exo_validation["flux"].apply(find_chunk_depth).to_numpy()
+    chunk_depth_exo_test = exo_test["flux"].apply(find_chunk_depth).to_numpy()
+    chunk_depth_eb_training = eb_training["flux"].apply(find_chunk_depth).to_numpy()
+    chunk_depth_eb_val = eb_validation["flux"].apply(find_chunk_depth).to_numpy()
+    chunk_depth_eb_test = eb_test["flux"].apply(find_chunk_depth).to_numpy()
+
     # Combine exo and eb data sets
     X_train = np.concatenate([X_exo_training, X_eb_training], axis=0)
     y_train = np.concatenate([y_exo_training, y_eb_training], axis=0)
     kepid_train = np.concatenate([kepid_exo_training, kepid_eb_training], axis=0)
+    chunk_depth_train = np.concatenate([chunk_depth_exo_training, chunk_depth_eb_training], axis=0)
 
     X_val = np.concatenate([X_exo_val, X_eb_val], axis=0)
     y_val = np.concatenate([y_exo_val, y_eb_val], axis=0)
     kepid_val = np.concatenate([kepid_exo_val, kepid_eb_val], axis=0)
+    chunk_depth_val = np.concatenate([chunk_depth_exo_val, chunk_depth_eb_val], axis=0)
 
     X_test = np.concatenate([X_exo_test, X_eb_test], axis=0)
     y_test = np.concatenate([y_exo_test, y_eb_test], axis=0)
     kepid_test = np.concatenate([kepid_exo_test, kepid_eb_test], axis=0)
+    chunk_depth_test = np.concatenate([chunk_depth_exo_test, chunk_depth_eb_test], axis=0)
 
     # Shuffle data
-    X_train, y_real_train, kepid_train = shuffle(X_train, y_train, kepid_train, seed)
-    X_val, y_real_val, kepid_val = shuffle(X_val, y_val, kepid_val, seed+1)
-    X_test, y_real_test, kepid_test = shuffle(X_test, y_test, kepid_test, seed+2)
+    X_train, y_real_train, kepid_train, chunk_depth_train = shuffle(X_train, y_train, kepid_train, chunk_depth_train, seed)
+    X_val, y_real_val, kepid_val, chunk_depth_val = shuffle(X_val, y_val, kepid_val, chunk_depth_val, seed+1)
+    X_test, y_real_test, kepid_test, chunk_depth_test = shuffle(X_test, y_test, kepid_test, chunk_depth_test, seed+2)
 
     # Normalize data
     X_real_train = normalize(X_train)
@@ -156,9 +173,9 @@ def main(seed, train_ratio, val_test_ratio) -> None:
     output_dir = REAL_MODEL_DIR
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    np.savez_compressed(output_dir / "train.npz", X=X_real_train, y=y_real_train, kepid=kepid_train)
-    np.savez_compressed(output_dir / "val.npz", X=X_real_val, y=y_real_val, kepid=kepid_val)
-    np.savez_compressed(output_dir / "test.npz", X=X_real_test, y=y_real_test, kepid=kepid_test)
+    np.savez_compressed(output_dir / "train.npz", X=X_real_train, y=y_real_train, kepid=kepid_train, chunk_depth=chunk_depth_train)
+    np.savez_compressed(output_dir / "val.npz", X=X_real_val, y=y_real_val, kepid=kepid_val, chunk_depth=chunk_depth_val)
+    np.savez_compressed(output_dir / "test.npz", X=X_real_test, y=y_real_test, kepid=kepid_test, chunk_depth=chunk_depth_test)
 
 if __name__ == "__main__":
     params = yr.load_params(yaml_file)

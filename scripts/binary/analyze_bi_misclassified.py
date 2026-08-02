@@ -38,6 +38,7 @@ def load_data() -> tuple[DataFrame, DataFrame, Any, Any]:
         "y_pred": misclassified["false_positive_y_pred"],
         "y_pred_prob": misclassified["false_positive_y_pred_prob"],
         "confidence": misclassified["false_positive_confidence"],
+        "chunk_depth": misclassified["false_positive_chunk_depth"],
     })
 
     fn_df = pd.DataFrame({
@@ -46,6 +47,7 @@ def load_data() -> tuple[DataFrame, DataFrame, Any, Any]:
         "y_pred": misclassified["false_negative_y_pred"],
         "y_pred_prob": misclassified["false_negative_y_pred_prob"],
         "confidence": misclassified["false_negative_confidence"],
+        "chunk_depth": misclassified["false_negative_chunk_depth"],
     })
 
     fp_X = misclassified["false_positive_X"]
@@ -106,6 +108,45 @@ def plot_low_med_high_conf_hist(low_data, med_data, high_data, bins, value_name)
         print("Bonferroni p-value:", min(result.pvalue * 3, 1.0))
         print()
 
+
+def plot_misclassified_eb_depths(df: pd.DataFrame, output_dir: Path) -> None:
+    """
+    Plot chunk-depth distribution for false positives.
+
+    In the binary model, false positives are true eclipsing binaries
+    predicted as transits.
+    """
+    output_dir.mkdir(parents=True, exist_ok=True)
+    chunk_depth = df["chunk_depth"].dropna()
+
+    def save_depth_histogram(depth_data: pd.Series, output_file: Path, title: str) -> None:
+        plt.figure(figsize=(9, 6))
+        plt.hist(
+            depth_data,
+            bins=80,
+            edgecolor="black",
+            color="#4c78a8",
+            alpha=0.85,
+        )
+
+        plt.xlabel("Chunk Depth")
+        plt.ylabel("Number of Misclassified EB Chunks")
+        plt.title(title)
+        plt.tight_layout()
+        plt.savefig(output_file, dpi=200)
+        plt.close()
+
+    save_depth_histogram(
+        chunk_depth,
+        output_dir / "misclassified_eb_chunk_depth_histogram_full.png",
+        "Depth Distribution of Misclassified Eclipsing Binaries",
+    )
+    save_depth_histogram(
+        chunk_depth[chunk_depth <= 0.1],
+        output_dir / "misclassified_eb_chunk_depth_histogram_zoomed.png",
+        "Depth Distribution of Misclassified Eclipsing Binaries (Depth <= 0.1)",
+    )
+
 def main():
 
     params = load_params(YAML_DIR)["plots_info"]
@@ -165,9 +206,13 @@ def main():
 
     box_results_dir = RESULTS_DIR / "misclassified_plots" / "boxplots"
     hist_results_dir = RESULTS_DIR / "misclassified_plots" / "histograms"
+    ecdf_results_dir = RESULTS_DIR / "misclassified_plots" / "ecdfs"
 
     box_results_dir.mkdir(parents=True, exist_ok=True)
     hist_results_dir.mkdir(parents=True, exist_ok=True)
+    ecdf_results_dir.mkdir(parents=True, exist_ok=True)
+
+    plot_misclassified_eb_depths(fp_with_eb, hist_results_dir)
 
     for df, case in zip([fp_with_eb, fn_with_exo], ["fp", "fn"]):
         df["std"] = df["std"].replace(0, np.nan)
@@ -187,7 +232,7 @@ def main():
 
         for par in params:
             box_jitter(df_clean, par["col"], par["name"], box_results_dir, case, par["log"])
-            hist_plotting(df_clean, par["col"], par["name"], 10, hist_results_dir, case, par["log"])
+            ecdf_plotting(df_clean, par["col"], par["name"], ecdf_results_dir, case, par["log"])
             write_stats(df_clean, par["col"], RESULTS_DIR / f"{case}_distribution_stats.json")
 
 

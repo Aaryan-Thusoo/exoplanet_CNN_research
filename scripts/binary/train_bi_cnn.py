@@ -53,6 +53,8 @@ def prepare_layers(model_layers, input_shape):
             layers.append(dense_layer(**layer_config))
         elif type == "global_max_pooling1d":
             layers.append(global_max_pooling_layer())
+        elif type == "global_avg_pooling1d":
+            layers.append(global_avg_pooling_layer())
 
     model = keras.Sequential([
         keras.layers.Input(shape=input_shape)
@@ -92,7 +94,7 @@ def history_saving(history, results_dir: Path) -> None:
         for key, values in history.history.items()
     }
 
-    with open(results_dir / "training_history.json", "w") as file:
+    with open(results_dir / "bi_training_history.json", "w") as file:
         json.dump(history_dict, file, indent=2)
 
 def results_saving(history, results_dir: Path) -> None:
@@ -105,7 +107,7 @@ def results_saving(history, results_dir: Path) -> None:
         "final_val_accuracy": float(history.history["val_accuracy"][-1]),
     }
 
-    with open(results_dir / "real_metrics.json", "w") as file:
+    with open(results_dir / "bi_metrics.json", "w") as file:
         json.dump(metrics, file, indent=2)
 
 

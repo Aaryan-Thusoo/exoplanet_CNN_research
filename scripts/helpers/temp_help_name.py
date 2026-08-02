@@ -2,7 +2,8 @@ import lightkurve as lk
 import numpy as np
 import pandas as pd
 
-def download_lcs(kic, n=4894):
+
+def download_lcs_exo(kic, n=4894):
     """
     Download a Kepler light curve for a given KIC, preprocess it,
     and split the flux into equal chunks of length n.
@@ -32,6 +33,49 @@ def download_lcs(kic, n=4894):
     chunks = [flux[i:i+n] for i in range(0, len(flux), n) if len(flux[i:i+n]) == n]
 
     return chunks
+
+def download_lcs_eb(kic, n=4894, threshold=-1):
+    """
+    Download a Kepler light curve for a given KIC, preprocess it,
+    and split the flux into equal chunks of length n.
+
+    Parameters
+    ----------
+    kic : int or str
+        Kepler ID.
+    n : int
+        Chunk length.
+    threshold : int
+        Minimum depth threshold for EB to be considered deep
+
+    Returns
+    -------
+    chunks : list of np.ndarray
+        List of flux chunks, each of length n.
+    depth : float
+        Median of 100 lowest points in light curve
+    deep: boolean
+        True if light curve determined to be of depth greater than the set threshold
+    """
+
+    search_result = lk.search_lightcurve(f"KIC {kic}", author="Kepler")
+
+    lcc = search_result[-5:-1].download_all()
+
+    lc = lcc.stitch().remove_nans().remove_outliers(sigma=5).normalize()
+    lc_flat, _ = lc.flatten(window_length=301, return_trend=True)
+
+    flux = np.array(lc_flat.flux, dtype=np.float32)
+
+    lowest_values = np.sort(flux)[:100]
+    depth  = np.median(lowest_values)
+    deep = depth < threshold
+
+    chunks = [flux[i:i+n] for i in range(0, len(flux), n) if len(flux[i:i+n]) == n]
+
+    return chunks, depth, deep
+
+
 
 def split_df(df, split_ratio):
 

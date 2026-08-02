@@ -1,6 +1,7 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 from pathlib import Path
 
 import json
@@ -76,36 +77,65 @@ def box_jitter(df: pd.DataFrame, column: str, title: str, output_dir: Path, case
     plt.savefig(output_dir / f"{case}_boxplot_{column}.png", bbox_inches="tight")
 
 
-def hist_plotting(df: pd.DataFrame, column: str, title:str, bins: int, output_dir: Path, case: str, log_scale=False):
+def ecdf_plotting(df: pd.DataFrame, column: str, title: str, output_dir: Path, case: str, log_scale=False):
+
+    plot_df = df.dropna(subset=[column, "confidence_group"]).copy()
+
+    if log_scale:
+        plot_df = plot_df[plot_df[column] > 0].copy()
+
+    if plot_df.empty:
+        return
 
     plt.figure(figsize=(9, 6))
 
-    sns.histplot(
-        data=df,
-        x=column,
-        hue="confidence_group",
-        hue_order=["Low", "Medium", "High"],
-        bins=bins,
-        stat="density",
-        common_norm=False,
-        element="step",
-        fill=True,
-        alpha=0.35,
-        palette={
-            "Low": "#1f77b4",
-            "Medium": "#ff7f0e",
-            "High": "#d62728",
-        },
-    )
+    order = ["Low", "Medium", "High"]
+    palette = {
+        "Low": "#1f77b4",
+        "Medium": "#ff7f0e",
+        "High": "#d62728",
+    }
+
+    for confidence_group in order:
+        group_values = (
+            plot_df.loc[plot_df["confidence_group"] == confidence_group, column]
+            .sort_values()
+            .to_numpy()
+        )
+
+        if len(group_values) == 0:
+            continue
+
+        y_values = np.arange(1, len(group_values) + 1) / len(group_values)
+        x_step = np.insert(group_values, 0, group_values[0])
+        y_step = np.insert(y_values, 0, 0)
+
+        plt.step(
+            x_step,
+            y_step,
+            where="post",
+            color=palette[confidence_group],
+            linewidth=2,
+            label=confidence_group,
+        )
+        plt.fill_between(
+            x_step,
+            y_step,
+            step="post",
+            color=palette[confidence_group],
+            alpha=0.15,
+        )
 
     if log_scale:
         plt.xscale("log")
 
     plt.xlabel(title)
-    plt.ylabel("Density")
-    plt.title(f"{title} Distribution by Confidence Group")
+    plt.ylabel("Cumulative Fraction of Misclassified Samples")
+    plt.title(f"{title} ECDF by Confidence Group")
+    plt.legend(title="Confidence Group")
     plt.tight_layout()
-    plt.savefig(output_dir / f"{case}_hist_{column}.png", bbox_inches="tight")
+    plt.savefig(output_dir / f"{case}_ecdf_{column}.png", bbox_inches="tight")
+    plt.close()
 
 def write_stats(df: pd.DataFrame, column: str, output_file: Path) -> None:
     low_data = df.loc[df["confidence_group"] == "Low", column].dropna()

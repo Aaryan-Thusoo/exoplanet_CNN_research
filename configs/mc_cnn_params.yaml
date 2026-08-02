@@ -3,7 +3,7 @@ training_and_compiling:
   batch_size: 32
   learning_rate: 5e-4
   weight_decay: 1e-4
-  loss: "binary_crossentropy"
+  loss: "sparse_categorical_crossentropy"
   metrics: ["accuracy"]
 
 cnn_layers:
@@ -49,5 +49,5 @@ cnn_layers:
     rate: 0.3
 
   - type: "dense"
-    units: 1
-    activation: "sigmoid"
+    units: 3
+    activation: "softmax"

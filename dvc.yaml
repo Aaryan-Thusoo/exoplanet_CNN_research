@@ -227,3 +227,22 @@ stages:
       - results/multiclass/misclassified_results/misclassified_lightcurves.npz
     metrics:
       - results/multiclass/evaluation.json
+
+  train_mc_random_forest:
+    cmd: python scripts/multiclass/train_mc_random_forest.py
+    deps:
+      - scripts/multiclass/train_mc_random_forest.py
+      - data/multi_model/train.npz
+      - data/multi_model/val.npz
+      - data/multi_model/test.npz
+    params:
+      - configs/mc_randf_params.yaml:
+          - n_estimators
+          - seed
+          - class_weight
+    outs:
+      - models/multiclass_random_forest.pkl
+      - results/multiclass/random_forest/confusion_matrix.png
+      - results/multiclass/random_forest/feature_importance.png
+    metrics:
+      - results/multiclass/random_forest/metrics.json

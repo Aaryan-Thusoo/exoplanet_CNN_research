@@ -15,6 +15,9 @@ def dense_layer(units, activation):
 def global_max_pooling_layer():
     return keras.layers.GlobalMaxPooling1D()
 
+def global_avg_pooling_layer():
+    return keras.layers.GlobalAveragePooling1D()
+
 def batch_norm_layer():
     return keras.layers.BatchNormalization()
 

@@ -33,8 +33,9 @@ def data_loading():
     X_test = test_data["X"][..., np.newaxis]
     y_test = test_data["y"]
     kepid_test = test_data["kepid"]
+    chunk_depth_test = test_data["chunk_depth"]
 
-    return X_test, y_test, kepid_test
+    return X_test, y_test, kepid_test, chunk_depth_test
 
 def plot_training_history(path):
 
@@ -218,6 +219,7 @@ def get_misclassified_lightcurves_by_type(
     y_test: np.ndarray,
     y_pred_prob: np.ndarray,
     kepid_test: np.ndarray,
+    chunk_depth_test: np.ndarray,
     threshold: float = 0.5,
 ) -> dict:
     """
@@ -244,6 +246,7 @@ def get_misclassified_lightcurves_by_type(
             "y_pred": y_pred[false_positive_mask],
             "y_pred_prob": y_pred_prob[false_positive_mask],
             "kepid": kepid_test[false_positive_mask],
+            "chunk_depth": chunk_depth_test[false_positive_mask],
             "confidence": confidence[false_positive_mask],
         },
         "false_negatives": {
@@ -252,6 +255,7 @@ def get_misclassified_lightcurves_by_type(
             "y_pred": y_pred[false_negative_mask],
             "y_pred_prob": y_pred_prob[false_negative_mask],
             "kepid": kepid_test[false_negative_mask],
+            "chunk_depth": chunk_depth_test[false_negative_mask],
             "confidence": confidence[false_negative_mask],
         },
     }
@@ -261,14 +265,14 @@ def main():
     (RESULTS_DIR / "misclassified_results").mkdir(parents=True, exist_ok=True)
 
     # Load test data
-    X_test, y_test, kepid_test = data_loading()
+    X_test, y_test, kepid_test, chunk_depth_test = data_loading()
 
     params = load_params(YAML_FILE)
 
     # Load model for testing
     model = keras.models.load_model(MODEL_PATH)
 
-    plot_training_history(RESULTS_DIR / "training_history.json")
+    plot_training_history(RESULTS_DIR / "bi_training_history.json")
 
     y_pred_prob = model.predict(X_test).ravel()
     y_pred = (y_pred_prob >= params["threshold"]).astype(int)
@@ -289,7 +293,14 @@ def main():
     with open(RESULTS_DIR / "evaluation.json", "w") as file:
         json.dump(metrics, file, indent=2)
 
-    misclassified = get_misclassified_lightcurves_by_type(X_test, y_test, y_pred_prob, kepid_test=kepid_test, threshold=params["threshold"])
+    misclassified = get_misclassified_lightcurves_by_type(
+        X_test,
+        y_test,
+        y_pred_prob,
+        kepid_test=kepid_test,
+        chunk_depth_test=chunk_depth_test,
+        threshold=params["threshold"],
+    )
 
     np.savez_compressed(
         RESULTS_DIR / "misclassified_results" / "misclassified_lightcurves.npz",
@@ -299,6 +310,7 @@ def main():
         false_positive_y_pred=misclassified["false_positives"]["y_pred"],
         false_positive_y_pred_prob=misclassified["false_positives"]["y_pred_prob"],
         false_positive_kepid=misclassified["false_positives"]["kepid"],
+        false_positive_chunk_depth=misclassified["false_positives"]["chunk_depth"],
         false_positive_confidence=misclassified["false_positives"]["confidence"],
 
         false_negative_X=misclassified["false_negatives"]["X"],
@@ -306,6 +318,7 @@ def main():
         false_negative_y_pred=misclassified["false_negatives"]["y_pred"],
         false_negative_y_pred_prob=misclassified["false_negatives"]["y_pred_prob"],
         false_negative_kepid=misclassified["false_negatives"]["kepid"],
+        false_negative_chunk_depth=misclassified["false_negatives"]["chunk_depth"],
         false_negative_confidence=misclassified["false_negatives"]["confidence"],
     )
 
