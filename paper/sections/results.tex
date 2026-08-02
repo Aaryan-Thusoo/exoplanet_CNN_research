@@ -20,15 +20,15 @@ Figure~\ref{fig:bi_history} shows line plots of the training and validation resu
 
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{figures/plots/loss_history.png}
-        \caption{Changes in the model's loss over epochs}
+        \includegraphics[width=\textwidth]{figures/plots/bi_loss_history.png}
+        \caption{Changes in the binary model's loss over epochs}
         \label{fig:bi_history_loss}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{figures/plots/accuracy_history.png}
-        \caption{Changes in the model's accuracy over epochs}
+        \includegraphics[width=\textwidth]{figures/plots/bi_accuracy_history.png}
+        \caption{Changes in the binary model's accuracy over epochs}
         \label{fig:bi_history_acc}
     \end{subfigure}
 
@@ -152,3 +152,25 @@ Another expression of the signal to noise results is shown in Figure~\ref{fig:sn
 \end{figure}
 
 With the SNR not returning a direct correlation, it is therefore useful to look into other properties of the light curves. This includes the orbital period as smaller periods allow for more repetition of the signal patterns. This may allow the model to better learn in the 100 day chunk. By plotting the same box plot format for misclassified cases the following is seen shown in Figure~\ref{}
+
+
+\subsection{Multiclass CNN Training History}
+
+The process for the multiclass case was the same as the binary case. However now with three classes the expected results are different. First to look into the model training through the history the loss and accuracy plots are used. Below in Figure~\ref{fig:}
+
+\begin{figure}[htbp]
+    \centering
+
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/plots/mc_loss_history.png}
+        \caption{Changes in the multiclass model's loss over epochs}
+        \label{fig:mc_history_loss}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/plots/mc_accuracy_history.png}
+        \caption{Changes in the multiclass model's accuracy over epochs}
+        \label{fig:mc_history_acc}
+\end{subfigure}
