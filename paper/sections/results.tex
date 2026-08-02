@@ -129,4 +129,26 @@ The same analysis was repeated using the signal-to-noise ratio saved in the Kepl
     \label{fig:koi_snr_boxplot}
 \end{figure}
 
+Another expression of the signal to noise results is shown in Figure~\ref{fig:snr_ratio_bottom}. These plots show the incorrect classification ratio for low, medium, and high SNR groups again split by low, medium, and high model confidence. Here, the correct results are also incorporated and now the full test set context is used. The mistake count for each bin is divided by the total number of samples in each SNR/confidence bin.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/plots/calculated_snr_incorrect_ratio_bottom_only.png}
+        \caption{Calculated SNR}
+        \label{fig:calc_snr_ratio_bottom}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/plots/koi_snr_incorrect_ratio_bottom_only.png}
+        \caption{KOI model SNR}
+        \label{fig:koi_snr_ratio_bottom}
+    \end{subfigure}
+
+    \caption{Incorrect classification ratio across SNR groups and confidence groups.}
+    \label{fig:snr_ratio_bottom}
+\end{figure}
+
 With the SNR not returning a direct correlation, it is therefore useful to look into other properties of the light curves. This includes the orbital period as smaller periods allow for more repetition of the signal patterns. This may allow the model to better learn in the 100 day chunk. By plotting the same box plot format for misclassified cases the following is seen shown in Figure~\ref{}
