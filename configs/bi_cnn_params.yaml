@@ -1,7 +1,7 @@
 training_and_compiling:
-  epochs: 30
-  batch_size: 32
-  learning_rate: 5e-4
+  epochs: 12
+  batch_size: 64
+  learning_rate: 5e-3
   weight_decay: 1e-4
   loss: "binary_crossentropy"
   metrics: ["accuracy"]
@@ -21,7 +21,7 @@ cnn_layers:
     pool_size: 2
 
   - type: "dropout"
-    rate: 0.2
+    rate: 0.15
 
   - type: "conv1d"
     channels: 64
@@ -37,7 +37,7 @@ cnn_layers:
     pool_size: 2
 
   - type: "dropout"
-    rate: 0.2
+    rate: 0.15
 
   - type: "conv1d"
     channels: 128
@@ -53,17 +53,24 @@ cnn_layers:
     pool_size: 2
 
   - type: "dropout"
-    rate: 0.25
-
+    rate: 0.20
 
   - type: "global_avg_pooling1d"
+
+  - type: "dense"
+    units: 64
+    activation: "relu"
+
+  - type: "dropout"
+    rate: 0.3
 
   - type: "dense"
     units: 32
     activation: "relu"
 
-  - type: "dropout"
-    rate: 0.3
+  - type: "dense"
+    units: 16
+    activation: "relu"
 
   - type: "dense"
     units: 1
