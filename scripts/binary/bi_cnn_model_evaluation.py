@@ -50,7 +50,7 @@ def plot_training_history(path):
     epochs = np.arange(1, len(accuracy) + 1)
 
     # Loss plot
-    plt.figure(figsize=(8, 5))
+    plt.figure(figsize=(12, 4))
     plt.plot(epochs, loss, label="Training Loss")
     plt.plot(epochs, val_loss, label="Validation Loss")
 
@@ -64,7 +64,7 @@ def plot_training_history(path):
     plt.savefig(RESULTS_DIR / "plots" / "training_loss_history.png")
 
     # Accuracy plot
-    plt.figure(figsize=(8, 5))
+    plt.figure(figsize=(12, 4))
     plt.plot(epochs, accuracy, label="Training Accuracy")
     plt.plot(epochs, val_accuracy, label="Validation Accuracy")
 
@@ -73,6 +73,7 @@ def plot_training_history(path):
 
     plt.xlabel("Epoch")
     plt.ylabel("Accuracy")
+    plt.ylim(accuracy[0] - 0.05, accuracy[-1] + 0.05)
     plt.title("Training and Validation Accuracy")
     plt.legend()
     plt.savefig(RESULTS_DIR / "plots" / "training_accuracy_history.png")
