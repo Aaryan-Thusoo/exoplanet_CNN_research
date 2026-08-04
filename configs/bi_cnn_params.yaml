@@ -41,7 +41,7 @@ cnn_layers:
 
   - type: "conv1d"
     channels: 128
-    kernel_size: 5
+    kernel_size: 11
     padding: "same"
 
   - type: "batch_norm"
@@ -58,15 +58,18 @@ cnn_layers:
   - type: "global_avg_pooling1d"
 
   - type: "dense"
-    units: 64
+    units: 128
     activation: "relu"
 
   - type: "dropout"
     rate: 0.3
 
   - type: "dense"
-    units: 32
+    units: 64
     activation: "relu"
+
+  - type: "dropout"
+    rate: 0.3
 
   - type: "dense"
     units: 16
