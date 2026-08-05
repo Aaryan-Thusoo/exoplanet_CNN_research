@@ -92,8 +92,15 @@ def run_training(model, training_and_compiling, X_train, y_train, X_val, y_val):
         restore_best_weights=True
     )
 
+    reduce_lr = keras.callbacks.ReduceLROnPlateau(
+        monitor="val_loss",
+        factor=0.5,
+        patience=2,
+        min_lr=1e-5,
+    )
+
     history = model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=epochs,
-                        batch_size=batch_size, callbacks=[early_stop], shuffle=True)
+                        batch_size=batch_size, callbacks=[early_stop, reduce_lr], shuffle=True,)
 
     history.history["loss"] = [initial_train_loss] + history.history["loss"]
     history.history["accuracy"] = [initial_train_accuracy] + history.history["accuracy"]
