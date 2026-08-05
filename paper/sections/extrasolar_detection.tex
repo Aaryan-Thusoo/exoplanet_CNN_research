@@ -1,41 +1,18 @@
-\section{Extrasolar Planets Detection} \label{sec:Extrasolar_Planets_Detection}
+\subsection{Light-Curve Morphology} \label{sec:light-curve-morphology}
 
-\subsection{Exoplanets} \label{sec:Exoplanets}
-
-Figure~\ref{fig:exoplanet_methods_figure} shows the distribution of all confirmed exoplanets by discovery method, as obtained from the NASA Exoplanet Archive \citep{NASA_Exoplanet_Tool, Exoplanet_NASA_Table}. The figure illustrates that transit photometry (purple) is currently the most successful detection method, followed by radial velocity measurements (green), although many more methods have been developed to find new planets. The discovery method refers to the first technique used to determine the presence of an exoplanet. Once an initial detection is reported, the host system becomes the focus of further observations. To improve confidence in exoplanet candidates, astronomers tend to use multiple detection methods \citep{Confirm_w_multiple}.
+Transit photometry observes the flux from stars, searching for periodic decreases in brightness caused by a planet crossing the stellar disk \citep{Exoplanet_Detection_Methods}. This method has become the most successful approach for exoplanet detection, with over 4300 confirmed planets discovered through transits \citep{Num_Transit_Exoplanets_Discovered}. Since transit observations are naturally represented as one-dimensional light curves, their depth, duration, and shape provide a suitable input structure for machine learning models. An example of a Kepler transit light curve is shown in Figure~\ref{fig:example_transit_&_EB}.
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=1.2\linewidth]{figures/images/exoplanet_method_numbers}
-    \caption{The rate of exoplanet discoveries has increased dramatically since 1995\protect\footnotemark[2]. Transit photometry grew rapidly as technology improved becoming the most common detection method.}
-    \label{fig:exoplanet_methods_figure}
+    \includegraphics[width=0.75\linewidth]{figures/images/lightcurve_examples.png}
+    \caption{These light curves are examples of the one-dimensional Kepler data used in the model training done in this paper. The top plot is a \textbf{(How many days)}-day chunk of KIC \textbf{(XXXXXXX)}, a confirmed transit light curve. The bottom plot is a \textbf{(How many days)}-day chunk of KIC \textbf{(XXXXXXX)}, a confirmed eclipsing binary light curve. The model looks for features such as the dips and their duration and shape to classify the data as a transiting light curve. \textbf{(Maybe discuss the noticeable differences)}}
+    \label{fig:example_transit_&_EB}
 \end{figure}
-
-\footnotetext[2]{\url{https://ourworldindata.org/grapher/cumulative-exoplanets-by-method}}
-
-\subsection{Light Curves} \label{sec:Lc_Detection}
-
-Transit photometry observes the flux from stars searching for periodic decreases in brightness caused by a planet crossing the stellar disk \citep{Exoplanet_Detection_Methods}. This method has become the most successful in exoplanet detection, with over 4300 confirmed planets \citep{Num_Transit_Exoplanets_Discovered}. This success is due to its relatively simplistic process and easy parameter estimation directly from the light curve \citep{Transit_Method}. Figure~\ref{fig:WASP-104 Full} illustrates this pattern with a light curve of star WASP-104 highlighting the consistent dip in the observed flux \citep{2003ApJ...585.1038S}.
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.75\linewidth]{figures/other_papers/WASP-104b_transit.jpg}
-    \caption{Photometric light curve of the WASP-104 system showing repeated transit events of the exoplanet WASP-104 b. The horizontal axis is time in Barycentric Julian Date (BJD - 2450000), while the vertical axis shows the measured stellar flux. Each downward spike corresponds to a planetary transit, where the planet passes in front of its host star and blocks a small fraction of the starlight. The black curve shows the original observed light curve, while the red curve shows the processed or detrended data used to highlight the transit signal. Reproduced from \citep{WASP-104b_Lightcurves} (Figure 1).}
-    \label{fig:WASP-104 Full}
-\end{figure}
-
 
 \begin{align}
     \delta F \approx \left(\frac{R_p}{R_*}\right)^2 \label{eq:flux_depth}
 \end{align}
 
-Astronomers analyze many features in transit light curves which describe key parameters of the exoplanet system. The depth of the transit provides a direct measurement of the planet-to-star radius ratio. This relation is depicted in Equation~\ref{eq:flux_depth} above. Here $\delta F$ is the change in normalized flux caused by the transit dip. $R_p$ and $R_*$ represent the radius of the exoplanet and its host star respectively.
+Astronomers analyse many features in transit light curves which describe key parameters of the exoplanet system. The depth of the transit provides a direct measurement of the planet-to-star radius ratio. This relation is depicted in Equation~\ref{eq:flux_depth}. Here $\delta F$ is the change in normalized flux caused by the transit dip. $R_p$ and $R_*$ represent the radius of the exoplanet and its host star respectively. As the ratio of radii between a planet and star is relatively small, the expected flux depth of a transit system is not very deep. In the eclipsing binary case, the ratio of the radii of two stars is typically much higher and thus the expected depth in the light curve is larger.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\linewidth]{figures/images/transit_anatomy.png}
-    \caption{A breakdown of the parameters researchers look for in transit light curves. Transits are broken into four segments labelled $t_I$ to $t_{IV}$. $\tau$ is used to represent ingress and egress times which occur between $t_I$ and $t_{II}$ or $t_{III}$ and $t_{IV}$ respectively. $T$ is the elapsed time for which the full planet is transiting in front of its host star. These times are heavily affected by the impact parameter $b$. Reproduced from \citet{2010exop.book...55W} (Figure 2).}
-    \label{fig:Transit_Anatomy}
-\end{figure}
-
-Stars also exhibit limb darkening, a phenomenon in which the stellar surface appears dimmer near the limb due to variations in temperature and optical depth within the stellar atmosphere. The curvature of the transit dip is influenced by stellar limb darkening. The initial and final phases of a transit are known as ingress and egress respectively \citep{2003ApJ...585.1038S}. The total transit duration, ingress/egress duration, and overall transit shape provide information about the impact parameter, orbital inclination, and stellar density \citep{2010exop.book...55W}. More detailed transit fitting can be used to constrain planetary and orbital properties more generally \citep{2023MNRAS.520.4103H, 2015ApJ...808..126V}. Figure~\ref{fig:Transit_Anatomy} illustrates the morphology of a typical transit light curve and the parameters encoded within it. The mathematical relationships between transit light-curve features and the physical properties of the system are summarized in Appendix~\ref{sec:Transit_Geometry}.
+Transit shape also contains useful information. The ingress and egress are the times when the planet is beginning to pass and ending its pass across the star. The duration represents how long the planet is in front of the star. For transiting exoplanets the ingress and egress usually make a curved U-shape. In eclipsing binaries however, the shape is more sharp making a V-shape. 

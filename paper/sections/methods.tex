@@ -8,16 +8,6 @@ To make the workflow reproducible, the project was organized as a staged pipelin
 
 Two forms of data were used for this study. First, synthetic datasets were generated using simplified analytic light-curve shapes. This allowed for appropriate testing of the CNN architecture under controlled conditions. By introducing simple and progressively more difficult synthetic datasets the model was able to be evaluated solely on its configuration and not by observational complications. Afterwards, real light curve data was collected from the \textit{Kepler} mission to use as the main dataset for classification using the CNN. The following subsections explain the generation and collection of all data used in this work.
 
-\subsubsection{Synthetic Data}
-
-Synthetic data were used to check that the model architecture and training pipeline behaved as expected under controlled conditions. The synthetic data were developed in three stages with each being increasingly realistic. The first stage contained straight lines with only dips representing transits and eclipsing binary cases. This stage was expected to produce near-perfect results. The generated data used randomized values for the transit or eclipsing binary dips, transit or eclipse durations, orbital periods all approximate ranges expected of real systems. Each instance contains 4894 data points which is roughly 100 days of data assuming the \textit{Kepler} long-cadence of 29.4 minutes. In addition, the shape of dips is different for the two cases with transits having the characteristic U-shape and eclipsing binaries having the V-shape to approximate the expected morphologies.
-
-The second stage used the same underlying signal parameters as the initial stage but added noise to each light curve. The noise was generated through a uniform random distribution where each data point was perturbed by uncorrelated uniform noise. This created a more difficult classification task than the initial stage and tested whether the model could still identify the injected signals when handling less idealized light curves.
-
-The final synthetic stage was the most realistic of the three and acted as a bridge between the generated signals and observed data. To develop this stage, the representative Kepler noise was extracted and applied instead of the generated noise. Thus the model handled data more statistically similar to real instances. Since the injected signal type was known exactly, the synthetic set was useful for testing whether the model architecture and preprocessing pipeline behaved as expected. However, these synthetic datasets were not used as the main scientific test of the CNN classifier. Instead, they are used as a control before applying the CNN to real archival light curves. 
-
-\subsubsection{Real Kepler Data Collection}
-
 The real Kepler data collection was designed to produce two labelled classes for supervised learning: confirmed transiting exoplanets and confirmed eclipsing binaries (EB). Confirmed exoplanets were selected from the NASA Exoplanet Archive KOI cumulative table using the KOI disposition label, while eclipsing binaries were identified using a separate catalogue of known EB targets from the Kepler Eclipsing Binary Catalog. The KepID, or Kepler Input Catalog identifier, was used as the common identifier linking catalogue labels, archive metadata, and the downloaded light curves. By first collecting the EB KepIDs, the corresponding metadata for those systems could then be queried from the NASA Exoplanet Archive. Additional metadata columns were also retained so that model errors could later be compared against physical and observational properties such as signal-to-noise ratio, transit depth, and orbital period.
 
 \begin{lstlisting}[language=SQL, caption={SQL query used to extract confirmed Kepler exoplanets data from Kepler Exoplanet Archive.}, label={lst:transit-query}]
@@ -54,19 +44,19 @@ AND koi_period <= 30
 
 \subsection{Data Preparation}
 
-The overall process of downloading and preparing each light curve was done using the \textit{lightkurve} Python package \textbf{(GET CITATION)}. Each KepID was passed into the library to collect its flux data. As \textit{Kepler} observations are divided into quarters\textbf{(Have I mentioned this properly?)}, multiple light-curve files can exist for a single target and thus we must stitch them all together. Next, all NaN values were removed, outliers beyond $5\sigma$ were dropped as well. In the same step the data was normalized so that flux values were placed on a common relative scale. Next, the time-series data was flattened which removed slow, long-term trends from the light curves while trying to preserve the shorter transit or eclipse events. This was done in the \textit{lightkurve} package by applying a Savitzky-Golay filter and dividing it out. The processed flux for each \textit{Kepler} object was then saved to a NumPy array.
+The overall process of downloading and preparing each light curve was done using the \textit{lightkurve} Python package \citep{Lightkurve}. Each KepID was passed into the library to collect its flux data. As \textit{Kepler} observations are divided into quarters, multiple light-curve files can exist for a single target and thus we must stitch them all together. Next, all NaN values were removed, outliers beyond $5\sigma$ were dropped as well. In the same step the data was normalized so that flux values were placed on a common relative scale. Next, the time-series data was flattened which removed slow, long-term trends from the light curves while trying to preserve the shorter transit or eclipse events. This was done in the \textit{lightkurve} package by applying a Savitzky-Golay filter and dividing it out. The processed flux for each \textit{Kepler} object was then saved to a NumPy array.
 
-To make the download process more manageable, the total batch was split into sub-batches of 200 KepIDs. Each sub-batch was saved into a separate CSV file until all light curves were processed. Each finalized CSV file contained two columns: the KepID and the corresponding flux sequence. It was important to keep each instance labelled with its KepID for the modelling and evaluation steps. Through the process, if a KepID did not return a usable light curve, that object was skipped and recorded separately. A KepIDs was considered unusable if \textit{lightkurve} cannot find any data to download or the collected data could not be processed following the steps in this methodology. Overall \textbf{(How many total could not be downloaded?)} targets were skipped.
+To make the download process more manageable, the total batch was split into sub-batches of 200 KepIDs. Each sub-batch was saved into a separate CSV file until all light curves were processed. Each finalized CSV file contained two columns: the KepID and the corresponding flux sequence. It was important to keep each instance labelled with its KepID for the modelling and evaluation steps. Through the process, if a KepID did not return a usable light curve, that object was skipped and recorded separately. A KepIDs was considered unusable if \textit{lightkurve} cannot find any data to download or the collected data could not be processed following the steps in this methodology. Overall only 8 targets were skipped in the transit exoplanets list.
 
-A total of \textbf{(Make sure)} 2745 confirmed exoplanets were pulled from the Kepler Exoplanet Archive catalogue. This same process was then repeated for the eclipsing binaries. The initial file collected from NASA had 2878 \textbf{(Also check this one)} catalogued eclipsing binaries. The KepIDs were processed into sub-batches of 200 KepIDs and saved to CSV files just like the transits and include the same column data. After removing unusable downloads, the final processed sample contained \textbf{(check number)} confirmed exoplanet targets and \textbf{(check number)} catalogued eclipsing binary targets. 
+A total of 2131 confirmed exoplanets were pulled from the Kepler Exoplanet Archive catalogue. After preprocessing filters such as duplicate removal, missing-value removal, and period limits, 1623 KepIDs were attempted to be downloaded. This same process was then repeated for the eclipsing binaries. The initial file collected from NASA had 2878 catalogued eclipsing binaries with 2865 being used for downloads. All KepIDs were processed into sub-batches of 200 KepIDs and saved to CSV files just like the transits and include the same column data. After removing unusable downloads, the final processed sample contained 1615 confirmed exoplanet targets and 2739 catalogued eclipsing binary targets. 
 
 For the multiclass model, an additional value was needed to separate the eclipsing binary cases into shallow and deep categories. In order to do this, the entire light curve was scanned, copied and sorted to extract the 100 smallest data points and take the median of the list. This was done to avoid outliers which could return a false dip. The median of these points was used then as an estimate of the minimum relative flux observed near the deepest part of the transit or eclipse.
 
-After collection, the raw data and catalogue metadata needed to be converted into consistent formats suitable for the model and future evaluation. First, each input into the CNN model needed to be the same length and so the length of each model input had to be standardized. Chunking also increased the number of training instances which then raised the number of training samples available to the model. The method chosen was to split each light curve into fixed-length segments of 4894 flux measurements. Given the time step of the \textit{Kepler} mission was 29.4 minutes, this corresponds to each chunk covering a length of $\sim 100$ days. Many targets can be split into three or more of these chunks increasing the total instances to \textbf{(How many?)}. Afterwards, the chunks are saved into new CSV files, again with each containing roughly 200 total \textit{Kepler} objects. 
+After collection, the raw data and catalogue metadata needed to be converted into consistent formats suitable for the model and future evaluation. First, each input into the CNN model needed to be the same length and so the length of each model input had to be standardized. Chunking also increased the number of training instances which then raised the number of training samples available to the model. The method chosen was to split each light curve into fixed-length segments of 4894 flux measurements. Given the time step of the \textit{Kepler} mission was 29.4 minutes, this corresponds to each chunk covering a length of $\sim 100$ days. Many targets can be split into three or more of these chunks increasing the total exoplanet instances to 7596 and eclipsing binary instances to 9259. Afterwards, the chunks are saved into new CSV files, again with each containing roughly 200 total \textit{Kepler} objects. 
 
 When preparing the model inputs, the saved flux sequences were read from the processed CSV files and converted into NumPy arrays. These arrays were then stacked so that each row represented one fixed-length light curve sample. The CNN input itself used the processed flux arrays, while the catalogue KepID was retained to link each sample back to its metadata. For the purpose of further analysis, the remaining catalogue columns in Table~\ref{tab:kep_query_cols} were retained for later analysis. 
 
-For the multi-class version of the experiment, a threshold was required to separate the deep and shallow eclipsing binary cases. Using the binary model misclassification results and depth distribution, a practical separation was determined such that any chunk with an estimated dip $\geq 0.01$ \textbf{(Check this value)} was considered a deep eclipsing binary. The classification of shallow or deep was saved to each eclipsing binary chunk.
+For the multi-class version of the experiment, a threshold was required to separate the deep and shallow eclipsing binary cases. Using the binary model misclassification results and depth distribution, a practical separation was determined such that any chunk with an estimated dip $\geq 0.01$ was considered a deep eclipsing binary. The classification of shallow or deep was saved to each eclipsing binary chunk.
 
 The calculated signal to noise estimate of each instance was also needed. While Kepler does provide the \texttt{koi\_model\_snr} column, some rows especially in the eclipsing binary cases were missing values. In order to assign an SNR estimate to as many test cases as possible, a simple formula was applied and shown in Equation~\ref{eq:snr_calc}. As this quantity was calculated directly from the available light curves, this value allowed each instance to have an assigned relative SNR estimate. NumPy was used for the standard deviation and the catalogue depth values, the result for each instance was added to the updated table. 
 
@@ -74,7 +64,7 @@ The calculated signal to noise estimate of each instance was also needed. While 
     \text{SNR} = \frac{\text{Transit Depth}}{\text{Standard Deviation}} \label{eq:snr_calc}
 \end{align}
 
-The light curve samples were split into training, validation, and testing sets. First the datasets were checked for overlapping KepIDs in the exoplanet and eclipsing binary datasets. While this should not happen it was a good precaution to make sure no targets were repeated in both classes. This could reduce the reliability of the learned classification boundary. Next, training is most effective when the exoplanets and eclipsing binaries datasets contain the same number of instances. This gives equal importance to learning the patterns in each class. Imbalanced class sizes can bias the model toward the more prevalent case and can skew final results. Thus the data sets are made to match the same number of total Kepler targets by limiting the eclipsing binaries to the same number as the transits. This takes the eclipsing binary dataset from \textbf{(How many total?)} to \textbf{(How many total?)}. 
+The light curve samples were split into training, validation, and testing sets. First the datasets were checked for overlapping KepIDs in the exoplanet and eclipsing binary datasets. While this should not happen it was a good precaution to make sure no targets were repeated in both classes. This could reduce the reliability of the learned classification boundary. Next, training is most effective when the exoplanets and eclipsing binaries datasets contain the same number of instances. This gives equal importance to learning the patterns in each class. Imbalanced class sizes can bias the model toward the more prevalent case and can skew final results. Thus the data sets are made to match the same number of total Kepler targets by limiting the eclipsing binaries to the same number as the transits. This takes the eclipsing binary dataset from 9259 to 7596 instances. 
 
 Now the data was ready to be split into the different sets. However it was very important to manage how the instances are split. For one KepID, one of its chunks could not be in the training set while another was in the validation or test set. This would be unfair to the model as it will likely recognize target-specific features giving a false boost in the final performance metrics. This would lead to data leakage and would be notable in the validation results. Thus to avoid this, we split the data into the three sets not by individual rows but by KepIDs.
 
@@ -96,22 +86,28 @@ To structure the CNN, the TensorFlow/Keras Python libraries were used. As CNNs a
 
 \begin{table}[h]
     \centering
-    \begin{tabular}{|c|c|l|}\hline
-            Layer \# &Layer Type&  Parameters\\\hline
-            1&Input& Input Length = 4894 \\\hline
-            2&Convolution& 32 channels, kernel size=11, same padding, ReLU activation \\\hline
-             &Batch Normalization & \\\hline
-            3&Max Pooling& Pool Size=2 \\\hline
-            4&Dropout& Rate = 0.2 \\\hline
-            5&Convolution&  64 channels, kernel size=11, same padding, ReLU activation\\\hline
-             &Batch Normalization & \\\hline
-            6&Max Pooling& Pool Size=2 \\\hline
-            7&Dropout& Rate=0.2 \\\hline
-            8&Global Pooling &  \\\hline
-            9&Dense&  \\\hline
-            10&Dropout& Rate=0.3 \\\hline
-            11&Output& Sigmoid for binary; softmax for multiclass\\ \hline
-    \end{tabular}
+    \small
+    \begin{tabularx}{\textwidth}{c l X}
+        \toprule
+        Layer \# & Layer Type & Parameters \\
+        \midrule
+        1 & Input & Input length = 4894 \\
+        2 & Convolution & 32 channels, kernel size = 11, same padding \\
+        3 & Batch normalization & \\
+        4 & Activation & ReLU activation \\
+        5 & Max pooling & Pool size = 2 \\
+        6 & Dropout & Rate = 0.2 \\
+        7 & Convolution & 64 channels, kernel size = 11, same padding \\
+        8 & Batch normalization & \\
+        9 & Activation & ReLU activation \\
+        10 & Max pooling & Pool size = 2 \\
+        11 & Dropout & Rate = 0.2 \\
+        12 & Global pooling & \\
+        13 & Dense & 32 units, ReLU activation \\
+        14 & Dropout & Rate = 0.3 \\
+        15 & Output & Sigmoid for binary; softmax for multiclass \\
+        \bottomrule
+    \end{tabularx}
     \caption{Order of all layers used in the training of the neural network. All parameters applied are listed as well.}
     \label{tab:layer_order}
 \end{table}
@@ -126,17 +122,17 @@ A final pooling layer was needed near the end of the network in order to convert
      \text{C}_{\text{binary}} = \max{(p, 1-p)}\label{eq:bi_confidence}
 \end{align}
 
-For the multiclass case, there were three output neurons with each representing one of the three classes. The activation chosen was softmax which gives a probability for each class, and the loss function was sparse categorical cross-entropy. As the labels are given as 0, 1, 2 and not as one-hot vectors, this was the appropriate choice for classifying our results. The predicted class is the class with the largest softmax probability. The confidence value is defined as the output neuron with the largest recorded probability. Equation~\ref{mc_confidence} below shows the simple confidence function used for the multiclass model where $p_0$, $p_1$, and $p_2$ are the softmax probabilities of each class
+For the multiclass case, there were three output neurons with each representing one of the three classes. The activation chosen was softmax which gives a probability for each class, and the loss function was sparse categorical cross-entropy. As the labels are given as 0, 1, 2 and not as one-hot vectors, this was the appropriate choice for classifying our results. The predicted class is the class with the largest softmax probability. The confidence value is defined as the output neuron with the largest recorded probability. Equation~\ref{eq:mc_confidence} below shows the simple confidence function used for the multiclass model where $p_0$, $p_1$, and $p_2$ are the softmax probabilities of each class
 
 \begin{align}
     \text{C}_{\text{multiclass}} = \max{(p_0, p_1, p_2)}\label{eq:mc_confidence}
 \end{align}
 
-The above training process was repeated over several epochs with a backpropagation step after each mini-batch. For the backpropagation, the Adam optimizer was used. Adam was chosen as it adjusts update sizes for different network weights making it more stable than standard gradient descent. Alongside the optimizer was the learning rate which controlled how large each update step was. A choice of \textbf{(What number?)} was used to avoid too big steps and too small updates. Alongside this, a weight decay value of \textbf{(What number?)} was chosen. This value was used for regularization to discourage overly large weights throughout the model, preventing over-fitting.
+The above training process was repeated over several epochs with a backpropagation step after each mini-batch. For the backpropagation, the Adam optimizer was used. Adam was chosen as it adjusts update sizes for different network weights making it more stable than standard gradient descent. Alongside the optimizer was the learning rate which controlled how large each update step was. A choice of 0.005 was used to avoid too big steps and too small updates. Alongside this, a weight decay value of 0.001 was chosen. This value was used for regularization to discourage overly large weights throughout the model, preventing over-fitting.
 
 The loss function was needed to compare the results of each training iteration with the true labels and measures the difference between predicted scores and true labels. As the classification was binary, binary cross-entropy was the chosen loss function as it is appropriate for the sigmoid classification score. For the multiclass CNN, sparse categorical cross-entropy was used instead because labels were stored as integer values. For both models, as the total training dataset was large, a random selection of $32$ light curve samples were used to determine the weight updates during backpropagation. The model was trained for up to 30 epochs. Early stopping was used to monitor the validation loss during training and restore the model weights from the best validation epoch.
 
-After training, the weights and model architecture were saved to a \texttt{.keras} model file which can be loaded and applied to validation or test light curves prepared in the same format. Additionally, the history of the training was saved into a JSON file. This can then be used to inspect how the model performed at each epoch in its training process. Several metrics were chosen to record in the learning process. Accuracy was recorded as the fraction of correctly classified samples. As well, the loss was recorded to show the prediction error during training. The accuracy and loss results were recorded at each epoch for both the training data and validation data. The training loss results were taken into account for updating the model and the validation metrics were recorded to allow for later monitering generalization during the model's training.
+After training, the weights and model architecture were saved to a \texttt{.keras} model file which can be loaded and applied to validation or test light curves prepared in the same format. Additionally, the history of the training was saved into a JSON file. This can then be used to inspect how the model performed at each epoch in its training process. Several metrics were chosen to record in the learning process. Accuracy was recorded as the fraction of correctly classified samples. As well, the loss was recorded to show the prediction error during training. The accuracy and loss results were recorded at each epoch for both the training data and validation data. The training loss results were taken into account for updating the model and the validation metrics were recorded to allow for later monitoring generalization during the model's training.
 
 Several other metrics were recorded after training. The finalized models were evaluated on the test set. The binary model saved holding the accuracy, precision, recall, F1 score, and ROC AUC. For the multiclass model, the accuracy, macro averaged precision, recall, and F1 score were saved. These results can then be used to asses more concretely what the model was good at and where it struggles.
 
@@ -144,9 +140,8 @@ Several other metrics were recorded after training. The finalized models were ev
 
 To provide a comparison to the CNN model, a random forest model was used. It serves as a baseline and simpler process which helps to test whether the CNN is learning extra time-series shape information. The random forest did not use the full light curve arrays directly but instead used features of the individual chunks. From the chunk data, the mean, standard deviation, minimum, and maximum of the flux data were extracted as input features. As well the estimated chunk depth was added to the observed features. Metadata from the Kepler archive were not applied to the model as this info comes from processed data and would not be a fair comparison to the CNN. The exact same set up was set up for the multiclass case.
 
-This model was trained where the prepared training and validation sets were combined to become the full training set with the test set being kept untouched. The same metrics as the convolutional neural network were collected and used for later comparison between the two models. This process was also applied to the multiclass case. 
+This model was trained where the prepared training and validation sets were combined to become the full training set with the test set being kept untouched. The same metrics as the convolutional neural network were collected and used for later comparison between the two models. This process was also applied to the multiclass case. In both random forest models a total of 300 estimators were used to reach the results.
 
-\textbf{(YOU HAVE TO MENTION HOW MANY TREES AND OTHER PARAMS FOR BOTH MODELS)
 
 \subsubsection{Error Analysis}
 
