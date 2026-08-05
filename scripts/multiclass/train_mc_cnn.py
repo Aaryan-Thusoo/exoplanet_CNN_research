@@ -73,6 +73,9 @@ def run_training(model, training_and_compiling, X_train, y_train, X_val, y_val):
     model.compile(optimizer=keras.optimizers.Adam(learning_rate=learning_rate, weight_decay=weight_decay),
                   loss=loss, metrics=metrics)
 
+    initial_train_loss, initial_train_accuracy = model.evaluate(X_train, y_train, verbose=0)
+    initial_val_loss, initial_val_accuracy = model.evaluate(X_val, y_val, verbose=0)
+
     early_stop = keras.callbacks.EarlyStopping(
         monitor="val_loss",
         patience=5,
@@ -81,6 +84,11 @@ def run_training(model, training_and_compiling, X_train, y_train, X_val, y_val):
 
     history = model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=epochs,
                         batch_size=batch_size, callbacks=[early_stop])
+
+    history.history["loss"] = [initial_train_loss] + history.history["loss"]
+    history.history["accuracy"] = [initial_train_accuracy] + history.history["accuracy"]
+    history.history["val_loss"] = [initial_val_loss] + history.history["val_loss"]
+    history.history["val_accuracy"] = [initial_val_accuracy] + history.history["val_accuracy"]
 
     return history
 
