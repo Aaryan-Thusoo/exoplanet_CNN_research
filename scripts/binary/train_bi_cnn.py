@@ -1,14 +1,22 @@
 from pathlib import Path
 import sys
+import os
+
+os.environ["TF_DETERMINISTIC_OPS"] = "1"
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 import numpy as np
 import json
+import tensorflow as tf
 
 from scripts.helpers.yaml_reading import load_params
 from scripts.helpers.layers_helper import *
+
+SEED = 42
+keras.utils.set_random_seed(SEED)
+tf.config.experimental.enable_op_determinism()
 
 # Parameters file path
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -85,7 +93,7 @@ def run_training(model, training_and_compiling, X_train, y_train, X_val, y_val):
     )
 
     history = model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=epochs,
-                        batch_size=batch_size, callbacks=[early_stop])
+                        batch_size=batch_size, callbacks=[early_stop], shuffle=True)
 
     history.history["loss"] = [initial_train_loss] + history.history["loss"]
     history.history["accuracy"] = [initial_train_accuracy] + history.history["accuracy"]

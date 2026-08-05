@@ -11,8 +11,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from sklearn.metrics import confusion_matrix
 
-from scripts.binary.train_bi_random_forest import PAPER_DIR
-
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 
@@ -105,6 +103,7 @@ def plot_confusion_matrix(all_true, all_preds):
     colorbar.set_label("Fraction of True Class", rotation=270, labelpad=18)
 
     fig.tight_layout()
+    fig.savefig(RESULTS_DIR / "confusion_matrix.png", dpi=200, bbox_inches="tight")
     fig.savefig(PAPER_DIR / "mc_rf_confusion_matrix.png", dpi=200, bbox_inches="tight")
     plt.close(fig)
 
@@ -118,6 +117,7 @@ def plot_feature_importance(model, feature_names):
     plt.title("Random Forest Feature Importance")
     plt.xticks(rotation=45, ha="right")
     plt.tight_layout()
+    plt.savefig(RESULTS_DIR / "feature_importance.png", dpi=200)
     plt.savefig(PAPER_DIR / "mc_feature_importance.png", dpi=200)
     plt.close()
 
@@ -153,6 +153,7 @@ def main():
 
     MODEL_DIR.mkdir(parents=True, exist_ok=True)
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    PAPER_DIR.mkdir(parents=True, exist_ok=True)
 
     metrics = {
         "accuracy": float(accuracy_score(y_test, y_pred)),

@@ -1,9 +1,9 @@
 training_and_compiling:
-  epochs: 15
-  batch_size: 64
-  learning_rate: 0.001
+  epochs: 20
+  batch_size: 128
+  learning_rate: 0.0003
   weight_decay: 0.0001
-  loss: "binary_crossentropy"
+  loss: "sparse_categorical_crossentropy"
   metrics: ["accuracy"]
 
 cnn_layers:
@@ -76,5 +76,5 @@ cnn_layers:
     activation: "relu"
 
   - type: "dense"
-    units: 1
-    activation: "sigmoid"
+    units: 3
+    activation: "softmax"
