@@ -6,29 +6,30 @@ This section presents the results of the binary and multiclass models for Kepler
 \subsection{Binary CNN Training History}
 
  The model was trained over 14 epochs with no early stopping. During this time, the loss and accuracy of the training data were recorded at the end of each epoch. The validation data was not used in the updating of weights but was used to evaluate performance at the end of each epoch and recorded as well. This was done to evaluate improvements of the model over time to make sure to avoid under or over training. The results throughout the epoch are recorded to check learning progress and overfitting.
- 
-Figure~\ref{fig:bi_history} shows line plots of the training and validation results across epochs. Loss decreases over the first epochs and begins to stabilize showing the model learned discriminative patterns but eventually hits a performance plateau on its performance. The accuracy increases during the early epochs but also stabilizes showing improved classification performance. The flattening of the curves suggest adding more epochs would be unlikely to substantially improve. As in both cases the training and validation lines have the same shape and do not spread far apart from one another, there is no strong evidence the model has not suffered from noticeable over fitting. 
 
 \begin{figure}[H]
     \centering
 
-    \begin{subfigure}[b]{0.48\textwidth}
+    \begin{subfigure}[b]{0.9\textwidth}
         \centering
         \includegraphics[width=\textwidth]{paper/figures/plots/bi_training_loss_history.png}
         \caption{Changes in the model's loss over epochs}
         \label{fig:bi_history_loss}
     \end{subfigure}
     \hfill
-    \begin{subfigure}[b]{0.48\textwidth}
+    \begin{subfigure}[b]{0.9\textwidth}
         \centering
         \includegraphics[width=\textwidth]{paper/figures/plots/bi_training_accuracy_history.png}
         \caption{Changes in the model's accuracy over epochs}
         \label{fig:bi_history_acc}
     \end{subfigure}
 
-    \caption{The above models show the progress of the models (a) loss and (b) accuracy. By looking at the separation between the training and validation curves, we can understand the model is not over fitting the training data. As the plots begin to flatten out, it shows the limit of the model as increasing the number of epochs will not improve the model by meaningful amounts.}
+    \caption{The above models show the progress of the binary models (a) loss and (b) accuracy. By looking at the separation between the training and validation curves, we can understand the model is not over fitting the training data. As the plots begin to flatten out, it shows the limit of the model as increasing the number of epochs will not improve the model by meaningful amounts.}
     \label{fig:bi_history}
 \end{figure}
+ 
+Figure~\ref{fig:bi_history} shows line plots of the training and validation results across epochs. Loss decreases over the first epochs and begins to stabilize showing the model learned discriminative patterns but eventually hits a performance plateau on its performance. The accuracy increases during the early epochs but also stabilizes showing improved classification performance. The flattening of the curves suggest adding more epochs would be unlikely to substantially improve. As in both cases the training and validation lines have the same shape and do not spread far apart from one another, there is no strong evidence the model has not suffered from noticeable over fitting. 
+
 
 \subsection{Binary CNN Test Performance}
 
@@ -51,8 +52,6 @@ The accuracy shows the model correctly classified about $85\%$ of all the test l
 
 The F1 score of $0.87$ sumarizes the balance of the precision and recall. This value indicates the model maintains a reasonable balance between recovering true transits and avoiding false transit detections, although precision remains the weaker component. Finally, the ROC AUC result of $0.89$ is strong and thus the model separates score ranks the classes reasonably well across classification thresholds. There is however still room for threshold tuning to potentially improve the model further. 
 
-A confusion matrix is also helpful for evaluating the model results. Figure~\ref{fig:acc_conf_matrix} shows the confusion matrix and depicts how well the binary model performed. By looking at the figure, this pattern is consistent with the metrics observed earlier. 26\% of eclipsing binaries were incorrectly classified compared to only 4.5\% of transits. It is shown in clearer view how the model misclassified a larger fraction of eclipsing binaries than transits and thus the network tended to predict instances as transits. 
-
 \begin{figure}[H]
     \centering
     \includegraphics[width=1.0\linewidth]{paper/figures/plots/bi_confusion_matrix.png}
@@ -60,18 +59,20 @@ A confusion matrix is also helpful for evaluating the model results. Figure~\ref
     \label{fig:acc_conf_matrix}
 \end{figure}
 
-\subsection{Binary CNN Confidence and Misclassification Analysis}
+A confusion matrix is also helpful for evaluating the model results. Figure~\ref{fig:acc_conf_matrix} shows the confusion matrix and depicts how well the binary model performed. By looking at the figure, this pattern is consistent with the metrics observed earlier. 26\% of eclipsing binaries were incorrectly classified compared to only 4.5\% of transits. It is shown in clearer view how the model misclassified a larger fraction of eclipsing binaries than transits and thus the network tended to predict instances as transits. 
+
+\subsection{Binary CNN Analysis}
 
 Of the 1555 test instances used, 231 were misclassified. There were 195 false positives and 36 false negatives and to understand why the model misclassified certain samples it is important to analyse the properties of these light curve instances. The first feature to analyse was the distribution of confidence for all test instances. Classifications with low confidence indicate the model prediction was close to the decision boundary. Misclassified instances with high confidence are of particular interest as the model assigns high confidence despite being incorrect. In a binary classification model, it is expected to see incorrect instances with low confidence near the 0.5 threshold. Thus it is important to analyse the incorrect cases which received higher confidence values. 
 
-Figure~\ref{fig:conf_corr_vs_incorr_hist} shows the confidence distribution of all test instances split by correct and incorrect classifications. The majority of results are correct and mostly sit in the high confidence range which is to be expected based on the evaluation metrics. However there is a high number of high confidence misclassification which indicate the model is heavily struggling with certain instances. Thus it is important to analyse the properties of these light curves to find if any features of the light curve data is the main cause.
-
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.0\linewidth]{figures/plots/confidence_correct_vs_incorrect.png}
-    \caption{A histogram showing the spread of frequency of each confidence value the model returned. All correct classifications shown in blue while incorrect classifications shown in orange. An interesting bump in mistakes by the model is found in the high 0.8 region.}
+    \includegraphics[width=0.7\linewidth]{paper/figures/plots/bi_confidence_correct_vs_incorrect.png}
+    \caption{A histogram showing the spread of frequency of each confidence value the binary model returned. All correct classifications shown in blue while incorrect classifications shown in orange. An interesting bump in mistakes by the model is found in the high 0.8 region.}
     \label{fig:conf_corr_vs_incorr_hist}
 \end{figure}
+
+Figure~\ref{fig:conf_corr_vs_incorr_hist} shows the confidence distribution of all test instances split by correct and incorrect classifications. The majority of results are correct and mostly sit in the high confidence range which is to be expected based on the evaluation metrics. However there is a high number of high confidence misclassification which indicate the model is heavily struggling with certain instances. Thus it is important to analyse the properties of these light curves to find if any features of the light curve data is the main cause.
 
 The features chosen to be looked into are labelled in Table~\ref{tab:kep_query_cols} and were collected during the query steps in the Methodology. Apart from the \texttt{kepid} label and \texttt{koi\_disposition}, the remaining columns all contain measured features of each light curve used. It is important to note that the calculated SNR developed in the methodology was added to this list for comparison against the \texttt{koi\_model\_snr}. Each of these features are plotted comparing their numbers to the confidence the model returned in its classification. By then looking trends it is possible to look for what features affect the model the most.
 
@@ -82,21 +83,21 @@ The first property evaluated was the signal-to-noise ratio (SNR), because low SN
 \begin{figure}[H]
     \centering
 
-    \begin{subfigure}[b]{0.48\textwidth}
+    \begin{subfigure}[b]{0.7\textwidth}
         \centering
         \includegraphics[width=\textwidth]{figures/plots/fp_boxplot_calculated_SNR.png}
         \caption{Boxplot of calculated SNR values for false positives}
         \label{fig:calc_snr_boxplot_fp}
     \end{subfigure}
     \hfill
-    \begin{subfigure}[b]{0.48\textwidth}
+    \begin{subfigure}[b]{0.7\textwidth}
         \centering
         \includegraphics[width=\textwidth]{figures/plots/fn_boxplot_calculated_SNR.png}
         \caption{Boxplot of calculated SNR values for false negatives}
         \label{fig:calc_snr_boxplot_fn}
     \end{subfigure}
 
-    \caption{Boxplots of calculated SNR values of misclassified test light curves. They are split by low, medium, and high confidence values.}
+    \caption{Boxplots of calculated SNR values of misclassified test light curves from the binary CNN model. They are split by low, medium, and high confidence values.}
     \label{fig:calc_snr_boxplot}
 \end{figure}
 
@@ -104,8 +105,8 @@ In the false positive plot, there is a broad distribution of SNR values in the l
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\linewidth]{paper/figures/plots/bi_mistake_ratios_by_calculated_snr_and_confidence_bottom.png}
-    \caption{Caption}
+    \includegraphics[width=0.9\linewidth]{paper/figures/plots/mistake_ratios_by_calculated_snr_and_confidence_bottom.png}
+    \caption{Incorrect classification ratio for the binary CNN across calculated SNR groups and prediction-confidence levels. The numbers listed above each bar show the number of incorrectly classified samples in each bin.}
     \label{fig:bi_mistake_ratio_calc_snr}
 \end{figure}
 
@@ -140,25 +141,25 @@ Just like the calculated signal-to-noise ratio, the transit depth can be split i
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\linewidth]{paper/figures/plots/bi_mistake_ratios_by_transit_depth_and_confidence_bottom.png}
-    \caption{Caption}
+    \includegraphics[width=0.9\linewidth]{paper/figures/plots/mistake_ratios_by_transit_depth_and_confidence_bottom.png}
+    \caption{Incorrect classification ratio for the binary CNN across transit-depth groups and prediction-confidence levels. The numbers listed above each bar show the number of incorrectly classified samples in each bin.}
     \label{fig:bi_mistake_ratio_depth}
 \end{figure}
 
 \subsection{Multiclass CNN Training History}
 
-The training procedure for the multiclass case was the same as the binary case, but the output classes were changed to three categories. With three classes, the classification task was more difficult and lower performance was expected. The model training was evaluated using the loss and accuracy histories shown in Figure~\ref{fig:mc_history}. The multiclass model ran for 11 epochs with early stopping before reaching 20 iterations. Once again, there was no large separation between the training and validation data, indicating no prominent overfitting. The loss values are higher across training compared to the binary model, while the accuracy is also lower across the epochs.
+The training procedure for the multiclass case was the same as the binary case, but the output classes were changed to three categories. With three classes, the classification task was more difficult and lower performance was expected. The model training was evaluated using the loss and accuracy histories shown in Figure~\ref{fig:mc_history}. The multiclass model ran for 15 epochs with early stopping before reaching 20 iterations. Once again, there was no large separation between the training and validation data, indicating no prominent overfitting. The loss values are higher across training compared to the binary model, while the accuracy is also lower across the epochs.
 
 \begin{figure}[H]
     \centering
-    \begin{subfigure}[b]{0.49\textwidth}
+    \begin{subfigure}[b]{0.9\textwidth}
         \centering
         \includegraphics[width=\textwidth]{figures/plots/multiclass/mc_training_loss_history.png}
         \caption{Changes in the multiclass model's loss over epochs}
         \label{fig:mc_loss_history}
     \end{subfigure}
     \hfill
-    \begin{subfigure}[b]{0.49\textwidth}
+    \begin{subfigure}[b]{0.9\textwidth}
         \centering
         \includegraphics[width=\textwidth]{figures/plots/multiclass/mc_training_accuracy_history.png}
         \caption{Changes in the multiclass model's accuracy over epochs}
@@ -202,7 +203,7 @@ Figure~\ref{fig:mc_confidence_correct_vs_incorrect} shows the distribution of co
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\linewidth]{figures/plots/multiclass/mc_confidence_correct_vs_incorrect.png}
-    \caption{Caption}
+    \caption{A histogram showing the spread of frequency of each confidence value the multiclass model returned. All correct classifications shown in blue while incorrect classifications shown in orange. There is a wider spread of high confidence misclassified instances.}
     \label{fig:mc_confidence_correct_vs_incorrect}
 \end{figure}
 
