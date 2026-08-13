@@ -6,6 +6,10 @@
 \usepackage{natbib}
 \usepackage{url}
 \usepackage{subcaption}
+\usepackage{array}
+\usepackage{comment}
+\usepackage{tabularx}
+\usepackage{booktabs}
 
 \usepackage{afterpage}
 
@@ -42,7 +46,7 @@
 
 \title{\textbf{Transit Exoplanet Surveys and False Positive Challenges}}
 
-\date{April 6th 2026}
+\date{August 27, 2026}
 \author{\textbf{Author}: Aaryan Thusoo \\ \textbf{Supervisor}: Prof. Vincent Van Eylen}
 
 \begin{document}
@@ -56,6 +60,7 @@
 \input{sections/pipelines}
 \input{sections/methods}
 \input{sections/results}
+\input{sections/discussion}
 \input{sections/conclusion}
 
 \bibliographystyle{plain}
@@ -132,5 +137,54 @@ The following are the equations used to calculate the metrics used in this paper
     AUC &= \int_0^1{\text{Recall}(FPR)d(FPR)}, \textbf{ where} \\
     FPR &= \frac{FP}{FP + TN}
 \end{align}
+
+
+\section{KOI SNR Analysis}
+
+The same analysis was repeated using the signal-to-noise ratio saved in the Kepler archive. The values are not on the same scale as the calculated SNR so the distributional pattern is the more important feature to observe. Below, Figure~\ref{fig:koi_snr_boxplot} shows the box plots for the archive SNR split again into confidence groups. Similar to the calculated SNR, the false positive cases with low to medium confidence display a wide range of archive SNR values. There are also few high confidence false positive values so no clear conclusion can be made. In the false negative case, all three confidence groups again do not show a clear separation by confidence groups.
+
+\begin{figure}[htbp]
+    \centering
+
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/plots/fp_boxplot_koi_model_snr.png}
+        \caption{Boxplot of Kepler SNR values for false positives}
+        \label{fig:koi_snr_boxplot_fp}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/plots/fn_boxplot_koi_model_snr.png}
+        \caption{Boxplot of Kepler SNR values for false negatives}
+        \label{fig:koi_snr_boxplot_fn}
+    \end{subfigure}
+
+    \caption{Boxplots of the Kepler archive SNR values of misclassified test light curves. They are split by low, medium, and high confidence values.}
+    \label{fig:koi_snr_boxplot}
+\end{figure}
+
+Another expression of the signal to noise results is shown in Figure~\ref{fig:snr_ratio_bottom}. These plots show the incorrect classification ratio for low, medium, and high SNR groups again split by low, medium, and high model confidence. Here, the correct results are also incorporated and now the full test set context is used. The mistake count for each bin is divided by the total number of samples in each SNR/confidence bin.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/plots/mistake_ratios_by_calculated_snr_and_confidence_bottom.png}
+        \caption{Calculated SNR}
+        \label{fig:calc_snr_ratio_bottom}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/plots/mistake_ratios_by_koi_model_snr_and_confidence_bottom.png}
+        \caption{KOI model SNR}
+        \label{fig:koi_snr_ratio_bottom}
+    \end{subfigure}
+
+    \caption{Incorrect classification ratio across SNR groups and confidence groups.}
+    \label{fig:snr_ratio_bottom}
+\end{figure}
+
 
 \end{document}

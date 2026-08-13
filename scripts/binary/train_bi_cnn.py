@@ -100,6 +100,11 @@ def run_training(model, training_and_compiling, X_train, y_train, X_val, y_val):
     history.history["val_loss"] = [initial_val_loss] + history.history["val_loss"]
     history.history["val_accuracy"] = [initial_val_accuracy] + history.history["val_accuracy"]
 
+    history.history["loss"] = [initial_train_loss] + history.history["loss"]
+    history.history["accuracy"] = [initial_train_accuracy] + history.history["accuracy"]
+    history.history["val_loss"] = [initial_val_loss] + history.history["val_loss"]
+    history.history["val_accuracy"] = [initial_val_accuracy] + history.history["val_accuracy"]
+
     return history
 
 def history_saving(history, results_dir: Path) -> None:

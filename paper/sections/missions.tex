@@ -1,55 +1,26 @@
-\section{Missions}
+\subsection{Kepler Mission}
+
+The \textit{Kepler} mission was designed to identify exoplanets using high-precision transit photometry. NASA operated \textit{Kepler} between 2009 and 2013, during which it monitored more than 190,000 stars in a fixed 115 square degree field toward the Cygnus and Lyra constellations \citep{Kepler_Mission, 2016ApJS..224...12C}. Its continuous observations produced long-cadence light curves with a sampling interval of approximately 29.4 minutes, providing the time-series data used for transit detection and classification in this work \citep{Borucki_2010_Kepler}.
+
+The \textit{Kepler} catalogue identifies observed stars using Kepler IDs (KepIDs), while stars showing transit-like signals are labelled as Kepler Objects of Interest (KOIs). KOIs that pass further vetting are classified as planet candidates. The final \textit{Kepler} catalogue demonstrated that detection performance depends strongly on orbital period and signal-to-noise ratio, with completeness and reliability decreasing for longer-period and lower-SNR planets \citep{2018ApJS..235...38T}. This is important for automated classification because shallow or low-SNR transit-like signals are more difficult to distinguish from astrophysical false positives.
+
+Although \textit{Kepler} observed only a small region of the sky, it produced a large archive of high-precision light curves and transit-like events. This makes it a valuable dataset for developing and testing machine-learning methods that classify transit-like light curves efficiently and consistently.
+
+\begin{comment}
+
+Just see if any of this info is still useful?:
+
+\section{Kepler Mission}
 
 As transit detections require long duration, continuous observations, several missions have been designed to monitor a large number of stars for potential exoplanet signals. Overall, these missions have collected extensive light curves for more than 20 million stars \citep{Borucki_2010_Kepler, Ricker2015}.
 
-\subsection{\textit{Kepler} Mission} \label{sec:Kepler_Mission}
+The \textit{Kepler} mission was designed to identify exoplanets using high-precision transit photometry, focusing primarily on F--K type stars where planetary transits produce relatively detectable decreases in stellar flux. NASA operated \textit{Kepler} between 2009 and 2013, during which it monitored more than 190,000 stars in a fixed 115 square degree field toward the Cygnus and Lyra constellations \citep{Kepler_Mission, 2016ApJS..224...12C}. The final \textit{Kepler} catalogue reported 8054 Kepler Objects of Interest (KOIs), including 4034 planet candidates and 10 terrestrial-size planets in the habitable zones of their host stars \citep{2018ApJS..235...38T}.
 
-On December 20, 2001 the \textit{Kepler} mission was selected by NASA as a key project for advancing exoplanet research \citep{Kepler_Mission}. It proposed to focus primarily on F–K-type stars, as these stars are well suited for transit searches. Stars in this range generally have smaller radii, therefore Equation~\ref{eq:flux_depth} predicts deeper transit signals that are easier to detect. By the time of its launch, roughly 300 exoplanets were confirmed through various RV, transit, and direct imaging methods \citep{Num_exoplanets_before_Kepler}. NASA operated the \textit{Kepler} mission between 2009 and 2013 \citep{Kepler_Mission} during which  $\sim2700$ exoplanets were confirmed. This mission monitored and recorded the brightness of more than 190,000 stars using ultrahigh precision photometry \citep{2016ApJS..224...12C}. Instead of surveying the entire sky, \textit{Kepler} focused on the Cygnus and Lyra constellations with a field size of 115 square degrees. Figure~\ref{fig:Kepler_FOV} shows a map of the field of view \textit{Kepler} focuses on. 
+Although \textit{Kepler} observed only a small region of the sky, its catalogue demonstrated the scale of the transit-classification problem. Large photometric surveys produce thousands of transit-like signals, many of which require further vetting to distinguish planetary candidates from astrophysical false positives. This makes \textit{Kepler} a valuable dataset for developing and testing machine-learning methods that can classify transit-like light curves efficiently and consistently.
 
-The \textit{Kepler} catalogue labels \textit{Kepler} Objects of Interest (KOIs) as stars exhibiting transit-like signals that may originate from exoplanet systems. Any KOI which passes the vetting process are classified as exoplanet candidates. \cite{2018ApJS..235...38T} present the final results of the overall \textit{Kepler} mission, reporting:
+The \textit{Kepler} catalogue labels each star it observes with a Kepler id called a KepID. For the KepIDs with as stars exhibiting transit-like signals that may originate from exoplanet systems, they are called \textit{Kepler} Objects of Interest (KOIs). Any KOI which passes the vetting process are classified as exoplanet candidates.
 
-\begin{itemize}
-    \item 8054 KOIs
-    \item 4034 candidates
-    \item 10 terrestrial size planets orbiting in the habitable zone of its host star
-\end{itemize}
+The final \textit{Kepler} catalogue also showed that detection performance depends strongly on orbital period and signal-to-noise ratio, with completeness and reliability decreasing for longer-period and lower-SNR planets \citep{2018ApJS..235...38T}. This is relevant for automated classification because shallow or low-SNR transit-like signals are more difficult to distinguish from false positives.
 
-Using the collected data, \cite{2018ApJS..235...38T} reported that these results came with $>85\%$ completeness and $>98\%$ reliability when managing planets with periods under 100 days. However, for planets with longer orbital periods and lower signal to noise ratios, the completeness and reliability dropped to $76.7\%$ and $50.5\%$, respectively.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\linewidth]{figures/images/Kepler_FOV.jpg}
-    \caption{Field of view of the \textit{Kepler} mission showing the CCD detector layout used to observe stars in the Cygnus–Lyra region of the Milky Way\footnotemark{}. The telescope monitored this fixed field continuously to detect periodic transit signals from exoplanets. }
-    \label{fig:Kepler_FOV}
-\end{figure}
-
-\footnotetext{\url{https://images.nasa.gov/details/PIA11983}}
-
-The \textit{Kepler} telescope used a differential photometer with a 115 square degree field of view \citep{Kepler_FirstResults} consisting of 42 CCDs and 84 readout channels working together \citep{Haas_2010}. They produced a long cadence (LC) sampling mode covering approximately 29.4 minutes. For selected targets, a short cadence (SC) mode was used. These recorded photometric measurements at approximately one-minute intervals using a smaller subset of target pixels \citep{Borucki_2010_Kepler}. With this configuration, \textit{Kepler} monitored and recorded the flux of $\sim 156,000$ stars continuously throughout its primary mission \citep{Jenkins_TCE_Label}.
-
-Following the failure of two reaction wheels in 2013, the \textit{Kepler} spacecraft was repurposed for the K2 mission. K2 observed a series of fields along the ecliptic plane, extending \textit{Kepler’s} exoplanet survey and producing additional planet discoveries \citep{2014PASP..126..398H}.
-
-\subsection{Transiting Exoplanet Survey Satellite (TESS)} \label{sec:TESS}
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.9\linewidth]{figures/images/TESS_vs_Kepler}
-    \caption{Comparison of the survey strategies of the \textit{Kepler} and TESS missions\protect\footnotemark[4]{}. \textit{Kepler} focused on a deep search of a small region of the sky, while TESS conducts a wide-field survey targeting nearby stars across nearly the entire sky.}
-    \label{fig:TESS_vs_Kepler}
-\end{figure}
-
-\footnotetext[4]{\url{https://www.nasa.gov/space-science-and-astrobiology-at-ames/division-overview/astrophysics-branch-overview-sta/exoplanet-mission/exoplanet-research-projects}}
-
-Following the success of the \textit{Kepler} and K2 missions, NASA launched the Transiting Exoplanet Survey Satellite (TESS) to carry out a wide-field survey of nearly the entire sky, focusing on nearby, bright stars well suited for follow-up characterization \citep{Ricker2015, Huang2018}. This observing strategy puts emphasis on short-period planets orbiting luminous host stars which are better suited for precision mass measurements and atmospheric studies.
-
-TESS monitors the sky in sectors with typical observing baselines of $\sim27$ days each. Compared to \textit{Kepler}, which maintained continuous observations of the same field, this is significantly shorter. Figure~\ref{fig:TESS_vs_Kepler} shows an artist rendition of the field of view covered by TESS in comparison to that of \textit{Kepler}. As a result, TESS is most sensitive to planets with orbital periods shorter than $\sim10$–$20$ days. Longer period planets remain better constrained by the extended \textit{Kepler} dataset \citep{Sullivan2015}. Despite this limitation, TESS has greatly expanded the known population of transiting exoplanets and produced thousands of candidates orbiting bright nearby stars across the sky \citep{Guerrero2021}.
-
-Together, \textit{Kepler} and TESS complement one another on insights into exoplanet populations. The long baseline and high photometric precision of \textit{Kepler} allowed for statistical studies of population occurrence rates and structure. One prominent result is the discovery of the “radius valley”, a deficit of planets with radii around $1.5$–$2R_{\oplus}$ that separates two dominant populations of super-Earths and sub-Neptunes \citep{2017AJ....154..109F, 2018MNRAS.479.4786V}. In contrast, TESS primarily detects planets orbiting bright nearby stars, making these systems well suited for detailed follow-up observations. These include radial velocity mass measurements and atmospheric characterization with facilities such as the James Webb Space Telescope. TESS is the connection between the statistical studies of exoplanet populations and parameter estimation of planetary systems \citep{Batalha2019}.
-
-\subsection{PLAnetary Transits and Oscillations of stars (PLATO)} \label{sec:PLATO}
-
-Looking ahead, the European Space Agency (ESA) is preparing the next major mission in exoplanet transit research. Known as the \textit{PLAnetary Transits and Oscillations of stars} (PLATO) mission, its objective is to extend the work \textit{Kepler} and TESS by introducing high-precision, long-baseline photometric monitoring of bright stars across large areas of the sky \citep{Rauer2014}. The mission is currently scheduled to launch between late 2026 and early 2027. PLATO's primary goal is to detect and characterize terrestrial exoplanets orbiting within the habitable zones of their host stars. Furthermore, the mission will perform asteroseisomology to determine precise stellar ages, radii, and masses.
-
-PLATO will combine wide-field coverage with long-duration observations lasting several years in selected fields. In contrast to TESS, PLATO's strategy is optimized for detecting small planets with longer orbital periods which are much more difficult to observe with current all-sky transit surveys \citep{Rauer2014}. The mission is expected to produce a statistically robust sample of Earth-sized planets with well constrained host-star properties. Such measurements will enable detailed study of planetary system evolution and improve estimates of habitable worlds in the solar neighbourhood. 
-
-Together, PLATO, \textit{Kepler}, and TESS form a complementary sequence of transit surveys. Collectively, they span deep narrow-field observations, all-sky coverage of bright stars, and future baseline characterization of nearby terrestrial systems.  Within this progression, PLATO is anticipated to provide the precise stellar and planetary parameters necessary to connect statistical exoplanet demographics with detailed physical characterization \citep{PLATO2022}.
+\textit{Kepler}'s continuous, high-precision photometry produced long-cadence light curves with a sampling interval of approximately 29.4 minutes, providing the time-series data used for transit detection and classification in this work \citep{Borucki_2010_Kepler}.
+\end{comment}

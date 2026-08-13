@@ -1,0 +1,59 @@
+\section{Discussion}
+
+The goal of this paper is to accurately classify light curves as representing potential exoplanets amongst many false positive cases. The binary model focused on the most common false positive occurring from eclipsing binary systems. The multiclass model attempts to include a separation between deep eclipsing binaries and shallow eclipsing binaries. Further cases can be added to give more possible classifications but for now the most important categories were covered.
+
+The binary model produced good results which show the model is clearly able to make distinctions between real and fake transit cases. While some light curve instances were outliers thus affecting the model, there are few cases which manage to trick the binary classifier. Figure~\ref{fig:good_vs_bad_examples} shows a collection of good and poor example instances used in the training. The first plot is a simple example of poor data as this is not representative of a real light curve formed by systems. The second light curve is from a misclassified eclipsing binary. \textbf{(What do we see?)}. The final instance is of a transit which was misclassified as an eclipsing binary. \textbf{(What do I say?)}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{paper/figures/images/good_bad_binary_examples.png}
+    \caption{Caption}
+    \label{fig:good_vs_bad_examples}
+\end{figure}
+
+It can be seen from the confidence histogram that a large number of misclassified instances were found in the high-confidence ranges. One likely factor is the depth of the transits or eclipses, which can first be seen in the box plot in Figure~\ref{fig:depth_boxplot_fp}, where the high-confidence group has the most consistent collection of low-depth cases. This is further supported by the high-confidence false positives, where over 80\% of the unique systems were matched to shallow eclipsing binaries. This suggests that the shallow EB class is important to separate from the transit and deep EB cases, as these systems can be confidently mistaken for exoplanet-like transits.
+
+Compared to the binary CNN model, the multiclass model performed much more poorly across the evaluation metrics. However, increasing the number of final classes reduces the chance of the model choosing the correct class when it is unsure. Looking at the confusion matrix, the multiclass model was still relatively successful in classifying transits and deep eclipsing binaries. The main difficulty was the shallow eclipsing-binary class, which contains features similar to both edge cases. Therefore, while the metrics show poorer performance, the main source of difficulty is separated into its own class.
+
+The shallow eclipsing binaries have depths similar to transits but also feature patterns expected of eclipsing binaries. Physically these are caused by a few cases. One common occurrence is from a third stellar light source being picked up in the observations. As well, if the eclipse is grazing and does not cover much of the opposite star, the dips will not be very pronounced. Shallow eclipsing binaries are a common case and seeing how they improve the multiclass model for the other cases it is important to make the distinction.  
+
+A major focus of this paper was the use of limited preprocessing to test how well the models could perform without heavily preparing the light-curve data. In the pipeline used for this research, the main processing step was the application of the Savitzky-Golay filter from the \texttt{lightkurve} package. No binning, phase folding, or heavier filtering was applied, reducing the amount of preprocessing required before classification. Based on the results of this paper, introducing some additional processing into the pipeline may improve model performance. However, the balance between preprocessing time and classification performance would need to be tested to determine the best approach. This may be especially important for shallow or noisy signals, where the model struggled most.
+
+The random forest model produced results which were similar to the CNN model. This is important because the random forest does not learn directly from the full shape of the light curve in the same way as the CNN. Instead, it uses extracted features such as the mean flux, standard deviation, minimum flux, maximum flux, and chunk depth. The similar performance suggests that these simple statistical features already contain a large amount of information needed to separate transits from eclipsing binaries. Therefore, while the CNN is useful because it can learn directly from the light-curve shape, the random forest results show that the classification problem is also strongly connected to basic depth and variability properties of the data. \textbf{(Rewrite)}
+
+
+\subsection{Potential Future Actions}
+
+There are a few things which could be done in a future project to improve results. The model layers can be altered to include more convolutions or dense learning layers. More convolution would help to create larger feature maps for the model to compare from. As well altering kernel sizes to fit more data in the filter could be helpful. The use of dropout to limit overfitting appears to have worked correctly and thus adding more overfitting prevention steps likely will not improve results. As the data is relatively simple for the CNN, massively increasing the number of layers is unlikely to provide noticeable improvements. The model used TensorFlow Keras layers which work very well but the library also allows for custom layers to be developed. Utilizing this, it may be possible to make a convolution layer customized for the specific case of light curve classification. 
+
+Models can also be trained using other models and is utilized in many machine learning cases across different fields. One way to use this in this work could be to develop synthetic data to initially train the model off of. If the generated data is made to be statistically significant compared to the real Kepler data, it can be used to make a basic starting model. Then, by creating a strong model off the synthetic light curves, the architecture can be reused on real data to potentially struggle less with the classification of real light curves.  
+ 
+
+\begin{comment}
+Is any of this useful to mention here?
+
+\subsection{Transiting Exoplanet Survey Satellite (TESS)} \label{sec:TESS}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/images/TESS_vs_Kepler}
+    \caption{Comparison of the survey strategies of the \textit{Kepler} and TESS missions\protect\footnotemark[4]{}. \textit{Kepler} focused on a deep search of a small region of the sky, while TESS conducts a wide-field survey targeting nearby stars across nearly the entire sky.}
+    \label{fig:TESS_vs_Kepler}
+\end{figure}
+
+\footnotetext[4]{\url{https://www.nasa.gov/space-science-and-astrobiology-at-ames/division-overview/astrophysics-branch-overview-sta/exoplanet-mission/exoplanet-research-projects}}
+
+Following the success of the \textit{Kepler} and K2 missions, NASA launched the Transiting Exoplanet Survey Satellite (TESS) to carry out a wide-field survey of nearly the entire sky, focusing on nearby, bright stars well suited for follow-up characterization \citep{Ricker2015, Huang2018}. This observing strategy puts emphasis on short-period planets orbiting luminous host stars which are better suited for precision mass measurements and atmospheric studies.
+
+TESS monitors the sky in sectors with typical observing baselines of $\sim27$ days each. Compared to \textit{Kepler}, which maintained continuous observations of the same field, this is significantly shorter. Figure~\ref{fig:TESS_vs_Kepler} shows an artist rendition of the field of view covered by TESS in comparison to that of \textit{Kepler}. As a result, TESS is most sensitive to planets with orbital periods shorter than $\sim10$–$20$ days. Longer period planets remain better constrained by the extended \textit{Kepler} dataset \citep{Sullivan2015}. Despite this limitation, TESS has greatly expanded the known population of transiting exoplanets and produced thousands of candidates orbiting bright nearby stars across the sky \citep{Guerrero2021}.
+
+Together, \textit{Kepler} and TESS complement one another on insights into exoplanet populations. The long baseline and high photometric precision of \textit{Kepler} allowed for statistical studies of population occurrence rates and structure. One prominent result is the discovery of the “radius valley”, a deficit of planets with radii around $1.5$–$2R_{\oplus}$ that separates two dominant populations of super-Earths and sub-Neptunes \citep{2017AJ....154..109F, 2018MNRAS.479.4786V}. In contrast, TESS primarily detects planets orbiting bright nearby stars, making these systems well suited for detailed follow-up observations. These include radial velocity mass measurements and atmospheric characterization with facilities such as the James Webb Space Telescope. TESS is the connection between the statistical studies of exoplanet populations and parameter estimation of planetary systems \citep{Batalha2019}.
+
+\subsection{PLAnetary Transits and Oscillations of stars (PLATO)} \label{sec:PLATO}
+
+Looking ahead, the European Space Agency (ESA) is preparing the next major mission in exoplanet transit research. Known as the \textit{PLAnetary Transits and Oscillations of stars} (PLATO) mission, its objective is to extend the work \textit{Kepler} and TESS by introducing high-precision, long-baseline photometric monitoring of bright stars across large areas of the sky \citep{Rauer2014}. The mission is currently scheduled to launch between late 2026 and early 2027. PLATO's primary goal is to detect and characterize terrestrial exoplanets orbiting within the habitable zones of their host stars. Furthermore, the mission will perform asteroseisomology to determine precise stellar ages, radii, and masses.
+
+PLATO will combine wide-field coverage with long-duration observations lasting several years in selected fields. In contrast to TESS, PLATO's strategy is optimized for detecting small planets with longer orbital periods which are much more difficult to observe with current all-sky transit surveys \citep{Rauer2014}. The mission is expected to produce a statistically robust sample of Earth-sized planets with well constrained host-star properties. Such measurements will enable detailed study of planetary system evolution and improve estimates of habitable worlds in the solar neighbourhood. 
+
+Together, PLATO, \textit{Kepler}, and TESS form a complementary sequence of transit surveys. Collectively, they span deep narrow-field observations, all-sky coverage of bright stars, and future baseline characterization of nearby terrestrial systems.  Within this progression, PLATO is anticipated to provide the precise stellar and planetary parameters necessary to connect statistical exoplanet demographics with detailed physical characterization \citep{PLATO2022}.
+\end{comment}
