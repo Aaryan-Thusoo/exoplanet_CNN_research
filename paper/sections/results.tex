@@ -63,7 +63,7 @@ A confusion matrix is also helpful for evaluating the model results. Figure~\ref
 
 \subsection{Binary CNN Analysis}
 
-Of the 1555 test instances used, 231 were misclassified. There were 195 false positives and 36 false negatives and to understand why the model misclassified certain samples it is important to analyse the properties of these light curve instances. The first feature to analyse was the distribution of confidence for all test instances. Classifications with low confidence indicate the model prediction was close to the decision boundary. Misclassified instances with high confidence are of particular interest as the model assigns high confidence despite being incorrect. In a binary classification model, it is expected to see incorrect instances with low confidence near the 0.5 threshold. Thus it is important to analyse the incorrect cases which received higher confidence values. 
+Of the 1555 test instances used, 231 were misclassified. There were 193 false positives and 67 false negatives and to understand why the model misclassified certain samples it is important to analyse the properties of these light curve instances. The first feature to analyse was the distribution of confidence for all test instances. Classifications with low confidence indicate the model prediction was close to the decision boundary. Misclassified instances with high confidence are of particular interest as the model assigns high confidence despite being incorrect. In a binary classification model, it is expected to see incorrect instances with low confidence near the 0.5 threshold. Thus it is important to analyse the incorrect cases which received higher confidence values. 
 
 \begin{figure}[H]
     \centering
