@@ -27,7 +27,7 @@ def prettify_label(text: str) -> str:
 
 def box_jitter(df: pd.DataFrame, column: str, title: str, output_dir: Path, case: str, log_scale: bool = False) -> None:
 
-    plt.figure(figsize=(12, 7))
+    plt.figure(figsize=(8, 8))
 
     order = ["Low", "Medium", "High"]
 

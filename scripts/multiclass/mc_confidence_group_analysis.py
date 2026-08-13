@@ -215,14 +215,14 @@ def plot_mistake_ratio(summary, plot_name):
     file_name = clean_file_name(plot_name)
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    fig, ax = plt.subplots(figsize=(9, 4.5))
+    fig, ax = plt.subplots(figsize=(9, 3.5))
     plot_ratio_axis(
         ax,
         summary,
         ratio_column="incorrect_ratio",
         count_column="incorrect",
         ylabel="All Incorrect Ratio",
-        title=f"Mistake Ratios by {plot_name} and Confidence",
+        title=f"Multiclass CNN Model Mistake Ratios by {plot_name} and Confidence",
     )
     ax.set_xlabel(f"{plot_name} Group")
     fig.tight_layout()

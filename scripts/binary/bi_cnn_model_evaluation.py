@@ -48,34 +48,38 @@ def plot_training_history(path):
         val_loss = params["val_loss"]
 
     epochs = np.arange(0, len(accuracy))
+    axis_size = 12
+
+    train_color = "#0072B2"  # blue
+    val_color = "#D55E00"  # vermillion/orange
 
     # Loss plot
-    plt.figure(figsize=(12, 4))
-    plt.plot(epochs, loss, label="Training Loss")
-    plt.plot(epochs, val_loss, label="Validation Loss")
+    plt.figure(figsize=(12, 3))
+    plt.plot(epochs, loss, marker="o", markersize=4, label="Training Loss", color=train_color)
+    plt.plot(epochs, val_loss, marker="o", markersize=4, label="Validation Loss", color=val_color)
 
     ax = plt.gca()
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
-    plt.xlabel("Epoch")
-    plt.ylabel("Loss")
-    plt.title("Training and Validation Loss")
+    plt.xlabel("Epoch", fontsize=axis_size)
+    plt.ylabel("Loss", fontsize=axis_size)
+    plt.title("Binary Model Training and Validation Loss", fontsize=axis_size+2)
     plt.legend()
     plt.savefig(RESULTS_DIR / "plots" / "training_loss_history.png")
     plt.savefig(PAPER_DIR / "bi_training_loss_history.png")
 
     # Accuracy plot
-    plt.figure(figsize=(12, 4))
-    plt.plot(epochs, accuracy, label="Training Accuracy")
-    plt.plot(epochs, val_accuracy, label="Validation Accuracy")
+    plt.figure(figsize=(12, 3))
+    plt.plot(epochs, accuracy, marker="o", markersize=4, label="Training Accuracy", color=train_color)
+    plt.plot(epochs, val_accuracy, marker="o", markersize=4, label="Validation Accuracy", color=val_color)
 
     ax = plt.gca()
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
-    plt.xlabel("Epoch")
-    plt.ylabel("Accuracy")
+    plt.xlabel("Epoch", fontsize=axis_size)
+    plt.ylabel("Accuracy", fontsize=axis_size)
     #plt.ylim(accuracy[0] - 0.05, accuracy[-1] + 0.05)
-    plt.title("Training and Validation Accuracy")
+    plt.title("Binary Model Training and Validation Accuracy", fontsize=axis_size+2)
     plt.legend()
     plt.savefig(RESULTS_DIR / "plots" / "training_accuracy_history.png")
     plt.savefig(PAPER_DIR / "bi_training_accuracy_history.png")
@@ -110,7 +114,7 @@ def plot_confusion_matrix(all_true, all_preds):
                 fontweight="bold",
             )
 
-    ax.set_title(f"Confusion Matrix - Accuracy: {accuracy:.2f}%", fontsize=14, pad=14)
+    ax.set_title(f"Binary CNN Model Confusion Matrix", fontsize=14, pad=14)
     ax.set_xlabel("Predicted Class", fontsize=12)
     ax.set_ylabel("True Class", fontsize=12)
     ax.set_xticks(np.arange(len(class_names)), labels=class_names)
@@ -210,9 +214,11 @@ def plot_correct_incorrect_confidence(
         edgecolor="black",
     )
 
-    plt.xlabel("Prediction Confidence")
-    plt.ylabel("Number of Samples")
-    plt.title("Prediction Confidence: Correct vs Incorrect")
+    axis_size = 12
+
+    plt.xlabel("Prediction Confidence", fontsize=axis_size)
+    plt.ylabel("Number of Samples", fontsize=axis_size)
+    plt.title("Binary CNN Model Prediction Confidence", fontsize=axis_size+2)
     plt.legend()
     plt.tight_layout()
     plt.savefig(results_dir / "confidence_correct_vs_incorrect.png", dpi=200)

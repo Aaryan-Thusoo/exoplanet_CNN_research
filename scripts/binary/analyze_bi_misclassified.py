@@ -234,11 +234,11 @@ def main():
 
         for par in params:
             if case == "fp":
-                box_jitter(df_clean, par["col"], f"False Positive {par["name"]}", PAPER_DIR, case, par["log"])
+                box_jitter(df_clean, par["col"], f"Binary Model False Positive by {par["name"]}", PAPER_DIR, case, par["log"])
                 ecdf_plotting(df_clean, par["col"], par["name"], ecdf_results_dir, case, par["log"])
                 write_stats(df_clean, par["col"], RESULTS_DIR / f"{case}_distribution_stats.json")
             else:
-                box_jitter(df_clean, par["col"], f"False Negative {par["name"]}", PAPER_DIR, case, par["log"])
+                box_jitter(df_clean, par["col"], f"Binary Model False Negative by {par["name"]}", PAPER_DIR, case, par["log"])
                 ecdf_plotting(df_clean, par["col"], par["name"], ecdf_results_dir, case, par["log"])
                 write_stats(df_clean, par["col"], RESULTS_DIR / f"{case}_distribution_stats.json")
 

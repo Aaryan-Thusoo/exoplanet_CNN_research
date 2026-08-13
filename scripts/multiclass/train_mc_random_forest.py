@@ -88,7 +88,7 @@ def plot_confusion_matrix(all_true, all_preds):
                 fontweight="bold",
             )
 
-    ax.set_title(f"Random Forest Confusion Matrix - Accuracy: {accuracy:.2f}%", fontsize=14, pad=14)
+    ax.set_title(f"Multiclass Random Forest Confusion Matrix", fontsize=14, pad=14)
     ax.set_xlabel("Predicted Class", fontsize=12)
     ax.set_ylabel("True Class", fontsize=12)
     ax.set_xticks(np.arange(len(class_names)), labels=class_names)
@@ -111,10 +111,10 @@ def plot_confusion_matrix(all_true, all_preds):
 def plot_feature_importance(model, feature_names):
     importances = model.feature_importances_
 
-    plt.figure(figsize=(8, 5))
+    plt.figure(figsize=(8, 7))
     plt.bar(feature_names, importances, color=RF_GREEN, edgecolor="black")
     plt.ylabel("Importance")
-    plt.title("Random Forest Feature Importance")
+    plt.title("Multiclass Random Forest Feature Importance")
     plt.xticks(rotation=45, ha="right")
     plt.tight_layout()
     plt.savefig(RESULTS_DIR / "feature_importance.png", dpi=200)

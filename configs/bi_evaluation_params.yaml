@@ -16,3 +16,5 @@ plots_info:
   - name: "Absolute Transit Depth"
     col: "transit_depth_abs"
     log: True
+
+eb_threshold_checks: [0.003, 0.005, 0.0075, 0.01, 0.015, 0.02, 0.05]

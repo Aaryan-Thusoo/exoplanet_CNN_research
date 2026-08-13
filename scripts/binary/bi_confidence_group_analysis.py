@@ -106,6 +106,7 @@ def add_metadata(results_df, metadata):
 
     results_df["lightcurve_std"] = results_df["lightcurve_std"].replace(0, np.nan)
     results_df["calculated_SNR"] = results_df["koi_depth"] / results_df["lightcurve_std"]
+    results_df["transit_depth_abs"] = results_df["transit_depth"].abs()
 
     return results_df
 
@@ -261,7 +262,7 @@ def plot_mistake_subplots(false_positive_summary, false_negative_summary, summar
         ratio_column="incorrect_ratio",
         count_column="incorrect",
         ylabel="All Incorrect Ratio",
-        title="All Incorrect Cases",
+        title=f"Mistake Ratios by {plot_name} and Confidence",
     )
 
     axes[2].set_xlabel(f"{plot_name} Group")
@@ -273,14 +274,14 @@ def plot_mistake_subplots(false_positive_summary, false_negative_summary, summar
     plt.close(fig)
 
     PAPER_DIR.mkdir(parents=True, exist_ok=True)
-    bottom_fig, bottom_ax = plt.subplots(figsize=(9, 4.5))
+    bottom_fig, bottom_ax = plt.subplots(figsize=(9, 3.5))
     plot_ratio_axis(
         bottom_ax,
         summary,
         ratio_column="incorrect_ratio",
         count_column="incorrect",
         ylabel="All Incorrect Ratio",
-        title=f"Mistake Ratios by {plot_name} and Confidence",
+        title=f"Binary Model Mistake Ratios by {plot_name} and Confidence",
     )
     bottom_ax.set_xlabel(f"{plot_name} Group")
     bottom_fig.tight_layout()

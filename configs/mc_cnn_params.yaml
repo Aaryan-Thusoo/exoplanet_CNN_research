@@ -1,8 +1,8 @@
 training_and_compiling:
-  epochs: 20
+  epochs: 15
   batch_size: 64
-  learning_rate: 0.0003
-  weight_decay: 0.0001
+  learning_rate: 5e-4
+  weight_decay: 1e-4
   loss: "sparse_categorical_crossentropy"
   metrics: ["accuracy"]
 
@@ -21,7 +21,7 @@ cnn_layers:
     pool_size: 2
 
   - type: "dropout"
-    rate: 0.15
+    rate: 0.10
 
   - type: "conv1d"
     channels: 64
@@ -41,7 +41,7 @@ cnn_layers:
 
   - type: "conv1d"
     channels: 128
-    kernel_size: 11
+    kernel_size: 5
     padding: "same"
 
   - type: "batch_norm"
@@ -53,7 +53,17 @@ cnn_layers:
     pool_size: 2
 
   - type: "dropout"
-    rate: 0.20
+    rate: 0.15
+
+  - type: "conv1d"
+    channels: 128
+    kernel_size: 3
+    padding: "same"
+
+  - type: "batch_norm"
+
+  - type: "activation"
+    activation: "relu"
 
   - type: "global_avg_pooling1d"
 
@@ -62,14 +72,14 @@ cnn_layers:
     activation: "relu"
 
   - type: "dropout"
-    rate: 0.3
+    rate: 0.25
 
   - type: "dense"
     units: 64
     activation: "relu"
 
   - type: "dropout"
-    rate: 0.3
+    rate: 0.20
 
   - type: "dense"
     units: 3

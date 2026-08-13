@@ -169,6 +169,18 @@ stages:
     metrics:
       - results/binary/random_forest/metrics.json
 
+  find_eb_threshold:
+    cmd: python scripts/binary/determine_eb_threshold.py
+    deps:
+      - scripts/binary/determine_eb_threshold.py
+      - models/binary_model.keras
+      - data/binary_model/val.npz
+    params:
+      - configs/bi_evaluation_params.yaml:
+          - eb_threshold_checks
+    outs:
+      - results/binary/validation_eb_chunk_results.csv
+
   #=================================================================
   # Multiclass Model
   #=================================================================
@@ -227,6 +239,37 @@ stages:
       - results/multiclass/misclassified_results/misclassified_lightcurves.npz
     metrics:
       - results/multiclass/evaluation.json
+
+  analyze_mc_misclassified:
+    cmd: python scripts/multiclass/analyze_mc_misclassified.py
+    deps:
+      - scripts/multiclass/analyze_mc_misclassified.py
+      - scripts/helpers/misclassified_helper.py
+      - scripts/helpers/yaml_reading.py
+      - results/multiclass/misclassified_results/misclassified_lightcurves.npz
+      - data/raw/Kepler_Confirmed_ExoPlanets.csv
+      - data/raw/Kepler_Confirmed_EB.csv
+    params:
+      - configs/mc_evaluation_params.yaml:
+          - plots_info
+    outs:
+      - results/multiclass/misclassified_results/misclassified_plots
+      - results/multiclass/misclassified_results/mc_distribution_stats.json
+
+  mc_confidence_group_analysis:
+    cmd: python scripts/multiclass/mc_confidence_group_analysis.py
+    deps:
+      - scripts/multiclass/mc_confidence_group_analysis.py
+      - scripts/helpers/yaml_reading.py
+      - data/multi_model/test.npz
+      - models/multi_model.keras
+      - data/raw/Kepler_Confirmed_ExoPlanets.csv
+      - data/raw/Kepler_Confirmed_EB.csv
+    params:
+      - configs/mc_evaluation_params.yaml:
+          - plots_info
+    outs:
+      - results/multiclass/confidence_group_analysis
 
   train_mc_random_forest:
     cmd: python scripts/multiclass/train_mc_random_forest.py
