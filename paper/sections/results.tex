@@ -146,6 +146,8 @@ Just like the calculated signal-to-noise ratio, the transit depth can be split i
     \label{fig:bi_mistake_ratio_depth}
 \end{figure}
 
+The trend is further supported when looking at the applied multiclass classification of the eclipsing binaries. Of the 113 high confidence false positive light curve chunks, 89 are labelled as shallow eclipsing binaries. This combined to 20 out 24 unique KepIDs making a roughly 80\% rate of shallow eclipsing binaries being the high confidence misclassified instances. For this reason, depth of the eclipses is useful to analyse further which leads to the multiclass model used next.
+
 \subsection{Multiclass CNN Training History}
 
 The training procedure for the multiclass case was the same as the binary case, but the output classes were changed to three categories. With three classes, the classification task was more difficult and lower performance was expected. The model training was evaluated using the loss and accuracy histories shown in Figure~\ref{fig:mc_history}. The multiclass model ran for 15 epochs with early stopping before reaching 20 iterations. Once again, there was no large separation between the training and validation data, indicating no prominent overfitting. The loss values are higher across training compared to the binary model, while the accuracy is also lower across the epochs.
