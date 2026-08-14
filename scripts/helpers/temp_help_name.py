@@ -25,7 +25,7 @@ def download_lcs_exo(kic, n=4894):
 
     lcc = search_result[-5:-1].download_all()
 
-    lc = lcc.stitch().remove_nans().remove_outliers(sigma=5).normalize()
+    lc = lcc.stitch().remove_nans().remove_outliers().normalize()
     lc_flat, _ = lc.flatten(window_length=301, return_trend=True)
 
     flux = np.array(lc_flat.flux, dtype=np.float32)
@@ -62,7 +62,7 @@ def download_lcs_eb(kic, n=4894, threshold=-1):
 
     lcc = search_result[-5:-1].download_all()
 
-    lc = lcc.stitch().remove_nans().remove_outliers(sigma=5).normalize()
+    lc = lcc.stitch().remove_nans().remove_outliers().normalize()
     lc_flat, _ = lc.flatten(window_length=301, return_trend=True)
 
     flux = np.array(lc_flat.flux, dtype=np.float32)
