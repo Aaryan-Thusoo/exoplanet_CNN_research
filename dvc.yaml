@@ -19,6 +19,8 @@ stages:
     cmd: python scripts/prepare_kepler_exo_data.py
     deps:
       - scripts/prepare_kepler_exo_data.py
+      - scripts/helpers/temp_help_name.py
+      - scripts/helpers/yaml_reading.py
       - data/raw/Kepler_Confirmed_ExoPlanets.csv
     params:
       - configs/data_process_params.yaml:
@@ -32,6 +34,8 @@ stages:
     cmd: python scripts/prepare_kepler_eb_data.py
     deps:
       - scripts/prepare_kepler_eb_data.py
+      - scripts/helpers/temp_help_name.py
+      - scripts/helpers/yaml_reading.py
       - data/raw/Kepler_Confirmed_EB.csv
     params:
       - configs/data_process_params.yaml:
@@ -62,11 +66,15 @@ stages:
       - data/binary_model/train.npz
       - data/binary_model/val.npz
       - data/binary_model/test.npz
+    metrics:
+      - total_counts.json
 
   train_bi_cnn:
     cmd: python scripts/binary/train_bi_cnn.py
     deps:
       - scripts/binary/train_bi_cnn.py
+      - scripts/helpers/layers_helper.py
+      - scripts/helpers/yaml_reading.py
       - data/binary_model/train.npz
       - data/binary_model/val.npz
     params:
@@ -84,6 +92,8 @@ stages:
     cmd: python scripts/binary/bi_cnn_model_evaluation.py
     deps:
       - scripts/binary/bi_cnn_model_evaluation.py
+      - scripts/helpers/layers_helper.py
+      - scripts/helpers/yaml_reading.py
       - models/binary_model.keras
       - data/binary_model/test.npz
       - results/binary/bi_training_history.json
@@ -104,6 +114,8 @@ stages:
     cmd: python scripts/binary/bi_classification_report.py
     deps:
       - scripts/binary/bi_classification_report.py
+      - scripts/helpers/layers_helper.py
+      - scripts/helpers/yaml_reading.py
       - results/binary/misclassified_results/misclassified_lightcurves.npz
       - data/binary_model/test.npz
       - models/binary_model.keras
@@ -152,6 +164,7 @@ stages:
     cmd: python scripts/binary/train_bi_random_forest.py
     deps:
       - scripts/binary/train_bi_random_forest.py
+      - scripts/helpers/yaml_reading.py
       - data/binary_model/train.npz
       - data/binary_model/val.npz
       - data/binary_model/test.npz
@@ -173,6 +186,8 @@ stages:
     cmd: python scripts/binary/determine_eb_threshold.py
     deps:
       - scripts/binary/determine_eb_threshold.py
+      - scripts/helpers/layers_helper.py
+      - scripts/helpers/yaml_reading.py
       - models/binary_model.keras
       - data/binary_model/val.npz
     params:
@@ -207,6 +222,8 @@ stages:
     cmd: python scripts/multiclass/train_mc_cnn.py
     deps:
       - scripts/multiclass/train_mc_cnn.py
+      - scripts/helpers/layers_helper.py
+      - scripts/helpers/yaml_reading.py
       - data/multi_model/train.npz
       - data/multi_model/val.npz
     params:
@@ -224,6 +241,8 @@ stages:
     cmd: python scripts/multiclass/mc_cnn_model_evaluation.py
     deps:
       - scripts/multiclass/mc_cnn_model_evaluation.py
+      - scripts/helpers/layers_helper.py
+      - scripts/helpers/yaml_reading.py
       - models/multi_model.keras
       - data/multi_model/test.npz
       - results/multiclass/mc_training_history.json
@@ -275,6 +294,7 @@ stages:
     cmd: python scripts/multiclass/train_mc_random_forest.py
     deps:
       - scripts/multiclass/train_mc_random_forest.py
+      - scripts/helpers/yaml_reading.py
       - data/multi_model/train.npz
       - data/multi_model/val.npz
       - data/multi_model/test.npz

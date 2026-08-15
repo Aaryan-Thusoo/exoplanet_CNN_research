@@ -21,11 +21,12 @@ def download_lcs_exo(kic, n=4894):
         List of flux chunks, each of length n.
     """
 
-    search_result = lk.search_lightcurve(f"KIC {kic}", author="Kepler")
+    search_result = lk.search_lightcurve(f"KIC {kic}", author="Kepler", cadence="long")
 
     lcc = search_result[-5:-1].download_all()
 
-    lc = lcc.stitch().remove_nans().remove_outliers().normalize()
+    # lc = lcc.stitch().remove_nans().remove_outliers().normalize() This one has 5sigma clipping
+    lc = lcc.stitch().remove_nans().normalize() # This one does not
     lc_flat, _ = lc.flatten(window_length=301, return_trend=True)
 
     flux = np.array(lc_flat.flux, dtype=np.float32)
@@ -58,11 +59,12 @@ def download_lcs_eb(kic, n=4894, threshold=-1):
         True if light curve determined to be of depth greater than the set threshold
     """
 
-    search_result = lk.search_lightcurve(f"KIC {kic}", author="Kepler")
+    search_result = lk.search_lightcurve(f"KIC {kic}", author="Kepler", cadence="long")
 
     lcc = search_result[-5:-1].download_all()
 
-    lc = lcc.stitch().remove_nans().remove_outliers().normalize()
+    # lc = lcc.stitch().remove_nans().remove_outliers().normalize() This one has 5sigma clipping
+    lc = lcc.stitch().remove_nans().normalize() # This one does not
     lc_flat, _ = lc.flatten(window_length=301, return_trend=True)
 
     flux = np.array(lc_flat.flux, dtype=np.float32)

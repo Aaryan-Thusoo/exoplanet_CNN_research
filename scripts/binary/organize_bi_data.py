@@ -4,7 +4,7 @@ from pathlib import Path
 import sys
 import ast
 from typing import List
-
+import json
 import numpy as np
 import pandas as pd
 
@@ -95,6 +95,14 @@ def main(seed, train_ratio, val_test_ratio) -> None:
     # Download files into DataFrames
     kepler_exo_df = files_to_df(exo_files)
     kepler_eb_df = files_to_df(eb_files)
+
+    count_dict = {
+        "total_exo": len(exo_files),
+        "total_eb": len(eb_files),
+    }
+
+    with open("total_counts.json", "w") as f:
+        json.dump(count_dict, f, indent=4)
 
     # Remove any overlaps
     exo_ids = set(kepler_exo_df["kepid"])
