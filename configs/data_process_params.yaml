@@ -9,8 +9,8 @@ eb_input_file: "/Users/aaryanthusoo/Desktop/UCL/CNN_Exoplanets/data/raw/Kepler_C
 eb_skipped_rows: 0
 eb_output_folder: "/Users/aaryanthusoo/Desktop/UCL/CNN_Exoplanets/data/processed/eb_data"
 
-organize_train_ratio: 0.8
-organize_val_test_ratio: 0.1
+organize_train_ratio: 0.7
+organize_val_test_ratio: 0.2
 organize_seed: 42
 
 shallow_threshold: 0.99
