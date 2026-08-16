@@ -17,4 +17,4 @@ plots_info:
     col: "transit_depth_abs"
     log: True
 
-eb_threshold_checks: [0.0005, 0.001, 0.003, 0.005, 0.0075, 0.01, 0.025, 0.05, 0.1]
+eb_threshold_checks: [0.001, 0.003, 0.005, 0.0075, 0.01, 0.025, 0.05, 0.1]
