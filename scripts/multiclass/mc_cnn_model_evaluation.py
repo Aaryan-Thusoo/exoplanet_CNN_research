@@ -24,7 +24,7 @@ YAML_FILE = PROJECT_ROOT / "configs"/ "mc_evaluation_params.yaml"
 DATA_DIR = PROJECT_ROOT / "data" / "multi_model"
 MODEL_PATH = PROJECT_ROOT / "models" / "multi_model.keras"
 RESULTS_DIR = PROJECT_ROOT / "results" / "multiclass"
-PAPER_DIR = PROJECT_ROOT / "paper" / "figures"/ "plots" / "multiclass"
+PAPER_DIR = Path("/Users/aaryanthusoo/Desktop/UCL/exoplanet_CNN_paper/figures/plots/multiclass")
 
 def data_loading():
 

@@ -20,7 +20,7 @@ DATA_DIR = PROJECT_ROOT / "data" / "multi_model"
 MODEL_DIR = PROJECT_ROOT / "models"
 RESULTS_DIR = PROJECT_ROOT / "results" / "multiclass" / "random_forest"
 PARAMS_DIR = PROJECT_ROOT / "configs" / "mc_randf_params.yaml"
-PAPER_DIR = PROJECT_ROOT / "paper" / "figures" / "plots" / "multiclass"
+PAPER_DIR = Path("/Users/aaryanthusoo/Desktop/UCL/exoplanet_CNN_paper/figures/plots/multiclass")
 RF_GREEN = "#2e7d32"
 
 

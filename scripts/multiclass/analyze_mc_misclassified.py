@@ -22,7 +22,7 @@ warnings.filterwarnings(
 RESULTS_DIR = PROJECT_ROOT / "results" / "multiclass" / "misclassified_results"
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
 YAML_DIR = PROJECT_ROOT / "configs" / "mc_evaluation_params.yaml"
-PAPER_DIR = PROJECT_ROOT / "paper" / "figures" / "plots" / "multiclass"
+PAPER_DIR = Path("/Users/aaryanthusoo/Desktop/UCL/exoplanet_CNN_paper/figures/plots/multiclass")
 
 
 def load_data() -> tuple[DataFrame, Any]:
@@ -124,6 +124,14 @@ def main():
             par["col"],
             par["name"],
             ecdf_results_dir,
+            "mc",
+            par["log"],
+        )
+        ecdf_plotting(
+            df_clean,
+            par["col"],
+            par["name"],
+            PAPER_DIR,
             "mc",
             par["log"],
         )

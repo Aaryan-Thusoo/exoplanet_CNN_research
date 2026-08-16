@@ -16,7 +16,7 @@ MODEL_PATH = PROJECT_ROOT / "models" / "multi_model.keras"
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
 RESULTS_DIR = PROJECT_ROOT / "results" / "multiclass" / "confidence_group_analysis"
 YAML_FILE = PROJECT_ROOT / "configs" / "mc_evaluation_params.yaml"
-PAPER_DIR = PROJECT_ROOT / "paper" / "figures" / "plots" / "multiclass"
+PAPER_DIR = Path("/Users/aaryanthusoo/Desktop/UCL/exoplanet_CNN_paper/figures/plots/multiclass")
 
 
 def load_test_data():
@@ -233,6 +233,11 @@ def plot_mistake_ratio(summary, plot_name):
     )
 
     PAPER_DIR.mkdir(parents=True, exist_ok=True)
+    fig.savefig(
+        PAPER_DIR / f"mc_mistake_ratios_by_{file_name}_and_confidence.png",
+        dpi=200,
+        bbox_inches="tight",
+    )
     fig.savefig(
         PAPER_DIR / f"mc_mistake_ratios_by_{file_name}_and_confidence_bottom.png",
         dpi=200,
