@@ -24,7 +24,7 @@ YAML_FILE = PROJECT_ROOT / "configs"/ "bi_evaluation_params.yaml"
 DATA_DIR = PROJECT_ROOT / "data" / "binary_model"
 MODEL_PATH = PROJECT_ROOT / "models" / "binary_model.keras"
 RESULTS_DIR = PROJECT_ROOT / "results" / "binary"
-PAPER_DIR = PROJECT_ROOT / "paper" / "figures" / "plots"
+PAPER_DIR = Path("/Users/aaryanthusoo/Desktop/UCL/exoplanet_CNN_paper/figures/plots")
 
 def data_loading():
 

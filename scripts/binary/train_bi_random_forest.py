@@ -21,7 +21,7 @@ RAW_DIR = PROJECT_ROOT / "data" / "raw"
 MODEL_DIR = PROJECT_ROOT / "models"
 RESULTS_DIR = PROJECT_ROOT / "results" / "binary" / "random_forest"
 PARAMS_DIR = PROJECT_ROOT / "configs" / "bi_randf_params.yaml"
-PAPER_DIR = PROJECT_ROOT / "paper" / "figures"/ "plots"
+PAPER_DIR = Path("/Users/aaryanthusoo/Desktop/UCL/exoplanet_CNN_paper/figures/plots")
 RF_GREEN = "#2e7d32"
 
 

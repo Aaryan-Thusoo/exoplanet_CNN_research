@@ -25,7 +25,7 @@ YAML_FILE = PROJECT_ROOT / "configs"/ "bi_evaluation_params.yaml"
 DATA_DIR = PROJECT_ROOT / "data" / "binary_model"
 MODEL_PATH = PROJECT_ROOT / "models" / "binary_model.keras"
 RESULTS_DIR = PROJECT_ROOT / "results" / "binary"
-PAPER_DIR = PROJECT_ROOT / "paper" / "figures" / "plots"
+PAPER_DIR = Path("/Users/aaryanthusoo/Desktop/UCL/exoplanet_CNN_paper/figures/plots")
 
 def load_binary_validation():
     data = np.load(DATA_DIR / "val.npz")
@@ -68,6 +68,9 @@ def prepare_binning(df):
     )
 
 def plot_depth_bin_confusion(summary):
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    PAPER_DIR.mkdir(parents=True, exist_ok=True)
+
     plt.figure(figsize=(9, 5))
 
     bars = plt.bar(
@@ -93,8 +96,8 @@ def plot_depth_bin_confusion(summary):
     plt.xticks(rotation=35, ha="right")
     plt.tight_layout()
 
-    plt.show()
-    #plt.savefig(RESULTS_DIR / "validation_eb_confusion_by_depth_bin.png", dpi=200)
+    plt.savefig(RESULTS_DIR / "validation_eb_confusion_by_depth_bin.png", dpi=200)
+    plt.savefig(PAPER_DIR / "bi_validation_eb_confusion_by_depth_bin.png", dpi=200)
     plt.close()
 
 if __name__ == "__main__":

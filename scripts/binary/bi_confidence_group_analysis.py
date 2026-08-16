@@ -16,7 +16,7 @@ MODEL_PATH = PROJECT_ROOT / "models" / "binary_model.keras"
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
 RESULTS_DIR = PROJECT_ROOT / "results" / "binary" / "confidence_group_analysis"
 YAML_FILE = PROJECT_ROOT / "configs" / "bi_evaluation_params.yaml"
-PAPER_DIR = PROJECT_ROOT / "paper" / "figures" / "plots"
+PAPER_DIR = Path("/Users/aaryanthusoo/Desktop/UCL/exoplanet_CNN_paper/figures/plots")
 
 def load_test_data():
     test_data = np.load(DATA_DIR / "test.npz")
@@ -271,9 +271,10 @@ def plot_mistake_subplots(false_positive_summary, false_negative_summary, summar
 
     file_name = clean_file_name(plot_name)
     fig.savefig(RESULTS_DIR / f"bi_mistake_ratios_by_{file_name}_and_confidence.png", dpi=200)
+    PAPER_DIR.mkdir(parents=True, exist_ok=True)
+    fig.savefig(PAPER_DIR / f"bi_mistake_ratios_by_{file_name}_and_confidence.png", dpi=200)
     plt.close(fig)
 
-    PAPER_DIR.mkdir(parents=True, exist_ok=True)
     bottom_fig, bottom_ax = plt.subplots(figsize=(9, 3.5))
     plot_ratio_axis(
         bottom_ax,
@@ -342,6 +343,8 @@ def plot_confidence_scatter(results_df, column, plot_name, log_scale):
 
     file_name = clean_file_name(plot_name)
     plt.savefig(RESULTS_DIR / f"confidence_vs_{file_name}.png", dpi=200)
+    PAPER_DIR.mkdir(parents=True, exist_ok=True)
+    plt.savefig(PAPER_DIR / f"bi_confidence_vs_{file_name}.png", dpi=200)
     plt.close()
 
 

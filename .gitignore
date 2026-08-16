@@ -29,3 +29,4 @@ dvc_plots/
 .env.*
 
 commads.txt
+/total_counts.json

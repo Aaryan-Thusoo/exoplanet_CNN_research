@@ -28,7 +28,7 @@ RESULTS_DIR = PROJECT_ROOT / "results" / "binary" / "misclassified_results"
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
 REAL_MODEL_DIR = PROJECT_ROOT / "data" / "binary_model"
 YAML_DIR = PROJECT_ROOT / "configs" / "bi_evaluation_params.yaml"
-PAPER_DIR = PROJECT_ROOT / "paper" / "figures" / "plots"
+PAPER_DIR = Path("/Users/aaryanthusoo/Desktop/UCL/exoplanet_CNN_paper/figures/plots")
 
 def load_data() -> tuple[DataFrame, DataFrame, Any, Any]:
     misclassified = np.load(RESULTS_DIR / "misclassified_lightcurves.npz")
@@ -212,8 +212,10 @@ def main():
     box_results_dir.mkdir(parents=True, exist_ok=True)
     hist_results_dir.mkdir(parents=True, exist_ok=True)
     ecdf_results_dir.mkdir(parents=True, exist_ok=True)
+    PAPER_DIR.mkdir(parents=True, exist_ok=True)
 
     plot_misclassified_eb_depths(fp_with_eb, hist_results_dir)
+    plot_misclassified_eb_depths(fp_with_eb, PAPER_DIR)
 
     for df, case in zip([fp_with_eb, fn_with_exo], ["fp", "fn"]):
         df["std"] = df["std"].replace(0, np.nan)
@@ -236,10 +238,12 @@ def main():
             if case == "fp":
                 box_jitter(df_clean, par["col"], f"Binary Model False Positive by {par["name"]}", PAPER_DIR, case, par["log"])
                 ecdf_plotting(df_clean, par["col"], par["name"], ecdf_results_dir, case, par["log"])
+                ecdf_plotting(df_clean, par["col"], par["name"], PAPER_DIR, case, par["log"])
                 write_stats(df_clean, par["col"], RESULTS_DIR / f"{case}_distribution_stats.json")
             else:
                 box_jitter(df_clean, par["col"], f"Binary Model False Negative by {par["name"]}", PAPER_DIR, case, par["log"])
                 ecdf_plotting(df_clean, par["col"], par["name"], ecdf_results_dir, case, par["log"])
+                ecdf_plotting(df_clean, par["col"], par["name"], PAPER_DIR, case, par["log"])
                 write_stats(df_clean, par["col"], RESULTS_DIR / f"{case}_distribution_stats.json")
 
 
