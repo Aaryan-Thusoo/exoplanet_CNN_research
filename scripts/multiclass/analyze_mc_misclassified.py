@@ -115,6 +115,7 @@ def main():
             df_clean,
             par["col"],
             f"Multiclass Misclassified {par['name']}",
+            f"{par['name']}",
             PAPER_DIR,
             "mc",
             par["log"],

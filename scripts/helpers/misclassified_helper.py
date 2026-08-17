@@ -25,9 +25,9 @@ def prettify_label(text: str) -> str:
         for word in words
     )
 
-def box_jitter(df: pd.DataFrame, column: str, title: str, output_dir: Path, case: str, log_scale: bool = False) -> None:
+def box_jitter(df: pd.DataFrame, column: str, title: str, ylabel: str, output_dir: Path, case: str, log_scale: bool = False) -> None:
 
-    plt.figure(figsize=(8, 8))
+    plt.figure(figsize=(6, 6))
 
     order = ["Low", "Medium", "High"]
 
@@ -69,7 +69,7 @@ def box_jitter(df: pd.DataFrame, column: str, title: str, output_dir: Path, case
         hue="confidence_group",
     )
 
-    plt.ylabel(title)
+    plt.ylabel(ylabel)
     plt.xlabel("Confidence Group")
 
     if log_scale:

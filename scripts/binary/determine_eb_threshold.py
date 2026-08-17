@@ -79,11 +79,11 @@ def plot_depth_bin_confusion(summary):
         edgecolor="black",
     )
 
-    for bar, count in zip(bars, summary["confused_count"]):
+    for bar, count, total in zip(bars, summary["confused_count"], summary["total_ebs"]):
         plt.text(
             bar.get_x() + bar.get_width() / 2,
             bar.get_height(),
-            str(int(count)),
+            f"{str(int(count))}/{str(int(total))}",
             ha="center",
             va="bottom",
             fontsize=9,

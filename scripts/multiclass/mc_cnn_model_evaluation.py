@@ -53,7 +53,7 @@ def plot_training_history(path):
     val_color = "#D55E00"  # vermillion/orange
 
     # Loss plot
-    plt.figure(figsize=(12, 4))
+    plt.figure(figsize=(12, 3))
     plt.plot(epochs, loss, marker="o", markersize=4, label="Training Loss", color=train_color)
     plt.plot(epochs, val_loss, marker="o", markersize=4, label="Validation Loss", color=val_color)
 
@@ -64,11 +64,12 @@ def plot_training_history(path):
     plt.ylabel("Loss", fontsize=axis_size)
     plt.title("Multiclass Model Training and Validation Loss", fontsize=axis_size+2)
     plt.legend()
+    plt.tight_layout()
     plt.savefig(RESULTS_DIR / "plots" / "training_loss_history.png")
     plt.savefig(PAPER_DIR / "mc_training_loss_history.png")
 
     # Accuracy plot
-    plt.figure(figsize=(12, 4))
+    plt.figure(figsize=(12, 3))
     plt.plot(epochs, accuracy, marker="o", markersize=4, label="Training Accuracy", color=train_color)
     plt.plot(epochs, val_accuracy, marker="o", markersize=4, label="Validation Accuracy", color=val_color)
 
@@ -79,6 +80,7 @@ def plot_training_history(path):
     plt.ylabel("Accuracy", fontsize=axis_size)
     plt.title("Multiclass Model Training and Validation Accuracy", fontsize=axis_size+2)
     plt.legend()
+    plt.tight_layout()
     plt.savefig(RESULTS_DIR / "plots" / "training_accuracy_history.png")
     plt.savefig(PAPER_DIR / "mc_training_accuracy_history.png")
 

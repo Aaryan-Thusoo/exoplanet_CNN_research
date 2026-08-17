@@ -65,6 +65,7 @@ def plot_training_history(path):
     plt.ylabel("Loss", fontsize=axis_size)
     plt.title("Binary Model Training and Validation Loss", fontsize=axis_size+2)
     plt.legend()
+    plt.tight_layout()
     plt.savefig(RESULTS_DIR / "plots" / "training_loss_history.png")
     plt.savefig(PAPER_DIR / "bi_training_loss_history.png")
 
@@ -81,6 +82,7 @@ def plot_training_history(path):
     #plt.ylim(accuracy[0] - 0.05, accuracy[-1] + 0.05)
     plt.title("Binary Model Training and Validation Accuracy", fontsize=axis_size+2)
     plt.legend()
+    plt.tight_layout()
     plt.savefig(RESULTS_DIR / "plots" / "training_accuracy_history.png")
     plt.savefig(PAPER_DIR / "bi_training_accuracy_history.png")
 

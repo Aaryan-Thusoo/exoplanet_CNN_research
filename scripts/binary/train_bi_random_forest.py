@@ -84,8 +84,8 @@ def plot_confusion_matrix(all_true, all_preds):
     conf_rates = confusion_matrix(all_true, all_preds, normalize="true")
     accuracy = np.mean(all_true == all_preds) * 100
 
-    fig, ax = plt.subplots(figsize=(7, 6))
-    image = ax.imshow(conf_rates, cmap="Greens", vmin=0, vmax=1)
+    fig, ax = plt.subplots(figsize=(8, 4))
+    image = ax.imshow(conf_rates, cmap="Greens", vmin=0, vmax=1, aspect="auto")
 
     for row in range(conf_rates.shape[0]):
         for col in range(conf_rates.shape[1]):
@@ -127,11 +127,11 @@ def plot_confusion_matrix(all_true, all_preds):
 def plot_feature_importance(model, feature_names):
     importances = model.feature_importances_
 
-    plt.figure(figsize=(8, 6))
+    plt.figure(figsize=(8, 4))
     plt.bar(feature_names, importances, color=RF_GREEN, edgecolor="black")
-    plt.ylabel("Importance")
-    plt.title("Binary Random Forest Feature Importance")
-    plt.xticks(rotation=45, ha="right")
+    plt.ylabel("Importance", fontsize=12)
+    plt.title("Binary Random Forest Feature Importance", fontsize=14)
+    plt.xticks(rotation=45, ha="right", fontsize=12)
     plt.tight_layout()
     plt.savefig(RESULTS_DIR / "feature_importance.png", dpi=200)
     plt.savefig(PAPER_DIR / "bi_feature_importance.png", dpi=200)

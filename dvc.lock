@@ -9,8 +9,8 @@ stages:
       size: 86336
     - path: scripts/helpers/temp_help_name.py
       hash: md5
-      md5: 8c86a5ae31eada822989a3091116751e
-      size: 4205
+      md5: 24549613bfccc3192f97f5ea0ab2a292
+      size: 4208
     - path: scripts/helpers/yaml_reading.py
       hash: md5
       md5: 51ca3f50ea74abfc26eda804de6a5624
@@ -42,8 +42,8 @@ stages:
       size: 87191
     - path: scripts/helpers/temp_help_name.py
       hash: md5
-      md5: 8c86a5ae31eada822989a3091116751e
-      size: 4205
+      md5: 24549613bfccc3192f97f5ea0ab2a292
+      size: 4208
     - path: scripts/helpers/yaml_reading.py
       hash: md5
       md5: 51ca3f50ea74abfc26eda804de6a5624
@@ -62,8 +62,8 @@ stages:
     outs:
     - path: data/processed/exo_data
       hash: md5
-      md5: 54fa056e96d0cad30ed51a3055d6ee4c.dir
-      size: 712543256
+      md5: ecb7c4b933d85e4482c3e2a08b7c8897.dir
+      size: 466900488
       nfiles: 10
   organize_data:
     cmd: python scripts/real/organize_data.py
@@ -437,13 +437,13 @@ stages:
       nfiles: 16
     - path: data/processed/exo_data
       hash: md5
-      md5: 54fa056e96d0cad30ed51a3055d6ee4c.dir
-      size: 712543256
+      md5: ecb7c4b933d85e4482c3e2a08b7c8897.dir
+      size: 466900488
       nfiles: 10
     - path: scripts/helpers/temp_help_name.py
       hash: md5
-      md5: 8c86a5ae31eada822989a3091116751e
-      size: 4205
+      md5: 24549613bfccc3192f97f5ea0ab2a292
+      size: 4208
     - path: scripts/helpers/yaml_reading.py
       hash: md5
       md5: 51ca3f50ea74abfc26eda804de6a5624
@@ -455,32 +455,32 @@ stages:
     params:
       configs/data_process_params.yaml:
         organize_seed: 42
-        organize_train_ratio: 0.7
-        organize_val_test_ratio: 0.2
+        organize_train_ratio: 0.8
+        organize_val_test_ratio: 0.1
     outs:
     - path: data/multi_model/test.npz
       hash: md5
-      md5: 5fec1c31be17ac3d600a90a4a6494f98
-      size: 21717509
+      md5: d3aba0272c3b2d0628df72def791fdcb
+      size: 11588034
     - path: data/multi_model/train.npz
       hash: md5
-      md5: 1661efe71322dcacea3558f31205ce23
-      size: 157865795
+      md5: 620e906086e563d092d5cc732787b77b
+      size: 90620020
     - path: data/multi_model/val.npz
       hash: md5
-      md5: 7647491a8e544f4c79a147c63073ff68
-      size: 45298972
+      md5: 649e1dab653b4563e38ace6bbc8a5f9c
+      size: 11255282
   train_mc_cnn:
     cmd: python scripts/multiclass/train_mc_cnn.py
     deps:
     - path: data/multi_model/train.npz
       hash: md5
-      md5: 1661efe71322dcacea3558f31205ce23
-      size: 157865795
+      md5: 620e906086e563d092d5cc732787b77b
+      size: 90620020
     - path: data/multi_model/val.npz
       hash: md5
-      md5: 7647491a8e544f4c79a147c63073ff68
-      size: 45298972
+      md5: 649e1dab653b4563e38ace6bbc8a5f9c
+      size: 11255282
     - path: scripts/helpers/layers_helper.py
       hash: md5
       md5: dd1ab79c553ac5c29efe00bb1e5302fa
@@ -551,9 +551,9 @@ stages:
           units: 3
           activation: softmax
         training_and_compiling:
-          epochs: 20
+          epochs: 15
           batch_size: 64
-          learning_rate: 0.0005
+          learning_rate: 0.00025
           weight_decay: 0.0001
           loss: sparse_categorical_crossentropy
           metrics:
@@ -561,31 +561,31 @@ stages:
     outs:
     - path: models/multi_model.keras
       hash: md5
-      md5: 4f9cf4d33e5e9214bb0c4023605f3630
-      size: 1671888
+      md5: 501ef6f5b36b2997a3bc0e51d3f249e1
+      size: 1671887
     - path: results/multiclass/mc_metrics.json
       hash: md5
-      md5: c7a240c8c6ed9a61b26869ceb6780878
-      size: 173
+      md5: 1602a597e6dbb77e9223b090c42ed17d
+      size: 172
     - path: results/multiclass/mc_training_history.json
       hash: md5
-      md5: 729331eb9d36a6b68896a7dfc6583494
-      size: 1430
+      md5: 8822f467b8f58323c9e1d7f2f86c5bd1
+      size: 1918
   evaluate_mc_cnn:
     cmd: python scripts/multiclass/mc_cnn_model_evaluation.py
     deps:
     - path: data/multi_model/test.npz
       hash: md5
-      md5: 5fec1c31be17ac3d600a90a4a6494f98
-      size: 21717509
+      md5: d3aba0272c3b2d0628df72def791fdcb
+      size: 11588034
     - path: models/multi_model.keras
       hash: md5
-      md5: 4f9cf4d33e5e9214bb0c4023605f3630
-      size: 1671888
+      md5: 501ef6f5b36b2997a3bc0e51d3f249e1
+      size: 1671887
     - path: results/multiclass/mc_training_history.json
       hash: md5
-      md5: 729331eb9d36a6b68896a7dfc6583494
-      size: 1430
+      md5: 8822f467b8f58323c9e1d7f2f86c5bd1
+      size: 1918
     - path: scripts/helpers/layers_helper.py
       hash: md5
       md5: dd1ab79c553ac5c29efe00bb1e5302fa
@@ -596,41 +596,41 @@ stages:
       size: 319
     - path: scripts/multiclass/mc_cnn_model_evaluation.py
       hash: md5
-      md5: 684fe097a725b82300a4bead7c8c8f54
-      size: 9810
+      md5: d1bda620e44bbdc0f03c41931d8df1e7
+      size: 9856
     params:
       configs/mc_evaluation_params.yaml:
         threshold: 0.5
     outs:
     - path: results/multiclass/evaluation.json
       hash: md5
-      md5: f107ff6a4e7eaa16a8e4aacfb92fa145
-      size: 129
+      md5: beb094bc5de31d184cb276a48d29b9ac
+      size: 131
     - path: 
         results/multiclass/misclassified_results/misclassified_lightcurves.npz
       hash: md5
-      md5: 4d3066b8574b61fe625d2c8fd42020dd
-      size: 6023669
+      md5: 6704a7198a4f66244658d82fa12031de
+      size: 2443169
     - path: results/multiclass/plots/confidence_correct_vs_incorrect.png
       hash: md5
-      md5: 2de342b1fb6d79e6d4419618e5884a2d
-      size: 57234
+      md5: 57bfdde6122980de58fe5a835a1d20f9
+      size: 54727
     - path: results/multiclass/plots/confidence_histogram.png
       hash: md5
-      md5: fc2a0c9486c7c86b0eaad4daf21829b2
-      size: 47260
+      md5: 93974d46901941f42556b5346cc5de07
+      size: 44890
     - path: results/multiclass/plots/confusion_matrix.png
       hash: md5
-      md5: ab7fa312dcd3d8c7e64c8a53c438b8e4
-      size: 102572
+      md5: 0b606be07d355f0aa44f0e48f8b3fd83
+      size: 102867
     - path: results/multiclass/plots/training_accuracy_history.png
       hash: md5
-      md5: 40819b9ce18f348c728f8c2abd0742d6
-      size: 37562
+      md5: 8453376cbb353ded2a39bf0eaa48b17b
+      size: 35870
     - path: results/multiclass/plots/training_loss_history.png
       hash: md5
-      md5: 6ffa63a387aa82ebda9b8eeeb523213b
-      size: 35114
+      md5: a62ffadc3a652d305494301d2cbb73af
+      size: 33657
   organize_bi_data:
     cmd: python scripts/binary/organize_bi_data.py
     deps:
@@ -641,8 +641,8 @@ stages:
       nfiles: 16
     - path: data/processed/exo_data
       hash: md5
-      md5: 54fa056e96d0cad30ed51a3055d6ee4c.dir
-      size: 712543256
+      md5: ecb7c4b933d85e4482c3e2a08b7c8897.dir
+      size: 466900488
       nfiles: 10
     - path: scripts/binary/organize_bi_data.py
       hash: md5
@@ -650,8 +650,8 @@ stages:
       size: 7712
     - path: scripts/helpers/temp_help_name.py
       hash: md5
-      md5: 8c86a5ae31eada822989a3091116751e
-      size: 4205
+      md5: 24549613bfccc3192f97f5ea0ab2a292
+      size: 4208
     - path: scripts/helpers/yaml_reading.py
       hash: md5
       md5: 51ca3f50ea74abfc26eda804de6a5624
@@ -659,21 +659,21 @@ stages:
     params:
       configs/data_process_params.yaml:
         organize_seed: 42
-        organize_train_ratio: 0.7
-        organize_val_test_ratio: 0.2
+        organize_train_ratio: 0.8
+        organize_val_test_ratio: 0.1
     outs:
     - path: data/binary_model/test.npz
       hash: md5
-      md5: 44ba439d4cc1ede3c3389cd0620a04bc
-      size: 25760516
+      md5: 7f949d83c09a95e65748a74c39b3e37c
+      size: 15875360
     - path: data/binary_model/train.npz
       hash: md5
-      md5: 305d5cbfb97f8fd1e0791eaf827dd261
-      size: 171807234
+      md5: 592a6a62e595526357eff754b4941a96
+      size: 126469243
     - path: data/binary_model/val.npz
       hash: md5
-      md5: 1e044769d0dc28308855c84764aabd34
-      size: 48161474
+      md5: 3eb6dd45b6ccf97bdb41e4dda353f1c4
+      size: 15840136
     - path: total_counts.json
       hash: md5
       md5: cde494d85d8f3ee20147726ff4c8f3bc
@@ -683,12 +683,12 @@ stages:
     deps:
     - path: data/binary_model/train.npz
       hash: md5
-      md5: 305d5cbfb97f8fd1e0791eaf827dd261
-      size: 171807234
+      md5: 592a6a62e595526357eff754b4941a96
+      size: 126469243
     - path: data/binary_model/val.npz
       hash: md5
-      md5: 1e044769d0dc28308855c84764aabd34
-      size: 48161474
+      md5: 3eb6dd45b6ccf97bdb41e4dda353f1c4
+      size: 15840136
     - path: scripts/binary/train_bi_cnn.py
       hash: md5
       md5: 98a6307c41dcb2dfa5dec3959975b2a9
@@ -755,7 +755,7 @@ stages:
           units: 1
           activation: sigmoid
         training_and_compiling:
-          epochs: 15
+          epochs: 20
           batch_size: 64
           learning_rate: 0.001
           weight_decay: 0.0001
@@ -765,35 +765,35 @@ stages:
     outs:
     - path: models/binary_model.keras
       hash: md5
-      md5: b5834dedc3067ff6b187fa46e1a48254
+      md5: 89b45857f8cfbad020c9c6293d2a5145
       size: 1668818
     - path: results/binary/bi_metrics.json
       hash: md5
-      md5: 4c5fd9d015b1dcd81c1d3bdadd8816a3
-      size: 175
+      md5: 37f14f8fe84f968f5158c3d76c1ec2e4
+      size: 176
     - path: results/binary/bi_training_history.json
       hash: md5
-      md5: de4d72b08130e773ec55c96250986af1
-      size: 1708
+      md5: 481006aeece24053e7adecd144def0b1
+      size: 2215
   evaluate_bi_cnn:
     cmd: python scripts/binary/bi_cnn_model_evaluation.py
     deps:
     - path: data/binary_model/test.npz
       hash: md5
-      md5: 44ba439d4cc1ede3c3389cd0620a04bc
-      size: 25760516
+      md5: 7f949d83c09a95e65748a74c39b3e37c
+      size: 15875360
     - path: models/binary_model.keras
       hash: md5
-      md5: b5834dedc3067ff6b187fa46e1a48254
+      md5: 89b45857f8cfbad020c9c6293d2a5145
       size: 1668818
     - path: results/binary/bi_training_history.json
       hash: md5
-      md5: de4d72b08130e773ec55c96250986af1
-      size: 1708
+      md5: 481006aeece24053e7adecd144def0b1
+      size: 2215
     - path: scripts/binary/bi_cnn_model_evaluation.py
       hash: md5
-      md5: 0fcfba1ec2507a5614f2e97d5755e2b9
-      size: 11901
+      md5: 96f0aa5b9e0947cd776774b436288d3d
+      size: 11947
     - path: scripts/helpers/layers_helper.py
       hash: md5
       md5: dd1ab79c553ac5c29efe00bb1e5302fa
@@ -808,47 +808,47 @@ stages:
     outs:
     - path: results/binary/evaluation.json
       hash: md5
-      md5: a5c42d417f4fa0946ded169bd0ed4d4c
-      size: 164
+      md5: b8eaae52e7ba57e09a474bb8435c499e
+      size: 163
     - path: results/binary/misclassified_results/misclassified_lightcurves.npz
       hash: md5
-      md5: ee1098384602674b29ac6b50cde630dc
-      size: 1974054
+      md5: 5d2dc8f8113460881eebd76c61173e04
+      size: 1220999
     - path: results/binary/plots/confidence_correct_vs_incorrect.png
       hash: md5
-      md5: 62979ec80930e5ef786cbe837e542e3e
-      size: 56519
+      md5: f85ebf3baa79edec8178889cf7815dda
+      size: 57459
     - path: results/binary/plots/confidence_histogram.png
       hash: md5
-      md5: 70e4265044801fce6aa098ec36595529
-      size: 43735
+      md5: 368b445d6eaaf140eca05e518a83e016
+      size: 44439
     - path: results/binary/plots/confusion_matrix.png
       hash: md5
-      md5: 605f86e534aac140603400dd6b264dc9
-      size: 80231
+      md5: d8622a5127b5422cc4fa30509edb6260
+      size: 77701
     - path: results/binary/plots/training_accuracy_history.png
       hash: md5
-      md5: 9a01e991c4507a8a98de6b6fa217a96d
-      size: 30339
+      md5: ed9bf62b041c2176c1467ced465b1ed8
+      size: 31454
     - path: results/binary/plots/training_loss_history.png
       hash: md5
-      md5: c236e780920974917cc080a3f5dd0100
-      size: 29505
+      md5: 57253ff4c1ec6fe5dc8debddedf6cdec
+      size: 31281
   analyze_bi_misclassified:
     cmd: python scripts/binary/analyze_bi_misclassified.py
     deps:
     - path: results/binary/misclassified_results/misclassified_lightcurves.npz
       hash: md5
-      md5: ee1098384602674b29ac6b50cde630dc
-      size: 1974054
+      md5: 5d2dc8f8113460881eebd76c61173e04
+      size: 1220999
     - path: scripts/binary/analyze_bi_misclassified.py
       hash: md5
-      md5: 01ab7d1addff7ef13dc966b9264d522a
-      size: 8719
+      md5: e076908ecee4efaf709c753e70440e9c
+      size: 8756
     - path: scripts/helpers/misclassified_helper.py
       hash: md5
-      md5: 7afc725bfa859e67cd31072008c2f6b8
-      size: 5290
+      md5: 95aa6bfe6d0448abf9512ab0f1e8bf56
+      size: 5304
     - path: scripts/helpers/yaml_reading.py
       hash: md5
       md5: 51ca3f50ea74abfc26eda804de6a5624
@@ -871,32 +871,32 @@ stages:
     outs:
     - path: results/binary/misclassified_results/fn_distribution_stats.json
       hash: md5
-      md5: 59935b41d7a3c0b5f997606219a304de
-      size: 3773
+      md5: 2f4b3397ff1506f90d97e3f51466bff4
+      size: 3767
     - path: results/binary/misclassified_results/fp_distribution_stats.json
       hash: md5
-      md5: 81d79f81115585415df99a006f666166
-      size: 3820
+      md5: a78fda45fc324ce093a81b006371881f
+      size: 3829
     - path: results/binary/misclassified_results/misclassified_plots
       hash: md5
-      md5: fbe881ff9bc2b95319dcda2528692aa4.dir
-      size: 324143
+      md5: 2e8e8df15e6284709e4c69a05935764c.dir
+      size: 324286
       nfiles: 10
   train_bi_random_forest:
     cmd: python scripts/binary/train_bi_random_forest.py
     deps:
     - path: data/binary_model/test.npz
       hash: md5
-      md5: 44ba439d4cc1ede3c3389cd0620a04bc
-      size: 25760516
+      md5: 7f949d83c09a95e65748a74c39b3e37c
+      size: 15875360
     - path: data/binary_model/train.npz
       hash: md5
-      md5: 305d5cbfb97f8fd1e0791eaf827dd261
-      size: 171807234
+      md5: 592a6a62e595526357eff754b4941a96
+      size: 126469243
     - path: data/binary_model/val.npz
       hash: md5
-      md5: 1e044769d0dc28308855c84764aabd34
-      size: 48161474
+      md5: 3eb6dd45b6ccf97bdb41e4dda353f1c4
+      size: 15840136
     - path: data/raw/Kepler_Confirmed_EB.csv
       hash: md5
       md5: e20bbc12b069d548fe929c618dd4e1b4
@@ -907,8 +907,8 @@ stages:
       size: 87191
     - path: scripts/binary/train_bi_random_forest.py
       hash: md5
-      md5: 76036c184e7fb04ed76cb4ea2d6178f8
-      size: 6477
+      md5: e14274a1c88669ed8640cef87c818295
+      size: 6531
     - path: scripts/helpers/yaml_reading.py
       hash: md5
       md5: 51ca3f50ea74abfc26eda804de6a5624
@@ -921,43 +921,43 @@ stages:
     outs:
     - path: models/binary_random_forest.pkl
       hash: md5
-      md5: f76244ee4ed8876440997a008a6fd303
-      size: 72024301
+      md5: 04e64e6cee0ca0fc28cd2ff1e87fa07e
+      size: 37386541
     - path: results/binary/random_forest/confusion_matrix.png
       hash: md5
-      md5: f2545a1fd2ad3082773067c690f67fcd
-      size: 79491
+      md5: 3e84c3652f6aa17cc18b8b0e695fd323
+      size: 76638
     - path: results/binary/random_forest/feature_importance.png
       hash: md5
-      md5: 040b73482198b00648c49e6d3c85e3b0
-      size: 56914
+      md5: 5c96ad935064733686838936012f6e05
+      size: 62570
     - path: results/binary/random_forest/metrics.json
       hash: md5
-      md5: 2ea35f1b2b43bc6dfb726c6a9fe73653
+      md5: 176b2596b4c6ac91a37e73d5840d5476
       size: 164
   train_mc_random_forest:
     cmd: python scripts/multiclass/train_mc_random_forest.py
     deps:
     - path: data/multi_model/test.npz
       hash: md5
-      md5: 5fec1c31be17ac3d600a90a4a6494f98
-      size: 21717509
+      md5: d3aba0272c3b2d0628df72def791fdcb
+      size: 11588034
     - path: data/multi_model/train.npz
       hash: md5
-      md5: 1661efe71322dcacea3558f31205ce23
-      size: 157865795
+      md5: 620e906086e563d092d5cc732787b77b
+      size: 90620020
     - path: data/multi_model/val.npz
       hash: md5
-      md5: 7647491a8e544f4c79a147c63073ff68
-      size: 45298972
+      md5: 649e1dab653b4563e38ace6bbc8a5f9c
+      size: 11255282
     - path: scripts/helpers/yaml_reading.py
       hash: md5
       md5: 51ca3f50ea74abfc26eda804de6a5624
       size: 319
     - path: scripts/multiclass/train_mc_random_forest.py
       hash: md5
-      md5: df686eead58e68915f6b3cfd762ec21b
-      size: 6454
+      md5: 010727542fac2521cdc79f62df982055
+      size: 6469
     params:
       configs/mc_randf_params.yaml:
         class_weight: balanced
@@ -966,27 +966,27 @@ stages:
     outs:
     - path: models/multiclass_random_forest.pkl
       hash: md5
-      md5: 7f888b4606aec4a2f9ee8babafd9ee44
-      size: 92585361
+      md5: 036144fa1b9dbd0f5617a4909e0082b9
+      size: 46594565
     - path: results/multiclass/random_forest/confusion_matrix.png
       hash: md5
-      md5: abbd95f739a85246fff54a6e1de2fcda
-      size: 106975
+      md5: a8282c759c86ad5fb2caadfdcfd60c82
+      size: 97096
     - path: results/multiclass/random_forest/feature_importance.png
       hash: md5
-      md5: b43936f800183b34ba4bedcdf06a2958
-      size: 59450
+      md5: f23e21625c2659b5af46419bcba2f99d
+      size: 55038
     - path: results/multiclass/random_forest/metrics.json
       hash: md5
-      md5: aed715eb3cf8a800694de29e5fb58ea1
+      md5: 3e43b35f1f89d3fa97d10d4f251dc275
       size: 314
   bi_confidence_group_analysis:
     cmd: python scripts/binary/bi_confidence_group_analysis.py
     deps:
     - path: data/binary_model/test.npz
       hash: md5
-      md5: 44ba439d4cc1ede3c3389cd0620a04bc
-      size: 25760516
+      md5: 7f949d83c09a95e65748a74c39b3e37c
+      size: 15875360
     - path: data/raw/Kepler_Confirmed_EB.csv
       hash: md5
       md5: e20bbc12b069d548fe929c618dd4e1b4
@@ -997,7 +997,7 @@ stages:
       size: 87191
     - path: models/binary_model.keras
       hash: md5
-      md5: b5834dedc3067ff6b187fa46e1a48254
+      md5: 89b45857f8cfbad020c9c6293d2a5145
       size: 1668818
     - path: scripts/binary/bi_confidence_group_analysis.py
       hash: md5
@@ -1026,8 +1026,8 @@ stages:
     outs:
     - path: results/binary/confidence_group_analysis
       hash: md5
-      md5: 8bf801582a2f8496c0ffa7d977ef4f01.dir
-      size: 1209144
+      md5: 1f9a17374e884eed4899753a8b298686.dir
+      size: 1085030
       nfiles: 12
   analyze_mc_misclassified:
     cmd: python scripts/multiclass/analyze_mc_misclassified.py
@@ -1043,20 +1043,20 @@ stages:
     - path: 
         results/multiclass/misclassified_results/misclassified_lightcurves.npz
       hash: md5
-      md5: 4d3066b8574b61fe625d2c8fd42020dd
-      size: 6023669
+      md5: 6704a7198a4f66244658d82fa12031de
+      size: 2443169
     - path: scripts/helpers/misclassified_helper.py
       hash: md5
-      md5: 7afc725bfa859e67cd31072008c2f6b8
-      size: 5290
+      md5: 95aa6bfe6d0448abf9512ab0f1e8bf56
+      size: 5304
     - path: scripts/helpers/yaml_reading.py
       hash: md5
       md5: 51ca3f50ea74abfc26eda804de6a5624
       size: 319
     - path: scripts/multiclass/analyze_mc_misclassified.py
       hash: md5
-      md5: cf9ed7e5753b0d7775695a4ba3a645be
-      size: 4050
+      md5: f16b740a469bd701c43b38acf8db27ca
+      size: 4080
     params:
       configs/mc_evaluation_params.yaml:
         plots_info:
@@ -1075,20 +1075,20 @@ stages:
     outs:
     - path: results/multiclass/misclassified_results/mc_distribution_stats.json
       hash: md5
-      md5: 49f4add9d389c7dd5728954c359ac029
-      size: 3916
+      md5: ef6cab6e2ec39e338d1efa596e8e07da
+      size: 3825
     - path: results/multiclass/misclassified_results/misclassified_plots
       hash: md5
-      md5: 895ad5a062c64a7b3487a77eb7a4ec25.dir
-      size: 124619
+      md5: 8737e236f296e969e202bbaeb6149f1a.dir
+      size: 115416
       nfiles: 4
   mc_confidence_group_analysis:
     cmd: python scripts/multiclass/mc_confidence_group_analysis.py
     deps:
     - path: data/multi_model/test.npz
       hash: md5
-      md5: 5fec1c31be17ac3d600a90a4a6494f98
-      size: 21717509
+      md5: d3aba0272c3b2d0628df72def791fdcb
+      size: 11588034
     - path: data/raw/Kepler_Confirmed_EB.csv
       hash: md5
       md5: e20bbc12b069d548fe929c618dd4e1b4
@@ -1099,8 +1099,8 @@ stages:
       size: 87191
     - path: models/multi_model.keras
       hash: md5
-      md5: 4f9cf4d33e5e9214bb0c4023605f3630
-      size: 1671888
+      md5: 501ef6f5b36b2997a3bc0e51d3f249e1
+      size: 1671887
     - path: scripts/helpers/yaml_reading.py
       hash: md5
       md5: 51ca3f50ea74abfc26eda804de6a5624
@@ -1127,24 +1127,24 @@ stages:
     outs:
     - path: results/multiclass/confidence_group_analysis
       hash: md5
-      md5: 87937ecb23511bbe60906978cfff831b.dir
-      size: 442677
+      md5: e065e0a58be0c1b5ddb9809f7754d0dc.dir
+      size: 338962
       nfiles: 6
   bi_classification_report:
     cmd: python scripts/binary/bi_classification_report.py
     deps:
     - path: data/binary_model/test.npz
       hash: md5
-      md5: 44ba439d4cc1ede3c3389cd0620a04bc
-      size: 25760516
+      md5: 7f949d83c09a95e65748a74c39b3e37c
+      size: 15875360
     - path: models/binary_model.keras
       hash: md5
-      md5: b5834dedc3067ff6b187fa46e1a48254
+      md5: 89b45857f8cfbad020c9c6293d2a5145
       size: 1668818
     - path: results/binary/misclassified_results/misclassified_lightcurves.npz
       hash: md5
-      md5: ee1098384602674b29ac6b50cde630dc
-      size: 1974054
+      md5: 5d2dc8f8113460881eebd76c61173e04
+      size: 1220999
     - path: scripts/binary/bi_classification_report.py
       hash: md5
       md5: 1505505a933f4ed9bb5609a459518dd5
@@ -1163,41 +1163,41 @@ stages:
     outs:
     - path: results/binary/misclassified_results/correct_eclipsing_binary.html
       hash: md5
-      md5: 1ba8bcb26f4b6e33660db008fd599c21
-      size: 59165783
+      md5: e91ed48029a50b9462e5ddbc81b1c930
+      size: 40277598
     - path: results/binary/misclassified_results/correct_transit.html
       hash: md5
-      md5: ad23bb570a2efd7d6e77e2624f8439d3
-      size: 59968900
+      md5: 21de96ed21a2d04d0aedd61e86cc7b8e
+      size: 32895521
     - path: 
         results/binary/misclassified_results/false_negative_high_confidence.html
       hash: md5
-      md5: 5d67807383861513e16afd3e4ddda963
-      size: 475292
+      md5: 0d2a55f3b2c69fb0f9c9768de652b33e
+      size: 527358
     - path: 
         results/binary/misclassified_results/false_positive_high_confidence.html
       hash: md5
-      md5: 219bcdfe018c674c6a5dc02e7f1d6e8d
-      size: 9034575
+      md5: 913cc1d050a44833711f5b6c6c87b67f
+      size: 2410266
     - path: results/binary/misclassified_results/misclassified_lightcurves.html
       hash: md5
-      md5: 69679ebf7cd4bb826ea443e3f7fd8d25
-      size: 20356963
+      md5: 9a3bdea4025f241496a1af3f8766e0d4
+      size: 5638107
   find_eb_threshold:
     cmd: python scripts/binary/determine_eb_threshold.py
     deps:
     - path: data/binary_model/val.npz
       hash: md5
-      md5: 1e044769d0dc28308855c84764aabd34
-      size: 48161474
+      md5: 3eb6dd45b6ccf97bdb41e4dda353f1c4
+      size: 15840136
     - path: models/binary_model.keras
       hash: md5
-      md5: b5834dedc3067ff6b187fa46e1a48254
+      md5: 89b45857f8cfbad020c9c6293d2a5145
       size: 1668818
     - path: scripts/binary/determine_eb_threshold.py
       hash: md5
-      md5: e0e4d6001ed3d0f855149f56d7c274d6
-      size: 3814
+      md5: f3bf718ac4b4fa079dae6c9a32c25efa
+      size: 3866
     - path: scripts/helpers/layers_helper.py
       hash: md5
       md5: dd1ab79c553ac5c29efe00bb1e5302fa
@@ -1214,12 +1214,11 @@ stages:
         - 0.005
         - 0.0075
         - 0.01
-        - 0.02
-        - 0.03
-        - 0.04
+        - 0.025
         - 0.05
+        - 0.1
     outs:
     - path: results/binary/validation_eb_chunk_results.csv
       hash: md5
-      md5: 79a66da6eab0a24657ae8cba79bfad54
-      size: 62693
+      md5: df94efd658bda5a133e745948474b5b7
+      size: 20316
